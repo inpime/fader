@@ -13,6 +13,8 @@ type Stringer interface {
 // M Map map storage
 type M map[string]interface{}
 
+// TODO: add function Valid (see https://github.com/go-playground/validator)
+
 // Map map storage
 func Map(m ...interface{}) M {
 	if len(m) == 0 {
@@ -175,6 +177,11 @@ func (m M) Bool(k string) bool {
 
 	switch t := v.(type) {
 	case string:
+		// for binding html form checkboxes
+		if t == "on" {
+			return true
+		}
+
 		b, err := strconv.ParseBool(t)
 		if err != nil {
 			return false
