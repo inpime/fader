@@ -38,9 +38,11 @@ func Map(m ...interface{}) M {
 func (m M) LoadFrom(v interface{}) M {
 	switch v := v.(type) {
 	case string:
-		err := json.Unmarshal([]byte(v), &m)
-		if err != nil {
-			logrus.WithError(err).Error("map: load from json")
+		if len(v) > 0 {
+			err := json.Unmarshal([]byte(v), &m)
+			if err != nil {
+				logrus.WithError(err).Error("map: load from json")
+			}
 		}
 	case map[string]interface{}:
 		m.LoadFromMapStrIfac(v)
