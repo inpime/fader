@@ -1140,200 +1140,199 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "newfileform")
-	if err == dbox.ErrNotFound {
-		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
+	// 	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "newfileform")
+	// 	if err == dbox.ErrNotFound {
+	// 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
-		file.SetContentType("text/html")
-		file.RawData().Write([]byte(`{# newfileform #}
+	// 		file.SetContentType("text/html")
+	// 		file.RawData().Write([]byte(`{# newfileform #}
 
-{% extends "console/layout" %}
+	// {% extends "console/layout" %}
 
-{% block breadcrumb %}
+	// {% block breadcrumb %}
 
-{% set bucket = LoadByID("buckets", ctx.Get("bucket_id")) %}
-{% set file = LoadByID(bucket.Name(), ctx.Get("file_id")) %}
+	// {% set bucket = LoadByID("buckets", ctx.Get("bucket_id")) %}
+	// {% set file = LoadByID(bucket.Name(), ctx.Get("file_id")) %}
 
-<ul class="uk-breadcrumb">
-    <li><a href="/console/buckets">buckets</a></li>
-    <li><a href="/console/buckets/{{ bucket.ID() }}/files"><i class="uk-icon-folder-open-o uk-text-muted"></i> {{ bucket.Name() }}</a></li>
-    <li><span>new file</span></li>
-</ul>
+	// <ul class="uk-breadcrumb">
+	//     <li><a href="/console/buckets">buckets</a></li>
+	//     <li><a href="/console/buckets/{{ bucket.ID() }}/files"><i class="uk-icon-folder-open-o uk-text-muted"></i> {{ bucket.Name() }}</a></li>
+	//     <li><span>new file</span></li>
+	// </ul>
 
-{% endblock %}
+	// {% endblock %}
 
-{% block content %}
+	// {% block content %}
 
-<div class="uk-width-1-2 uk-container uk-container-center">
+	// <div class="uk-width-1-2 uk-container uk-container-center">
 
-    <div class="uk-panel uk-margin-bottom">
-        <dl class="uk-description-list-horizontal uk-text-muted uk-float-right">
-            <dt>Bucket ID</dt>
-            <dd>{{ bucket.ID() }}</dd>
+	//     <div class="uk-panel uk-margin-bottom">
+	//         <dl class="uk-description-list-horizontal uk-text-muted uk-float-right">
+	//             <dt>Bucket ID</dt>
+	//             <dd>{{ bucket.ID() }}</dd>
 
-            <dt>Bucket name</dt>
-            <dd>{{ bucket.Name() }}</dd>
-        </dl>
-    </div>
+	//             <dt>Bucket name</dt>
+	//             <dd>{{ bucket.Name() }}</dd>
+	//         </dl>
+	//     </div>
 
-    <form class="uk-form" action="/console/buckets/{{ bucket.ID() }}/files" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="BucketID" value="{{ bucket.ID() }}" />
+	//     <form class="uk-form" action="/console/buckets/{{ bucket.ID() }}/files" method="post" enctype="multipart/form-data">
+	//         <input type="hidden" name="BucketID" value="{{ bucket.ID() }}" />
 
-        <legend>Main</legend>
-        <div class="uk-form-row">
-            <label class="uk-form-label">Name</label>
-            <div class="uk-form-controls">
-                <input type="text" class="uk-width-1-1 uk-form-large" name="Name" autofocus />
-            </div>
-        </div>
+	//         <legend>Main</legend>
+	//         <div class="uk-form-row">
+	//             <label class="uk-form-label">Name</label>
+	//             <div class="uk-form-controls">
+	//                 <input type="text" class="uk-width-1-1 uk-form-large" name="Name" autofocus />
+	//             </div>
+	//         </div>
 
-        <div class="uk-form-row">
-            <label class="uk-form-label">Content type</label>
-            <div class="uk-form-controls">
-                <div class="uk-autocomplete uk-form uk-width-1-1" id="select_contenttype-new_file" data-uk-autocomplete>
-                    <input type="text" class="uk-width-1-1" name="ContentType" autocomplete="off">
-                </div>
-            </div>
-        </div>
+	//         <div class="uk-form-row">
+	//             <label class="uk-form-label">Content type</label>
+	//             <div class="uk-form-controls">
+	//                 <div class="uk-autocomplete uk-form uk-width-1-1" id="select_contenttype-new_file" data-uk-autocomplete>
+	//                     <input type="text" class="uk-width-1-1" name="ContentType" autocomplete="off">
+	//                 </div>
+	//             </div>
+	//         </div>
 
-        <legend>Data</legend>
+	//         <legend>Data</legend>
 
-        <div class="uk-form-row">
-            <div class="uk-form-controls">
-                <input id="rawdata_source-new_file" type="hidden" name="TextData" value="" />
-                <div id="rawdata_view-new_file" class="uk-width-1-1" style="height:400px; border: 1px solid #ddd;"></div>
-            </div>
-        </div>
+	//         <div class="uk-form-row">
+	//             <div class="uk-form-controls">
+	//                 <input id="rawdata_source-new_file" type="hidden" name="TextData" value="" />
+	//                 <div id="rawdata_view-new_file" class="uk-width-1-1" style="height:400px; border: 1px solid #ddd;"></div>
+	//             </div>
+	//         </div>
 
-        <legend>Struct data</legend>
+	//         <legend>Struct data</legend>
 
-       <div class="uk-form-row">
-            <div class="uk-form-controls">
-                <input id="json_source-new_file" type="hidden" name="StructDataJson" value="" />
-                <div id="json_view-new_file" class="uk-width-1-1" style="height:400px; border: 1px solid #ddd;"></div>
-            </div>
-        </div>
+	//        <div class="uk-form-row">
+	//             <div class="uk-form-controls">
+	//                 <input id="json_source-new_file" type="hidden" name="StructDataJson" value="" />
+	//                 <div id="json_view-new_file" class="uk-width-1-1" style="height:400px; border: 1px solid #ddd;"></div>
+	//             </div>
+	//         </div>
 
+	//         <div class="uk-form-row">
+	//             <div class="uk-form-controls">
+	//                 <button class="uk-button" name="Mode" value="Manual">Create</button>
+	//             </div>
+	//         </div>
+	//     </form>
 
-        <div class="uk-form-row">
-            <div class="uk-form-controls">
-                <button class="uk-button" name="Mode" value="Manual">Create</button>
-            </div>
-        </div>
-    </form>
+	// </div>
+	// {% endblock %}
 
-</div>
-{% endblock %}
+	// {% block scripts %}
+	// <script src="//cdn.jsdelivr.net/uikit/2.26.2/js/components/autocomplete.min.js"></script>
+	// <script src="//cdnjs.cloudflare.com/ajax/libs/jsoneditor/5.5.5/jsoneditor.min.js"></script>
+	// <script>
+	//     var selectedContentType = "";
+	//     var autocomplete = UIkit.autocomplete("#select_contenttype-new_file", {
+	//                 source: [
+	//                 {
+	//                     value: 'image/jpeg'
+	//                 }, {
+	//                     value: 'image/pjpeg'
+	//                 }, {
+	//                     value: 'image/png'
+	//                 }, {
+	//                     value: 'image/vnd.microsoft.icon'
+	//                 }, {
+	//                     value: 'image/gif'
+	//                 }, {
+	//                     value: 'text/css'
+	//                 }, {
+	//                     value: 'text/plain'
+	//                 }, {
+	//                     value: 'text/javascript'
+	//                 }, {
+	//                     value: 'text/html'
+	//                 }, {
+	//                     value: 'text/toml'
+	//                 }, {
+	//                     value: 'application/javascript'
+	//                 }, {
+	//                     value: 'application/json'
+	//                 }, {
+	//                     value: 'application/soap+xml'
+	//                 }, {
+	//                     value: 'application/xhtml+xml'
+	//                 }, {
+	//                     value: 'text/csv'
+	//                 }, {
+	//                     value: 'text/x-jquery-tmpl'
+	//                 }, {
+	//                     value: 'text/php'
+	//                 }, {
+	//                     value: 'application/x-javascript'
+	//                 }],
+	//                 minLength: 2,
+	//                 delay: 0
+	//             });
 
-{% block scripts %}
-<script src="//cdn.jsdelivr.net/uikit/2.26.2/js/components/autocomplete.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jsoneditor/5.5.5/jsoneditor.min.js"></script>
-<script>
-    var selectedContentType = "";
-    var autocomplete = UIkit.autocomplete("#select_contenttype-new_file", {
-                source: [
-                {
-                    value: 'image/jpeg'
-                }, {
-                    value: 'image/pjpeg'
-                }, {
-                    value: 'image/png'
-                }, {
-                    value: 'image/vnd.microsoft.icon'
-                }, {
-                    value: 'image/gif'
-                }, {
-                    value: 'text/css'
-                }, {
-                    value: 'text/plain'
-                }, {
-                    value: 'text/javascript'
-                }, {
-                    value: 'text/html'
-                }, {
-                    value: 'text/toml'
-                }, {
-                    value: 'application/javascript'
-                }, {
-                    value: 'application/json'
-                }, {
-                    value: 'application/soap+xml'
-                }, {
-                    value: 'application/xhtml+xml'
-                }, {
-                    value: 'text/csv'
-                }, {
-                    value: 'text/x-jquery-tmpl'
-                }, {
-                    value: 'text/php'
-                }, {
-                    value: 'application/x-javascript'
-                }],
-                minLength: 2,
-                delay: 0
-            });
+	//     autocomplete.on("selectitem.uk.autocomplete", function(event, data, acobject) {
+	//         selectedContentType = data.value;
+	//     }).on("change", function(event, data, acobject) {
+	//         selectedContentType = event.target.value;
+	//     })
 
-    autocomplete.on("selectitem.uk.autocomplete", function(event, data, acobject) {
-        selectedContentType = data.value;
-    }).on("change", function(event, data, acobject) {
-        selectedContentType = event.target.value;
-    })
+	//     {% comment %}
+	//     json editor
+	//     {% endcomment %}
+	//     var jsonEditor;
+	//     var container = document.getElementById("json_view-new_file");
+	//     // https://github.com/josdejong/jsoneditor/blob/master/docs/api.md
+	//     var options = {
+	//         mode: "tree", // Available values: 'tree' (default), 'view', 'form', 'code', 'text'. In 'view' mode, the data and datastructure is read-only. In 'form' mode, only the value can be changed, the datastructure is read-only. Mode 'code' requires the Ace editor to be loaded on the page. Mode 'text' shows the data as plain text.
+	//         modes: ["tree", "code", "form", "view", "text"],
+	//         schema: {
+	//             "title": "root",
+	//             "type": "object",
+	//             "properties": {
+	//                 "fullName": {
+	//                     "type": "string"
+	//                 },
+	//                 "licenses": {
+	//                     "type": "array",
+	//                     "items": {
+	//                         "type": "string"
+	//                     },
+	//                     "minItems": 2,
+	//                     "uniqueItems": true
+	//                 }
+	//             },
+	//             "required": ["fullName", "licenses"]
+	//         },
+	//         indentation: 4,
 
-    {% comment %}
-    json editor
-    {% endcomment %}
-    var jsonEditor;
-    var container = document.getElementById("json_view-new_file");
-    // https://github.com/josdejong/jsoneditor/blob/master/docs/api.md
-    var options = {
-        mode: "tree", // Available values: 'tree' (default), 'view', 'form', 'code', 'text'. In 'view' mode, the data and datastructure is read-only. In 'form' mode, only the value can be changed, the datastructure is read-only. Mode 'code' requires the Ace editor to be loaded on the page. Mode 'text' shows the data as plain text.
-        modes: ["tree", "code", "form", "view", "text"],
-        schema: {
-            "title": "root",
-            "type": "object",
-            "properties": {
-                "fullName": {
-                    "type": "string"
-                },
-                "licenses": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "minItems": 2,
-                    "uniqueItems": true
-                }
-            },
-            "required": ["fullName", "licenses"]
-        },
-        indentation: 4,
+	//         search: false,
+	//         onChange: function() {
+	//             console.log(jsonEditor.get());
+	//             document.getElementById("json_source-new_file").value = JSON.stringify(jsonEditor.get());
+	//         }
+	//     };
+	//     jsonEditor = new JSONEditor(container, options);
+	//     jsonEditor.set({});
 
-        search: false,
-        onChange: function() {
-            console.log(jsonEditor.get());
-            document.getElementById("json_source-new_file").value = JSON.stringify(jsonEditor.get()); 
-        }
-    };
-    jsonEditor = new JSONEditor(container, options);
-    jsonEditor.set({});
+	//     {% comment %}
+	//     raw text editor
+	//     {% endcomment %}
 
-    {% comment %}
-    raw text editor
-    {% endcomment %}
+	//     var textEditor = ace.edit("rawdata_view-new_file");
+	//     textEditor.setFontSize("11pt");
+	//     textEditor.setValue("");
+	//     textEditor.getSession().on('change', function() {
+	//         document.getElementById("rawdata_source-new_file").value = textEditor.getSession().getValue();
+	//     });
 
-    var textEditor = ace.edit("rawdata_view-new_file");
-    textEditor.setFontSize("11pt");
-    textEditor.setValue("");
-    textEditor.getSession().on('change', function() {
-        document.getElementById("rawdata_source-new_file").value = textEditor.getSession().getValue();
-    });
-    
-    textEditor.$blockScrolling = Infinity;
-</script>
-{% endblock %}`))
+	//     textEditor.$blockScrolling = Infinity;
+	// </script>
+	// {% endblock %}`))
 
-		file.Sync()
-	}
+	// 		file.Sync()
+	// 	}
 
 	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "newfileform")
 	if err == dbox.ErrNotFound {
@@ -1559,12 +1558,62 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
                 <input type="text" class="uk-width-1-1 uk-form-large" name="Name" autofocus />
             </div>
         </div>
-
-        <legend>Struct data</legend>
-
-       <div class="uk-form-row">
+        
+        <legend>Store types <small>(allowed memory, local or boltdb)</small></legend>
+        <div class="uk-form-row">
+            <label class="uk-form-label">Meta data files</label>
             <div class="uk-form-controls">
-                <input id="json_source-new_file" type="hidden" name="StructDataJson" value="" />
+                <div class="uk-autocomplete uk-form uk-width-1-1" data-uk-autocomplete="{delay: 0, minLength: 1, source:[{value:'memory'}, {value:'local'}, {value:'boltdb'}]}">
+                    <input type="text" class="uk-width-1-1" name="MetaDataStoreType" autocomplete="off" value="">
+                </div>
+            </div>
+            <p class="uk-form-help-block">
+                <input id="SameAsMetaStoreTypeChekbox" type="checkbox" name="SameAsMetaStoreType" />
+                <label for="SameAsMetaStoreTypeChekbox" class="uk-form-label">similarly to map data and raw data</label>
+            </p>
+            <p class="uk-form-help-block">
+                <input id="MetaHaveSuffixChekbox" type="checkbox" name="MetaHaveSuffix" />
+                <label for="MetaHaveSuffixChekbox" class="uk-form-label">will have the suffix</label>
+            </p>
+        </div>
+        <div class="uk-form-row">
+            <label class="uk-form-label">Map data files</label>
+            <div class="uk-form-controls">
+                <div class="uk-autocomplete uk-form uk-width-1-1" data-uk-autocomplete="{delay: 0, minLength: 1, source:[{value:'memory'}, {value:'local'}, {value:'boltdb'}]}">
+                    <input type="text" class="uk-width-1-1" name="MapDataStoreType" autocomplete="off" value="">
+                </div>
+            </div>
+            <p class="uk-form-help-block">
+                <input id="MapDataHaveSuffixChekbox" type="checkbox" name="MapDataHaveSuffix" />
+                <label for="MapDataHaveSuffixChekbox" class="uk-form-label">will have the suffix</label>
+            </p>
+        </div>
+        <div class="uk-form-row">
+            <label class="uk-form-label">Raw data files</label>
+            <div class="uk-form-controls">
+                <div class="uk-autocomplete uk-form uk-width-1-1" data-uk-autocomplete="{delay: 0, minLength: 1, source:[{value:'memory'}, {value:'local'}, {value:'boltdb'}]}">
+                    <input type="text" class="uk-width-1-1" name="RawDataStoreType" autocomplete="off" value="">
+                </div>
+            </div>
+            <p class="uk-form-help-block">
+                <input id="RawDataHaveSuffixChekbox" type="checkbox" name="RawDataHaveSuffix" />
+                <label for="RawDataHaveSuffixChekbox" class="uk-form-label">will have the suffix</label>
+            </p>
+        </div>
+
+        <legend>
+            Mapping map data files
+            <a 
+                class="uk-link-muted"
+                href="https://www.elastic.co/guide/en/elasticsearch/guide/current/mapping-intro.html" 
+                target="_blank">
+                <i class="uk-icon uk-icon-question-circle"></i>
+            </a>
+        </legend>
+
+        <div class="uk-form-row">
+            <div class="uk-form-controls">
+                <input id="json_source-new_file" type="hidden" name="MappingMapDataFiles" value="" />
                 <div id="json_view-new_file" class="uk-width-1-1" style="height:400px; border: 1px solid #ddd;"></div>
             </div>
         </div>
@@ -1572,7 +1621,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 
         <div class="uk-form-row">
             <div class="uk-form-controls">
-                <button class="uk-button" name="Mode" value="Manual">Create bucket</button>
+                <button class="uk-button" value="Manual">Create bucket</button>
             </div>
         </div>
     </form>
@@ -1581,8 +1630,20 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 {% endblock %}
 
 {% block scripts %}
+<script src="//cdn.jsdelivr.net/uikit/2.26.2/js/components/autocomplete.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jsoneditor/5.5.5/jsoneditor.min.js"></script>
 <script>
+    $("#SameAsMetaStoreTypeChekbox").on("change", function(e) {
+        if ($(e.target).prop("checked")) {
+            $("input[name='MapDataStoreType']").prop("disabled", true);
+            $("input[name='RawDataStoreType']").prop("disabled", true);
+            $("input[name='MapDataStoreType']").val($("input[name='MetaDataStoreType']").prop("value"));
+            $("input[name='RawDataStoreType']").val($("input[name='MetaDataStoreType']").prop("value"));
+        } else {
+            $("input[name='MapDataStoreType']").prop( "disabled", false );
+            $("input[name='RawDataStoreType']").prop( "disabled", false );
+        }
+    })
     {% comment %}
     json editor
     {% endcomment %}
@@ -1620,7 +1681,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
         }
     };
     jsonEditor = new JSONEditor(container, options);
-    jsonEditor.set(JSON.parse("{{ DefaultBucketMapping()|atojs|escapejs}}"));
+    jsonEditor.set({});
 </script>
 {% endblock %}`))
 
@@ -1662,7 +1723,22 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
-		file.RawData().Write([]byte(`{# new bucket #}`))
+		file.RawData().Write([]byte(`{# new bucket #}
+
+{% if ctx.IsPost() %}
+
+{% set opt = ctx.BindFormToMap("Name", "MetaDataStoreType", "SameAsMetaStoreType", "MapDataStoreType", "RawDataStoreType", "MappingMapDataFiles", "MetaHaveSuffix", "MapDataHaveSuffix", "RawDataHaveSuffix" ) %}
+
+{% set res = CreateBucket(opt) %}
+{# res is error or bucket #}
+
+
+{% set url = "/console/buckets/"|add:res.ID()|add:"/files" %}
+{{ ctx.Redirect302(url) }}
+{% comment %}
+{% endcomment %}
+
+{% endif %}`))
 
 		file.Sync()
 	}
