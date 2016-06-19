@@ -20,7 +20,11 @@ var (
 						Set("type", "string").
 						Set("index", "not_analyzed")).
 					Set("TextData", utils.Map().
-						Set("type", "string"))
+						Set("type", "string")).
+					Set("MapData", utils.Map().
+						Set("type", "object").
+						Set("enabled", false)) // disabled mapping by default
+
 		// Set("IsRemoved", fieldMapping{"boolean", "", ""}).
 		// Set("CreatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"}).
 		// Set("UpdatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"})

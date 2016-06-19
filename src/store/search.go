@@ -75,10 +75,13 @@ func UpdateSearchMapping(bucket *Bucket) error {
 	}
 
 	docMapping := utils.Map(BucketFileMappingDefault).
-		Set("Meta", utils.Map().Set("properties", bucket.MetaDataFilesMapping())).
-		Set("MapData", utils.Map().Set("properties", bucket.MapDataFilesMapping()))
+		Set("Meta", utils.Map().Set("properties", bucket.MetaDataFilesMapping()))
 
-		// Set("UpdatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"})
+	if len(bucket.MapDataFilesMapping()) > 0 {
+		docMapping.Set("MapData", utils.Map().Set("properties", bucket.MapDataFilesMapping()))
+	}
+
+	// Set("UpdatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"})
 
 	mapping := map[string]interface{}{
 		"properties": docMapping,
