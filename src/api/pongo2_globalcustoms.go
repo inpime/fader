@@ -79,43 +79,43 @@ func pongo2InitGlobalCustoms() {
 		return pongo2.AsValue(utils.NewA([]string{}))
 	}
 
-	// DefaultBucketMapping default value mapping of the bucket
-	tpls.Globals["DefaultBucketMapping"] = func() *pongo2.Value {
-		m := utils.Map()
-		m.Set(store.MetaFilesBucketMappingKey, store.FileMetaMappingDefault)
-		m.Set(store.MapFilesBucketMappingKey, utils.Map().Set("licenses", utils.Map().
-			Set("type", "string").
-			Set("index", "not_analyzed")))
-		return pongo2.AsValue(m)
-	}
-
 	// CreateBucket special function (used only to create a bucket)
-	tpls.Globals["CreateBucket"] = func(name,
-		metaStoreName,
-		rawDataStoreName,
-		mapDataStoreName,
-		mappingMapDataFiles *pongo2.Value) *pongo2.Value {
-		bucket, err := store.BucketByName(name.String())
+	tpls.Globals["CreateBucket"] = func(_opt *pongo2.Value) *pongo2.Value {
+		opt := utils.Map().LoadFrom(_opt.Interface())
+
+		bucketName := opt.String("Name")
+		bucket, err := store.BucketByName(bucketName)
+
+		if opt.Bool("SameAsMetaStoreType") {
+			bucket.InitInOneStore(dbox.StoreType(opt.String("MetaDataStoreType")))
+		} else {
+
+			bucket.InitMetaDataStore(
+				dbox.StoreType(opt.String("MetaDataStoreType")),
+				opt.Bool("MetaHaveSuffix")) // store key - <type>.<name>.meta
+			bucket.InitMapDataStore(
+				dbox.StoreType(opt.String("MapDataStoreType")),
+				opt.Bool("MapDataHaveSuffix")) // store key - <type>.<name>.mapdata
+			bucket.InitRawDataStore(
+				dbox.StoreType(opt.String("RawDataStoreType")),
+				opt.Bool("RawDataHaveSuffix")) // store key - <type>.<name>.rawdata
+		}
 
 		// Only create new bucket
 		if err != dbox.ErrNotFound {
 			return pongo2.AsValue(err)
 		}
 
-		bucket.SetMetaDataStoreName(metaStoreName.String())
-		bucket.SetRawDataStoreName(rawDataStoreName.String())
-		bucket.SetMapDataStoreName(mapDataStoreName.String())
-
 		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
-		bucket.MMapDataFilesMapping().LoadFrom(mappingMapDataFiles.Interface())
+		bucket.MMapDataFilesMapping().LoadFrom(opt.String("MappingMapDataFiles"))
 
 		if err := bucket.UpdateMapping(); err != nil {
-			logrus.WithError(err).Errorf("create new bucket %q: update mapping", name.String())
+			logrus.WithError(err).Errorf("create new bucket %q: update mapping", bucketName)
 			return pongo2.AsValue(err)
 		}
 
 		if err := bucket.Sync(); err != nil {
-			logrus.WithError(err).Errorf("create new bucket %q: save bucket", name.String())
+			logrus.WithError(err).Errorf("create new bucket %q: save bucket", bucketName)
 			return pongo2.AsValue(err)
 		}
 
