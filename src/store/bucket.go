@@ -102,7 +102,7 @@ func (f Bucket) InitInOneStore(_type dbox.StoreType) {
 
 // InitMetaDataStore
 func (f Bucket) InitMetaDataStore(_type dbox.StoreType, withoutPostfix bool) {
-	postfix := "mapdata"
+	postfix := "metadata"
 	if withoutPostfix {
 		postfix = ""
 	}
@@ -112,7 +112,7 @@ func (f Bucket) InitMetaDataStore(_type dbox.StoreType, withoutPostfix bool) {
 
 // InitRawDataStore
 func (f Bucket) InitRawDataStore(_type dbox.StoreType, withoutPostfix bool) {
-	postfix := "mapdata"
+	postfix := "rawdata"
 	if withoutPostfix {
 		postfix = ""
 	}

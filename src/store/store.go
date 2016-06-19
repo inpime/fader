@@ -15,7 +15,7 @@ var (
 func FormatStoreName(_type dbox.StoreType, bucketname string, args ...string) string {
 	key := string(_type) + "." + bucketname
 
-	if len(args) > 0 {
+	if len(args) > 0 && len(args[0]) > 0 {
 		key += "." + args[0]
 	}
 
