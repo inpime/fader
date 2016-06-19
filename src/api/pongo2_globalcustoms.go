@@ -1,0 +1,340 @@
+package api
+
+import (
+	"github.com/Sirupsen/logrus"
+	"github.com/flosch/pongo2"
+	"github.com/inpime/dbox"
+	"store"
+	"strings"
+	"utils"
+)
+
+func pongo2InitGlobalCustoms() {
+
+	// SearchFiles search files in bucket
+	// (the request is formed in buildSearchQueryFilesByBycket)
+	tpls.Globals["SearchFiles"] = func(
+		bucketName,
+		queryStr,
+		page,
+		perpage *pongo2.Value,
+	) *pongo2.Value {
+
+		filter := store.NewSearchFilter(strings.ToLower(bucketName.String()))
+		filter.SetQueryString(queryStr.String())
+		filter.SetPage(page.Integer())
+		filter.SetPerPage(perpage.Integer())
+
+		queryRaw := buildSearchQueryFilesByBycket(
+			strings.ToLower(bucketName.String()),
+			queryStr.String(),
+			page.Integer(),
+			perpage.Integer(),
+		)
+		filter.SetQueryRaw(queryRaw)
+
+		return pongo2.AsValue(makeSearch(filter))
+	}
+
+	// LoadByID load file by ID
+	tpls.Globals["LoadByID"] = func(
+		bucketName,
+		fileID *pongo2.Value,
+	) *pongo2.Value {
+
+		file, err := store.LoadOrNewFileID(
+			strings.ToLower(bucketName.String()),
+			fileID.String())
+
+		if err != nil {
+			return pongo2.AsValue(err)
+		}
+
+		return pongo2.AsValue(file)
+	}
+
+	// Load load file by name
+	tpls.Globals["Load"] = func(
+		bucketName,
+		fileName *pongo2.Value,
+	) *pongo2.Value {
+		file, _ := store.LoadOrNewFile(
+			strings.ToLower(bucketName.String()),
+			fileName.String())
+
+		// if err != nil {
+		// 	return pongo2.AsValue(err)
+		// }
+
+		return pongo2.AsValue(file)
+	}
+
+	// Load load file by name
+	tpls.Globals["M"] = func() *pongo2.Value {
+
+		return pongo2.AsValue(utils.Map())
+	}
+
+	tpls.Globals["A"] = func() *pongo2.Value {
+		return pongo2.AsValue(utils.NewA([]string{}))
+	}
+
+	// DefaultBucketMapping default value mapping of the bucket
+	tpls.Globals["DefaultBucketMapping"] = func() *pongo2.Value {
+		m := utils.Map()
+		m.Set(store.MetaFilesBucketMappingKey, store.FileMetaMappingDefault)
+		m.Set(store.MapFilesBucketMappingKey, utils.Map().Set("licenses", utils.Map().
+			Set("type", "string").
+			Set("index", "not_analyzed")))
+		return pongo2.AsValue(m)
+	}
+
+	// CreateBucket special function (used only to create a bucket)
+	tpls.Globals["CreateBucket"] = func(name,
+		metaStoreName,
+		rawDataStoreName,
+		mapDataStoreName,
+		mappingMapDataFiles *pongo2.Value) *pongo2.Value {
+		bucket, err := store.BucketByName(name.String())
+
+		// Only create new bucket
+		if err != dbox.ErrNotFound {
+			return pongo2.AsValue(err)
+		}
+
+		bucket.SetMetaDataStoreName(metaStoreName.String())
+		bucket.SetRawDataStoreName(rawDataStoreName.String())
+		bucket.SetMapDataStoreName(mapDataStoreName.String())
+
+		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMapDataFilesMapping().LoadFrom(mappingMapDataFiles.Interface())
+
+		if err := bucket.UpdateMapping(); err != nil {
+			logrus.WithError(err).Errorf("create new bucket %q: update mapping", name.String())
+			return pongo2.AsValue(err)
+		}
+
+		if err := bucket.Sync(); err != nil {
+			logrus.WithError(err).Errorf("create new bucket %q: save bucket", name.String())
+			return pongo2.AsValue(err)
+		}
+
+		return pongo2.AsValue(bucket)
+	}
+
+	/*
+		// TODO: remove, existing stringformat
+
+
+		tpls.Globals["findFiles"] = func(bucket, query, page, perpage *pongo2.Value) *pongo2.Value {
+
+			return pongo2.AsValue(Searcher.SearchFiles(bucket.String(), query.String(), page.Integer(), perpage.Integer()))
+		}
+
+		tpls.Globals["loadFileByName"] = func(bucket, name *pongo2.Value) *pongo2.Value {
+			file, err := Mng.GetFullDataFileByNames(bucket.String(), name.String())
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(Mng.FileWrap(file))
+		}
+
+		tpls.Globals["loadFileByID"] = func(id *pongo2.Value) *pongo2.Value {
+			file, err := Mng.GetFullDataFileByID(id.String())
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(Mng.FileWrap(file))
+		}
+
+		tpls.Globals["updateStructDataFile"] = func(in *pongo2.Value) *pongo2.Value {
+			var _file *File
+			var ok bool
+
+			if _file, ok = in.Interface().(*File); !ok {
+				return pongo2.AsValue(fmt.Errorf("updateFileStructData: not expected type data, want %T, got %T", _file, in.Interface()))
+			}
+
+			file, err := Mng.PUpdateStructDataFile(_file)
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(Mng.FileWrap(file))
+		}
+
+		tpls.Globals["updateRawDataFile"] = func(in *pongo2.Value) *pongo2.Value {
+			var _file *File
+			var ok bool
+
+			if _file, ok = in.Interface().(*File); !ok {
+				return pongo2.AsValue(fmt.Errorf("updateFileStructData: not expected type data, want %T, got %T", _file, in.Interface()))
+			}
+
+			file, err := Mng.PUpdateFullDataFile(_file)
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(Mng.FileWrap(file))
+		}
+
+		// tpls.Globals["saveFileRawData"] = func(id, raw *pongo2.Value) *pongo2.Value {
+		// 	dto := NewUpdateFileDTO()
+		// 	dto.FileID = uuid.FromStringOrNil(id.String())
+
+		// 	switch raw.Interface().(type) {
+		// 	case string:
+		// 		dto.TextData = raw.String()
+		// 	case []byte:
+		// 		dto.BinData = raw.Interface().([]byte)
+		// 	default:
+		// 		logrus.Warningf("not expected type data, %T", raw.Interface())
+		// 		return pongo2.AsValue(fmt.Errorf("not expected type data"))
+		// 	}
+
+		// 	dto.BinData = []byte(raw.String())
+
+		// 	file, err := Mng.UpdateRawDataFile(dto)
+
+		// 	if err != nil {
+		// 		return pongo2.AsValue(err)
+		// 	}
+
+		// 	return pongo2.AsValue(Mng.FileWrap(file))
+		// }
+
+		tpls.Globals["search"] = func(bucket, query, page, perpage *pongo2.Value) *pongo2.Value {
+
+			return pongo2.AsValue(Searcher.SearchFiles(bucket.String(), query.String(), page.Integer(), perpage.Integer()))
+		}
+
+		// TODO: rename muted
+
+		tpls.Globals["clear"] = func(args ...*pongo2.Value) *pongo2.Value {
+
+			return pongo2.AsValue(nil)
+		}
+
+		tpls.Globals["struct"] = func() *pongo2.Value {
+
+			return pongo2.AsValue(store.NewMap())
+		}
+
+		// System data transfer object
+
+		// tpls.Globals["NewFileDTO"] = func() *pongo2.Value {
+		// 	return pongo2.AsValue(NewCreateFileDTO())
+		// }
+
+		// tpls.Globals["UpdateFileDTO"] = func() *pongo2.Value {
+		// 	return pongo2.AsValue(NewUpdateFileDTO())
+		// }
+
+		// ------------------------------
+		// ------------------------------
+		// ------------------------------
+
+		tpls.Globals["UpdateFile"] = func(in *pongo2.Value) *pongo2.Value {
+			var _file *File
+			var ok bool
+			var err error
+
+			if _file, ok = in.Interface().(*File); !ok {
+				return pongo2.AsValue(fmt.Errorf("UpdateFile: not expected type data, want %T, got %T", _file, in.Interface()))
+			}
+
+			_file.FileInterface, err = Mng.PUpdateFullDataFile(_file)
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(_file)
+		}
+
+		tpls.Globals["UpdateRawDataFile"] = func(in *pongo2.Value) *pongo2.Value {
+			var _file *File
+			var ok bool
+			var err error
+
+			if _file, ok = in.Interface().(*File); !ok {
+				return pongo2.AsValue(fmt.Errorf("updateFileStructData: not expected type data, want %T, got %T", _file, in.Interface()))
+			}
+
+			_file.FileInterface, err = Mng.PUpdateFullDataFile(_file)
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(_file)
+		}
+
+		tpls.Globals["UpdateStructDataFile"] = func(in *pongo2.Value) *pongo2.Value {
+			var _file *File
+			var ok bool
+			var err error
+
+			if _file, ok = in.Interface().(*File); !ok {
+				return pongo2.AsValue(fmt.Errorf("updateFileStructData: not expected type data, want %T, got %T", _file, in.Interface()))
+			}
+
+			_file.FileInterface, err = Mng.PUpdateStructDataFile(_file)
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(_file)
+		}
+
+		// Создание файла на основе *FIle
+		// flagViaUploader - указывает на то что файл созданиется на основе загруженного через uplaoder. Имя файла будет взято из мени загружаемого файла
+		tpls.Globals["CreateFile"] = func(in, flagViaUploader *pongo2.Value) *pongo2.Value {
+			var _file *File
+			var ok bool
+			var err error
+
+			if _file, ok = in.Interface().(*File); !ok {
+				return pongo2.AsValue(fmt.Errorf("updateFileStructData: not expected type data, want %T, got %T", _file, in.Interface()))
+			}
+
+			if flagViaUploader.IsBool() && flagViaUploader.Bool() {
+				_file.SetName(_file.FileOriginalName())
+			}
+
+			_file.FileInterface, err = Mng.PCreateFile(_file)
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(_file)
+		}
+
+		tpls.Globals["RenameFile"] = func(fileId, newName *pongo2.Value) *pongo2.Value {
+			err := Mng.RenameFileByID(fileId.String(), newName.String())
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(nil)
+		}
+
+		tpls.Globals["RemoveFile"] = func(fileId *pongo2.Value) *pongo2.Value {
+			file, err := Mng.DropFileByID(fileId.String())
+
+			if err != nil {
+				return pongo2.AsValue(err)
+			}
+
+			return pongo2.AsValue(Mng.FileWrap(file))
+		}
+	*/
+}
