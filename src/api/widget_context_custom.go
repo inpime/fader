@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"utils"
 )
 
 var (
@@ -78,4 +79,13 @@ func (c *ContextWrap) SetResponseData(data interface{}) *ContextWrap {
 // Redirect302 redirect to url. Statuc code 302
 func (c ContextWrap) Redirect302(url string) error {
 	return c.Redirect(http.StatusFound, url)
+}
+
+// BindFormToMap helper function for fast bind forms
+func (c ContextWrap) BindFormToMap(fieldNames ...string) utils.M {
+	m := utils.Map()
+	for _, name := range fieldNames {
+		m.Set(name, c.FormValue(name))
+	}
+	return m
 }
