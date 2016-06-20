@@ -62,7 +62,9 @@ func FileSearchFromFile(file *File) *FileSearchDTO {
 		// UpdatedAt: file.UpdatedAt(),
 	}
 
-	// TODO: detected text data type
+	if file.IsText() {
+		dto.TextData = string(file.RawData().Bytes())
+	}
 
 	return dto
 }
