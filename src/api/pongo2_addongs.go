@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/url"
+	"store"
 	"strings"
 	"sync"
 
@@ -22,7 +24,7 @@ func pongo2InitAddons() {
 		// Загружать props файла и проверять от сессии доступ к этому файлу
 
 		// filters
-		pongo2.RegisterFilter("static", filterStaticFile)
+		pongo2.RegisterFilter("urlfile", filterGetUrlFileContentByFileName)
 		pongo2.RegisterFilter("is_error", filterIsError)
 		pongo2.RegisterFilter("clear", filterClear)
 		pongo2.RegisterFilter("logf", filterLogf)
@@ -37,9 +39,18 @@ func pongo2InitAddons() {
 // filter static file
 // ------
 
-func filterStaticFile(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+func filterGetUrlFileContentByFileName(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	// TODO: get the URL based on the name route (after the routs will have the names)
 
-	return pongo2.AsValue("/statics/" + in.String()), nil
+	file, err := store.LoadOrNewFile(StaticBucketName, in.String())
+
+	if err != nil {
+		// TODO: what to do if the file is not found?
+
+		return pongo2.AsValue("/usercontent/not_found_file?err=" + url.QueryEscape(err.Error())), nil
+	}
+
+	return pongo2.AsValue("/usercontent/" + file.ID()), nil
 }
 
 // ------
