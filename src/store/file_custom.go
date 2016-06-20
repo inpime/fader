@@ -45,6 +45,11 @@ func (f *File) SetTextData(src string) *File {
 	return f
 }
 
+func (f *File) SetRawData(src []byte) *File {
+	f.RawData().Write(src)
+	return f
+}
+
 func (f File) IsImage() bool {
 	return getTypeNameFromContentType(f.ContentType()) == "image"
 }
