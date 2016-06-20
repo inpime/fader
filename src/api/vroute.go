@@ -14,6 +14,25 @@ type Request struct {
 	Method string
 }
 
+func NewHandlerFromRoute(r Rout) Handler {
+	var h Handler
+	if r.IsSpecial {
+		h = Handler{
+			Bucket:         "",
+			File:           "",
+			SpecialHandler: r.Handler,
+		}
+	} else {
+		h = NewHandlerFromString(r.Handler)
+	}
+
+	h.Licenses = r.Licenses
+	h.Path = r.Path
+	h.Methods = r.Methods
+
+	return h
+}
+
 func NewHandlerFromString(str string) Handler {
 	hConf := strings.Fields(str)
 
@@ -34,6 +53,8 @@ func NewHandler(bucket, file string) Handler {
 type Handler struct {
 	Bucket string
 	File   string
+
+	SpecialHandler string
 
 	Licenses []string
 	Methods  []string

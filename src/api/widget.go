@@ -38,6 +38,14 @@ func ExecuteWidget(c echo.Context) error {
 			return c.NoContent(http.StatusForbidden)
 		}
 
+		// Special handler
+
+		if ExistSpecialHandler(match.Handler.SpecialHandler) {
+			sHandler := GetSpecialHandler(match.Handler.SpecialHandler)
+
+			return sHandler(widgetCtx)
+		}
+
 		// Template execute
 
 		var tpl *pongo2.Template

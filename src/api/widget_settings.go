@@ -26,10 +26,11 @@ func AppRouts() []string {
 }
 
 type Rout struct {
-	Path     string   `toml:"path"`
-	Handler  string   `toml:"handler"`
-	Methods  []string `toml:"methods"`
-	Licenses []string `toml:"licenses"`
+	Path      string   `toml:"path"`
+	Handler   string   `toml:"handler"`
+	Methods   []string `toml:"methods"`
+	Licenses  []string `toml:"licenses"`
+	IsSpecial bool     `toml:"special"`
 }
 
 type Routing struct {
@@ -40,6 +41,8 @@ type Routing struct {
 func initWidgetVirtualRouts() {
 	reloadAppSettings()
 	reloadAppRouts()
+
+	RegistedSpecialHandler("usercontent", UserContentHandler)
 
 	go RefreshEvery(3*time.Second, reloadAppSettings)
 	go RefreshEvery(3*time.Second, reloadAppRouts)
@@ -68,7 +71,7 @@ func reloadAppSettings() {
 		return
 	}
 
-	logrus.WithField("settings", appSettings).Info("main settings")
+	// logrus.WithField("settings", appSettings).Info("main settings")
 }
 
 func reloadAppRouts() {
@@ -100,10 +103,7 @@ func updateAppRoutes(fileName string) {
 
 	for _, _r := range routing.Routs {
 
-		handler := NewHandlerFromString(_r.Handler)
-		handler.Licenses = _r.Licenses
-		handler.Methods = _r.Methods
-		handler.Path = _r.Path
+		handler := NewHandlerFromRoute(_r)
 
 		if len(_r.Methods) == 0 {
 			router.Handle(_r.Path, handler).Methods("GET")

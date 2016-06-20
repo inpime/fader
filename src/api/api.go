@@ -8,11 +8,6 @@ import (
 	"github.com/yosssi/boltstore/reaper"
 )
 
-func EmptyHandler(c echo.Context) error {
-
-	return c.String(200, "empty")
-}
-
 // Run init tempaltes and start server
 func Run() {
 
