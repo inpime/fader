@@ -18,6 +18,9 @@ var (
 	// BucketsStoreName  = "boltdb.buckets"
 	UsersStoreName = "boltdb.users"
 	// SettingsStoreName = "boltdb.settings"
+
+	// System file names
+	MainSettingsFileName = "main"
 )
 
 type Config struct {

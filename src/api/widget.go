@@ -40,7 +40,14 @@ func ExecuteWidget(c echo.Context) error {
 
 		// Template execute
 
-		tpl := pongo2.Must(pongo2.FromFile(match.Handler.Bucket + "/" + match.Handler.File))
+		var tpl *pongo2.Template
+
+		if IsPageCaching() {
+			tpl = pongo2.Must(pongo2.FromCache(match.Handler.Bucket + "/" + match.Handler.File))
+		} else {
+			ClearWidgetTemplatesCache()
+			tpl = pongo2.Must(pongo2.FromFile(match.Handler.Bucket + "/" + match.Handler.File))
+		}
 
 		res, err := tpl.Execute(pongo2.Context{
 			"ctx": widgetCtx,
