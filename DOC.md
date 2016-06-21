@@ -44,4 +44,6 @@ licenses = array string
 #### Special Handlers
 
 * `usercontent` - returns the file contents
+* `exportapp` - export all data
+* `importapp` - import all data (existing data is supplemented)
 
