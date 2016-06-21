@@ -9,17 +9,18 @@ before_install:
 script:
   - make build-linux
 
-deploy:
-  provider: s3
-  access_key_id: $AWS_ACCESS_KEY
-  secret_access_key: $AWS_SECRET_KEY
-  bucket: releases.fader.inpime.com
-  endpoint: releases.fader.inpime.com.s3-website.eu-central-1.amazonaws.com
-  region: eu-central-1
-  skip_cleanup: true
-  local-dir: build
-  acl: public_read
-  detect_encoding: true
-  cache_control: max-age=0
-  on:
-    repo: inpime/fader
+# deploy:
+#   provider: s3
+#   access_key_id: $AWS_ACCESS_KEY
+#   secret_access_key: $AWS_SECRET_KEY
+#   bucket: releases.fader.inpime.com
+#   endpoint: releases.fader.inpime.com.s3-website.eu-central-1.amazonaws.com
+#   region: eu-central-1
+#   skip_cleanup: true
+#   local-dir: build
+#   acl: public_read
+#   skip_cleanup: true
+#   detect_encoding: true
+#   cache_control: max-age=0
+#   on:
+#     repo: inpime/fader
