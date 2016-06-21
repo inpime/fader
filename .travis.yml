@@ -3,11 +3,12 @@ go:
   - 1.6
   - tip
 
-before_install: 
-  - echo "before install"
+# before_install: 
+#  - echo "before install"
 
 script:
   - make build-linux
+
 
 # deploy:
 #   provider: s3
