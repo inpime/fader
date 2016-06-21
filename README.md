@@ -2,6 +2,10 @@
 
 Fader is a abstract tool for creation of web applications. Gives maximum flexibility arranging information on the site.
 
+Download
+* [fader.go1.6.linux_amd64.latest.zip](https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/fader.go1.6.linux_amd64.latest.zip)
+* [fader.go1.7.linux_amd64.latest.zip](https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/fader.gotip.linux_amd64.latest.zip)
+
 ## Overview
 
 ## Features
