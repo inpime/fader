@@ -11,23 +11,30 @@ import (
 
 var flagWorkspacePath = flag.String("workspace", "./_workspace/", "workspace application")
 var flagApiAddress = flag.String("address", ":3322", "path to the static folder")
+var flagElasticSearchAddress = flag.String("es_address", "https://es.idheap.com", "url elasticsearch")
+var flagElasticSearchIndex = flag.String("es_index", "fader", "elasticsearch index name")
+var flagSessionSecret = flag.String("session_secret", "secure-key", "sessions secure key")
 
 func initConfig() {
 	flag.Parse()
 
 	workspace := *flagWorkspacePath
+	address := *flagApiAddress
+	esAddress := *flagElasticSearchAddress
+	esIndexName := *flagElasticSearchIndex
+	sessionSecureKey := *flagSessionSecret
 
 	api.Cfg = &api.Config{
-		Address:       "192.168.1.36:3322",
+		Address:       address,
 		WorkspacePath: workspace,
 		Search: api.SearchStore{
-			Host:      "https://es.idheap.com",
-			IndexName: "fader",
+			Host:      esAddress,
+			IndexName: esIndexName,
 		},
 		Session: api.ApiSessionConfig{
 			Path: "/",
 
-			SecretKey:  "secure-key",
+			SecretKey:  sessionSecureKey,
 			BucketName: "sessions",
 
 			Store: api.StoreConfig{
