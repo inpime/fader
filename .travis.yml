@@ -16,6 +16,10 @@ deploy:
     endpoint: releases.fader.inpime.com.s3-website.eu-central-1.amazonaws.com
     region: eu-central-1
     skip_cleanup: true
-    local-dir: output
+    local-dir: build
     acl: public_read
+    skip_cleanup: true
     detect_encoding: true
+    cache_control: max-age=0
+    on:
+        repo: inpime/fader
