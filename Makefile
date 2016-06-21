@@ -39,15 +39,17 @@ prebuild:
 
 	go get github.com/BurntSushi/toml
 
+	mkdir -p releases
+
 .PHONY: prebuild
 	
 build-linux: prebuild
 	@echo Build Linux amd64
 	env GOBIN=${PWD}/build/linux_amd64 GOOS=linux GOARCH=amd64 $(GO) install $(ENTIRYPOINTFILES)
-	zip -j ${PWD}/releases/fader.$(TRAVIS_GO_VERSION).linux_amd64.$(STAMP).zip ${PWD}/build/linux_amd64/fader
+	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).linux_amd64.$(STAMP).zip ${PWD}/build/linux_amd64/fader
 build-osx: prebuild
 	@echo Build OSX amd64
 	env GOBIN=${PWD}/build/osx_amd64 GOOS=darwin GOARCH=amd64 $(GO) install $(ENTIRYPOINTFILES)
-	zip -j ${PWD}/releases/fader.$(TRAVIS_GO_VERSION).osx_amd64.$(STAMP).zip ${PWD}/build/osx_amd64/fader
+	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).osx_amd64.$(STAMP).zip ${PWD}/build/osx_amd64/fader
 
 .PHONY: build-linux

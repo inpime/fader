@@ -2,3 +2,4 @@ _workspace*
 .vscode
 pkg
 build
+releases
