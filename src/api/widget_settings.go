@@ -43,6 +43,8 @@ func initWidgetVirtualRouts() {
 	reloadAppRouts()
 
 	RegistedSpecialHandler("usercontent", UserContentHandler)
+	RegistedSpecialHandler("exportapp", ExportAppHandler)
+	RegistedSpecialHandler("importapp", ImportAppHandler)
 
 	go RefreshEvery(3*time.Second, reloadAppSettings)
 	go RefreshEvery(3*time.Second, reloadAppRouts)
