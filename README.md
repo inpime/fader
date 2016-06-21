@@ -4,9 +4,6 @@ Fader is a abstract tool for creation of web applications. Gives maximum flexibi
 
 ## Overview
 
-Fader - инструмент предоставляющий возможность управления содержимым веб-сайта. Особенностью является возможность конструирования интерфейса  
-Это достигается за счет конструирования слоя управления сайтом.
-
 ## Features
 
 ## Demo
