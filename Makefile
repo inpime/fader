@@ -48,10 +48,15 @@ build-linux: prebuild
 	env GOBIN=${PWD}/build/linux_amd64 GOOS=linux GOARCH=amd64 $(GO) install $(ENTIRYPOINTFILES)
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).linux_amd64.$(STAMP).zip ${PWD}/build/linux_amd64/fader
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).linux_amd64.latest.zip ${PWD}/build/linux_amd64/fader
+.PHONY: build-linux
+
 build-osx: prebuild
 	@echo Build OSX amd64
 	env GOBIN=${PWD}/build/osx_amd64 GOOS=darwin GOARCH=amd64 $(GO) install $(ENTIRYPOINTFILES)
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).osx_amd64.$(STAMP).zip ${PWD}/build/osx_amd64/fader
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).osx_amd64.latest.zip ${PWD}/build/osx_amd64/fader
+.PHONY: build-osx
 
-.PHONY: build-linux
+build-linux-dev: build-linux
+	cp ${PWD}/build/linux_amd64/fader ${PWD}/state/app/fader
+.PHONY: build-linux-dev
