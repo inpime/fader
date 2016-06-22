@@ -2,21 +2,23 @@ package main
 
 import (
 	"api"
-	"fmt"
+	"github.com/Sirupsen/logrus"
 )
 
 func main() {
-	fmt.Println("Fader starting...")
+	logrus.Info("Fader starting...")
 
-	fmt.Println("Init config...")
+	logrus.Info("Init config...")
 	initConfig()
 
-	fmt.Println("Init elasticsearch...")
+	logrus.Info("Init elasticsearch...")
 	initElasticSearch()
 
-	fmt.Println("Init stores...")
+	logrus.Infof("[DEBUG]: Config %#v", api.Cfg)
+
+	logrus.Info("Init stores...")
 	initStroes()
 
-	fmt.Println("Api...")
+	logrus.Info("Api...")
 	api.Run()
 }

@@ -243,7 +243,22 @@ func initStroes() {
 	// Settings
 	// --------------------
 
-	file, err := store.LoadOrNewFile(api.SettingsBucketName, api.RoutingSettingsFileName)
+	file, err := store.LoadOrNewFile(api.SettingsBucketName, api.MainSettingsFileName)
+	if err == dbox.ErrNotFound {
+		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
+
+		file.SetContentType("text/toml")
+		file.RawData().Write([]byte(`# main settings
+
+routs = ["routing"]
+pageCaching = false
+
+[usercontent]
+bucket="static"`))
+		file.Sync()
+	}
+
+	file, err = store.LoadOrNewFile(api.SettingsBucketName, api.RoutingSettingsFileName)
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -258,6 +273,27 @@ path = "/"
 handler = "pages index"
 methods = ["get"]
 licenses = ["guest", "user", "admin"]
+
+[[routs]]
+path = "/usercontent/{fileid}"
+handler = "usercontent"
+special = true
+methods = ["get"]
+licenses = ["guest", "user", "admin"]
+
+[[routs]]
+path = "/console/settings/export"
+handler = "exportapp"
+special = true
+methods = ["get"]
+licenses = ["admin"]
+
+[[routs]]
+path = "/console/settings/import"
+handler = "importapp"
+special = true
+methods = ["post"]
+licenses = ["admin"]
 
 # -----------------
 # Sessions
@@ -338,6 +374,12 @@ methods = ["post"]
 licenses = ["admin"]
 
 [[routs]]
+path = "/console/buckets/{bucket_id}/files/{file_id}/rawdata/put_via_uploader"
+handler = "console putfile_rawdata_viauploader"
+methods = ["post"]
+licenses = ["admin"]
+
+[[routs]]
 path = "/console/buckets/{bucket_id}/files/{file_id}/structdata/put"
 handler = "console putfile_structdata"
 methods = ["post"]
@@ -360,6 +402,8 @@ path = "/console/buckets"
 handler = "console newbucket"
 methods = ["post"]
 licenses = ["admin"]
+
+
 
 `))
 
@@ -660,7 +704,61 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 {% block content %}
 <div class="uk-width-1-2 uk-container uk-container-center">
 <h1>Dashboard</h1>
+<div class="uk-panel uk-panel-box">
+    <div class="uk-panel-title">Import/export settings</div>
+    <a class="uk-button" href="/console/settings/export"><i class="uk-icon-download"></i> export</a>    
+    <hr />
+    <div> 
+        <div id="upload-drop" class="uk-placeholder uk-text-center">
+            <i class="uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right"></i> Attach archive by dropping them here or <a class="uk-form-file">selecting one<input id="upload-select" type="file" name="BinData" /></a> for import settings.
+        </div>
+        <div id="progressbar" class="uk-progress uk-hidden">
+            <div class="uk-progress-bar" style="width: 0%;">0%</div>
+        </div>
+    </div>
 </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var progressbar = $("#progressbar"),
+        bar         = progressbar.find('.uk-progress-bar'),
+        settings    = {
+
+            action: '/console/settings/import', // upload url
+            param: 'BinData',
+            params: {},
+            type: 'json',
+
+            allow : '*.', // allow all file types
+
+            loadstart: function() {
+                bar.css("width", "0%").text("0%");
+                progressbar.removeClass("uk-hidden");
+            },
+
+            progress: function(percent) {
+                percent = Math.ceil(percent);
+                bar.css("width", percent+"%").text(percent+"%");
+            },
+
+            allcomplete: function(response) {
+
+                bar.css("width", "100%").text("100%");
+
+                setTimeout(function(){
+                    progressbar.addClass("uk-hidden");
+                }, 250);
+                
+                alert(JSON.stringify(response))
+            }
+        };
+
+    var select = UIkit.uploadSelect($("#upload-select"), settings),
+        drop   = UIkit.uploadDrop($("#upload-drop"), settings);
+</script>
 {% endblock %}`))
 
 		file.Sync()
@@ -825,7 +923,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 
 {% block content %}
 
-<div class="uk-width-1-1 uk-container uk-container-center">
+<div id="upload-drop" class="uk-width-1-1 uk-container uk-container-center">
 
     <div class="uk-panel uk-margin-bottom">
         <dl class="uk-description-list-horizontal uk-text-muted uk-float-right">
@@ -904,31 +1002,21 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
             </form>
             {% endif %}
 
+            {% if file.IsImage() or file.IsRaw() %}
+            
             {% if file.IsImage() %}
-                // TODO: image
-                <div class="uk-panel-teaser uk-text-center">
-                    <img id="image-preview" class="uk-thumbnail" src="" style="max-height: 250px;" alt="" />
-                </div>
-                <div> 
-                    <div class="uk-placeholder uk-text-center">
-                        <i class="uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right"></i> Attach binaries by dropping them here or <a class="uk-form-file">selecting one<input id="upload-select" type="file" name="BinData" /></a>.
-                    </div>
-                    <div id="progressbar" class="uk-progress uk-hidden">
-                        <div class="uk-progress-bar" style="width: 0%;">0%</div>
-                    </div>
-                </div>
+            <div class="uk-panel-teaser uk-text-center">
+                <img id="image-preview" class="uk-thumbnail" src="{{ file.Name()|urlfile }}" style="max-height: 250px;" alt="" />
+            </div>
             {% endif %}
-
-            {% if file.IsRaw() %}
-                // TODO: raw
-                <div> 
-                    <div class="uk-placeholder uk-text-center">
-                        <i class="uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right"></i> Attach binaries by dropping them here or <a class="uk-form-file">selecting one<input id="upload-select" type="file" name="BinData" /></a>.
-                    </div>
-                    <div id="progressbar" class="uk-progress uk-hidden">
-                        <div class="uk-progress-bar" style="width: 0%;">0%</div>
-                    </div>
+            <div> 
+                <div class="uk-placeholder uk-text-center">
+                    <i class="uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right"></i> Attach binaries by dropping them here or <a class="uk-form-file">selecting one<input id="upload-select" type="file" name="BinData" /></a>.
                 </div>
+                <div id="progressbar" class="uk-progress uk-hidden">
+                    <div class="uk-progress-bar" style="width: 0%;">0%</div>
+                </div>
+            </div>
             {% endif %}
         </li>
         <li>
@@ -957,6 +1045,49 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 
 {% block scripts %}
 <script src="//cdn.jsdelivr.net/uikit/2.26.2/js/components/autocomplete.min.js"></script>
+<script>
+    var fileId = "{{ ctx.Get("file_id")|escapejs }}";
+    var file = {{ file|atojs }};
+    
+    var progressbar = $("#progressbar"),
+        bar         = progressbar.find('.uk-progress-bar'),
+        settings    = {
+
+            action: '/console/buckets/{{ bucket.ID() }}/files/{{ file.ID() }}/rawdata/put_via_uploader', // upload url
+            param: 'BinData',
+            params: {
+                FileID: "{{ file.ID() }}",
+                BucketID: "{{ bucket.ID() }}", 
+            },
+            type: 'json',
+
+            allow : '*', // allow all file types
+
+            loadstart: function() {
+                bar.css("width", "0%").text("0%");
+                progressbar.removeClass("uk-hidden");
+            },
+
+            progress: function(percent) {
+                percent = Math.ceil(percent);
+                bar.css("width", percent+"%").text(percent+"%");
+            },
+
+            allcomplete: function(response) {
+
+                bar.css("width", "100%").text("100%");
+
+                setTimeout(function(){
+                    progressbar.addClass("uk-hidden");
+                }, 250);
+
+                location.reload();
+            }
+        };
+
+    var select = UIkit.uploadSelect($("#upload-select"), settings),
+        drop   = UIkit.uploadDrop($("#upload-drop"), settings);
+</script>
 <script>
     var autocomplete = UIkit.autocomplete("#select_contenttype-{{file.ID()}}", {
                 source: [
