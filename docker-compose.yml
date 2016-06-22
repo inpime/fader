@@ -1,0 +1,28 @@
+version: "2"
+services:
+    app110:
+        build: ./state/app
+    #     # build: ./state/app/Developer.Dockerfile
+        # build: ./state/app/Production.Dockerfile
+        volumes:
+            - ./state/app/workspace:/app/_workspace
+            - ./state/logs/app:/app/logs
+    #     tty: true
+        ports:
+            - 8080:3322
+        environment:
+            FADER_WORKSPACE: "/app/_workspace/"
+            FADER_API_ADDR:: ":3322"
+            # FADER_ES_ADDR:: http://elasticsearch:9200
+            FADER_ES_ADDR_DOCKER: "elasticsearch"
+            FADER_ES_INDEX:: "fader_v1"
+            FADER_SESSION_SECRET: "secure-key"
+            FADER_MODE: dev
+        links:
+            - elasticsearch
+    elasticsearch:
+        image: elasticsearch
+    #     # volumes:
+    #         # - ./state/app_es/config:/usr/share/elasticsearch/config
+    #         # - ./state/app_es/data:/usr/share/elasticsearch/data:rw
+    #         # - ./state/logs/app_es:/usr/share/elasticsearch/log
