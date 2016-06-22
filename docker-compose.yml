@@ -1,8 +1,8 @@
 version: "2"
 services:
-    app110:
+    fader:
         build: ./state/app
-    #     # build: ./state/app/Developer.Dockerfile
+        # build: ./state/app/Developer.Dockerfile
         # build: ./state/app/Production.Dockerfile
         volumes:
             - ./state/app/workspace:/app/_workspace
@@ -22,7 +22,7 @@ services:
             - elasticsearch
     elasticsearch:
         image: elasticsearch
-    #     # volumes:
-    #         # - ./state/app_es/config:/usr/share/elasticsearch/config
-    #         # - ./state/app_es/data:/usr/share/elasticsearch/data:rw
-    #         # - ./state/logs/app_es:/usr/share/elasticsearch/log
+        volumes:
+            - ./state/app_es/config:/usr/share/elasticsearch/config
+            - ./state/app_es/data:/usr/share/elasticsearch/data:rw
+            - ./state/logs/app_es:/usr/share/elasticsearch/log
