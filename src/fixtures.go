@@ -38,7 +38,7 @@ func initElasticSearch() error {
 		// elastic.SetSniff(false),
 		elastic.SetURL(api.Cfg.Search.Host),
 		elastic.SetInfoLog(logrus.New()),
-		elastic.SetHealthcheckTimeoutStartup(time.Second*15),
+		elastic.SetHealthcheckTimeoutStartup(time.Second*60),
 		// elastic.SetTraceLog(logrus.New()),
 	)
 
