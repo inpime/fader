@@ -34,12 +34,11 @@ func initElasticSearch() error {
 		}
 	}
 
-	time.Sleep(time.Second * 5) // waiting bootstrap elasticsearch
-
 	db, err := elastic.NewClient(
 		// elastic.SetSniff(false),
 		elastic.SetURL(api.Cfg.Search.Host),
 		elastic.SetInfoLog(logrus.New()),
+		elastic.SetHealthcheckTimeoutStartup(time.Second*15),
 		// elastic.SetTraceLog(logrus.New()),
 	)
 
