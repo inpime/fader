@@ -4,6 +4,7 @@ import (
 	"api"
 	"flag"
 	"github.com/Sirupsen/logrus"
+	"os"
 	"path/filepath"
 	"store"
 	"utils"
@@ -18,11 +19,32 @@ var flagSessionSecret = flag.String("session_secret", "secure-key", "sessions se
 func initConfig() {
 	flag.Parse()
 
-	workspace := *flagWorkspacePath
-	address := *flagApiAddress
-	esAddress := *flagElasticSearchAddress
-	esIndexName := *flagElasticSearchIndex
-	sessionSecureKey := *flagSessionSecret
+	workspace := os.Getenv("FADER_WORKSPACE")
+	if len(workspace) == 0 {
+		workspace = *flagWorkspacePath
+	}
+
+	address := os.Getenv("FADER_API_ADDR")
+	if len(address) == 0 {
+		address = *flagApiAddress
+	}
+
+	esAddress := os.Getenv("FADER_ES_ADDR")
+	if len(esAddress) == 0 {
+		esAddress = *flagElasticSearchAddress
+	}
+
+	esIndexName := os.Getenv("FADER_ES_INDEX")
+	if len(esIndexName) == 0 {
+		esIndexName = *flagElasticSearchIndex
+	}
+
+	sessionSecureKey := os.Getenv("FADER_SESSION_SECRET")
+	if len(sessionSecureKey) == 0 {
+		sessionSecureKey = *flagSessionSecret
+	}
+
+	// TODO: if empty values then stop
 
 	api.Cfg = &api.Config{
 		Address:       address,

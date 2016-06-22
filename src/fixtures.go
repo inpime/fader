@@ -7,14 +7,37 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/inpime/dbox"
 	"gopkg.in/olivere/elastic.v3"
+	// "io/ioutil"
+	"log"
+	"net"
+	// "net/http"
+	"os"
+	// "sort"
 	"store"
 	"time"
 	"utils"
 )
 
 func initElasticSearch() error {
+	dockerElasticSearchHost := os.Getenv("FADER_ES_ADDR_DOCKER")
+	if len(dockerElasticSearchHost) > 0 {
+		log.Printf("Elasticsearch via docker. Host: %q", dockerElasticSearchHost)
+		ips, err := net.LookupIP(dockerElasticSearchHost)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("Lookup for elasticsearch returns the following IPs:")
+		for _, ip := range ips {
+			api.Cfg.Search.Host = "http://" + ip.String() + ":9200"
+			log.Printf("%v", ip)
+			break
+		}
+	}
+
+	time.Sleep(time.Second * 5) // waiting bootstrap elasticsearch
 
 	db, err := elastic.NewClient(
+		// elastic.SetSniff(false),
 		elastic.SetURL(api.Cfg.Search.Host),
 		elastic.SetInfoLog(logrus.New()),
 		// elastic.SetTraceLog(logrus.New()),
