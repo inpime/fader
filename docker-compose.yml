@@ -1,13 +1,13 @@
 version: "2"
 services:
     fader:
+        # before create Dockerfile in ./state/app
         build: ./state/app
-        # build: ./state/app/Developer.Dockerfile
-        # build: ./state/app/Production.Dockerfile
+        restart: always
         volumes:
             - ./state/app/workspace:/app/_workspace
             - ./state/logs/app:/app/logs
-    #     tty: true
+        # tty: true
         ports:
             - 8080:3322
         environment:
@@ -23,6 +23,6 @@ services:
     elasticsearch:
         image: elasticsearch
         volumes:
-            - ./state/app_es/config:/usr/share/elasticsearch/config
+            # - ./state/app_es/config:/usr/share/elasticsearch/config
             - ./state/app_es/data:/usr/share/elasticsearch/data:rw
             - ./state/logs/app_es:/usr/share/elasticsearch/log
