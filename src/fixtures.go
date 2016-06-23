@@ -1895,4 +1895,38 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 
 		file.Sync()
 	}
+
+	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "putfile_rawdata_viauploader")
+	if err == dbox.ErrNotFound {
+		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
+
+		file.RawData().Write([]byte(`{# put rawdata of file via uploader #}
+
+{% if ctx.IsPost() %}
+
+{% set bucketID = ctx.FormValue("BucketID") %}
+{{ bucketID }}
+{% set bucket = LoadByID("buckets", bucketID) %}
+
+{% set fileID = ctx.FormValue("FileID") %}
+{{ fileID }}
+{% set file = LoadByID(bucket.Name(), fileID) %}
+
+{% set fileData = ctx.FormFileData("BinData") %}
+
+{{ file.SetRawData(fileData.Data) }}
+{{ file.SetContentType(fileData.ContentType) }}
+{{ file.MMapData().Set("OrigName", fileData.Name) }}
+
+{{ file.Sync() }}
+
+{# TODO: check error #}
+
+{% set url = "/console/buckets/"|add:bucket.ID()|add:"/files/"|add:file.ID()|add:"/view" %}
+
+{{ ctx.Redirect302(url) }}
+{% endif %}`))
+
+		file.Sync()
+	}
 }
