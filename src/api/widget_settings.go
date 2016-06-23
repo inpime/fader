@@ -27,6 +27,7 @@ func AppRouts() []string {
 
 type Rout struct {
 	Path      string   `toml:"path"`
+	Name      string   `toml:"name"`
 	Handler   string   `toml:"handler"`
 	Methods   []string `toml:"methods"`
 	Licenses  []string `toml:"licenses"`
@@ -42,7 +43,9 @@ func initWidgetVirtualRouts() {
 	reloadAppSettings()
 	reloadAppRouts()
 
-	RegistedSpecialHandler("usercontent", UserContentHandler)
+	RegistedSpecialHandler(FileContentByNameSpecialHandlerName, FileContentByName_SpecialHandler)
+	RegistedSpecialHandler(FileContentByIDSpecialHandlerName, FileContentByID_SpecialHandler)
+
 	RegistedSpecialHandler("exportapp", ExportAppHandler)
 	RegistedSpecialHandler("importapp", ImportAppHandler)
 
@@ -108,9 +111,9 @@ func updateAppRoutes(fileName string) {
 		handler := NewHandlerFromRoute(_r)
 
 		if len(_r.Methods) == 0 {
-			router.Handle(_r.Path, handler).Methods("GET")
+			router.Handle(_r.Path, handler).Methods("GET").Name(_r.Name)
 		} else {
-			router.Handle(_r.Path, handler).Methods(_r.Methods...)
+			router.Handle(_r.Path, handler).Methods(_r.Methods...).Name(_r.Name)
 		}
 	}
 }

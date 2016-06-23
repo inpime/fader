@@ -2,9 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"net/url"
-	"store"
 	"strings"
 	"sync"
 
@@ -24,7 +23,12 @@ func pongo2InitAddons() {
 		// Загружать props файла и проверять от сессии доступ к этому файлу
 
 		// filters
-		pongo2.RegisterFilter("urlfile", filterGetUrlFileContentByFileName)
+
+		// file content
+		pongo2.RegisterFilter("fc", filterFileContentByNameURL)
+		pongo2.RegisterFilter("filecontenturl", filterFileContentByNameURL) // alias fc
+		pongo2.RegisterFilter("urlfile", filterFileContentByNameURL)        // OLD
+
 		pongo2.RegisterFilter("is_error", filterIsError)
 		pongo2.RegisterFilter("clear", filterClear)
 		pongo2.RegisterFilter("logf", filterLogf)
@@ -39,18 +43,23 @@ func pongo2InitAddons() {
 // filter static file
 // ------
 
-func filterGetUrlFileContentByFileName(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+func filterFileContentByNameURL(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	// TODO: get the URL based on the name route (after the routs will have the names)
+	route := router.Get(FileContentByNameHandlerName)
 
-	file, err := store.LoadOrNewFile(StaticBucketName, in.String())
-
-	if err != nil {
-		// TODO: what to do if the file is not found?
-
-		return pongo2.AsValue("/usercontent/not_found_file?err=" + url.QueryEscape(err.Error())), nil
+	if route == nil {
+		reason := fmt.Sprintf("not found route %q", FileContentByNameHandlerName)
+		return nil, &pongo2.Error{ErrorMsg: reason}
 	}
 
-	return pongo2.AsValue("/usercontent/" + file.ID()), nil
+	_url, err := route.URLPath("file", in.String())
+
+	if err != nil {
+		reason := fmt.Sprintf("error build url by %q", in.String())
+		return nil, &pongo2.Error{ErrorMsg: reason}
+	}
+
+	return pongo2.AsValue(_url.String()), nil
 }
 
 // ------

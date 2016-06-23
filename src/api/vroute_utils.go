@@ -187,6 +187,32 @@ func (v *routeRegexpGroup) setMatch(req *Request, m *RouteMatch, r *Route) {
 	// }
 }
 
+// url builds a URL part using the given values.
+func (r *routeRegexp) url(values map[string]string) (string, error) {
+	urlValues := make([]interface{}, len(r.varsN))
+	for k, v := range r.varsN {
+		value, ok := values[v]
+		if !ok {
+			return "", fmt.Errorf("mux: missing route variable %q", v)
+		}
+		urlValues[k] = value
+	}
+	rv := fmt.Sprintf(r.reverse, urlValues...)
+	if !r.regexp.MatchString(rv) {
+		// The URL is checked against the full regexp, instead of checking
+		// individual variables. This is faster but to provide a good error
+		// message, we check individual regexps if the URL doesn't match.
+		for k, v := range r.varsN {
+			if !r.varsR[k].MatchString(values[v]) {
+				return "", fmt.Errorf(
+					"mux: variable %q doesn't match, expected %q", values[v],
+					r.varsR[k].String())
+			}
+		}
+	}
+	return rv, nil
+}
+
 func extractVars(input string, matches []int, names []string, output map[string]string) {
 	matchesCount := 0
 	prevEnd := -1
@@ -253,4 +279,29 @@ func matchInArray(arr []string, value string) bool {
 		}
 	}
 	return false
+}
+
+// checkPairs returns the count of strings passed in, and an error if
+// the count is not an even number.
+func checkPairs(pairs ...string) (int, error) {
+	length := len(pairs)
+	if length%2 != 0 {
+		return length, fmt.Errorf(
+			"mux: number of parameters must be multiple of 2, got %v", pairs)
+	}
+	return length, nil
+}
+
+// mapFromPairsToString converts variadic string parameters to a
+// string to string map.
+func mapFromPairsToString(pairs ...string) (map[string]string, error) {
+	length, err := checkPairs(pairs...)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]string, length/2)
+	for i := 0; i < length; i += 2 {
+		m[pairs[i]] = pairs[i+1]
+	}
+	return m, nil
 }

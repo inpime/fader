@@ -69,6 +69,35 @@ func pongo2InitGlobalCustoms() {
 		return pongo2.AsValue(file)
 	}
 
+	// builds the path part of the URL
+	tpls.Globals["URL"] = func(args ...*pongo2.Value) *pongo2.Value {
+		if len(args) == 0 {
+			return pongo2.AsValue("")
+		}
+
+		stringArgs := []string{}
+
+		for _, arg := range args[1:] {
+			stringArgs = append(stringArgs, arg.String())
+		}
+
+		route := router.Get(args[0].String())
+
+		if route == nil {
+			return pongo2.AsValue("")
+		}
+
+		url, err := route.URLPath(stringArgs...)
+
+		if err != nil {
+			logrus.WithError(err).Warning("build url")
+
+			return pongo2.AsValue("")
+		}
+
+		return pongo2.AsValue(url.String())
+	}
+
 	// Load load file by name
 	tpls.Globals["M"] = func() *pongo2.Value {
 
