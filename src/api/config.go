@@ -1,6 +1,7 @@
 package api
 
 var Cfg *Config
+var AppVersion string = "dev"
 
 var (
 	BucketsBucketName  = "buckets"
@@ -24,6 +25,8 @@ var (
 )
 
 type Config struct {
+	AppVersion string
+
 	Address       string
 	WorkspacePath string
 
