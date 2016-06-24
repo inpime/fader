@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gorilla/sessions"
 	"store"
 	"utils"
@@ -50,6 +51,11 @@ func (s *Session) Signin(primaryKey, password string) error {
 
 	if err != nil {
 		return err
+	}
+
+	if file.MMapData().String("pwd") != password {
+
+		return fmt.Errorf("invalid credentials")
 	}
 
 	// TODO: encrypt a password and check password
