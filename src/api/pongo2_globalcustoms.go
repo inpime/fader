@@ -189,6 +189,11 @@ func pongo2InitGlobalCustoms() {
 		return pongo2.AsValue(bucket)
 	}
 
+	// ListGroupsImportExport возвращает список групп указанных в настройках приложения
+	tpls.Globals["ListGroupsImportExport"] = func() *pongo2.Value {
+		return pongo2.AsValue(ListGroupsImportExport())
+	}
+
 	/*
 		// TODO: remove, existing stringformat
 

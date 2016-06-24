@@ -114,6 +114,15 @@ func (m M) Map(k string) map[string]interface{} {
 	return m.Map(k)
 }
 
+func (m M) Keys(k string) (keys []string) {
+
+	for key, _ := range m.Map(k) {
+		keys = append(keys, key)
+	}
+
+	return
+}
+
 func (m M) M(k string) M {
 	v := m.GetOrNil(k)
 
