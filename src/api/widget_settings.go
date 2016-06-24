@@ -25,6 +25,10 @@ func AppRouts() []string {
 	return appSettings.Strings("routs")
 }
 
+func AppSettingsIncludeFiles() []string {
+	return appSettings.Strings("include")
+}
+
 type Rout struct {
 	Path      string   `toml:"path"`
 	Name      string   `toml:"name"`
@@ -76,7 +80,19 @@ func reloadAppSettings() {
 		return
 	}
 
-	// logrus.WithField("settings", appSettings).Info("main settings")
+	for _, includeFileName := range AppSettingsIncludeFiles() {
+		includeFile, err := store.LoadOrNewFile(SettingsBucketName, includeFileName)
+
+		if err != nil {
+			logrus.WithError(err).Info("find include file")
+			continue
+		}
+
+		if _, err := toml.Decode(string(includeFile.RawData().Bytes()), &appSettings); err != nil {
+			logrus.Errorf("main settings: decode toml error, %v, %q", err, string(includeFile.RawData().Bytes()))
+			return
+		}
+	}
 }
 
 func reloadAppRouts() {
