@@ -25,7 +25,7 @@
 
 ## Settings
 
-* main - general settings
+* main - general settings, [see more](MAINCONFIG.md)
 * routing - router 
 
 ### Routs
