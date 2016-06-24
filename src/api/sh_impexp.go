@@ -9,16 +9,15 @@ import (
 	"github.com/inpime/dbox"
 	"github.com/labstack/echo"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"store"
-	"strconv"
 	"time"
 	"utils"
 )
 
 var (
-	ImportExportSecionNameKey   = "importexport"
-	ImportExportSysGroupNameKey = "sys"
+	ImportExportSecionNameKey = "importexport"
 
 	ImportExportFileNameZipArchive = ".faderdata"
 
@@ -27,13 +26,15 @@ var (
 
 	ImportExportImportRouteName = "AppImport"
 	ImportExportExportRouteName = "AppExport"
+
+	ImportExportLatestVersionArchiveURL = "https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/archives/FADER(sys).dev.latest.zip"
 )
 
 //
 
-// IsSystemBucketFromImportExport является ли файл системным согласно настройкам
-func IsSystemBucketFromImportExport(bucketName string) bool {
-	config := appSettings.M(ImportExportSecionNameKey).M(ImportExportSysGroupNameKey)
+// IsIncludeInGroupBucketImportExport является ли файл системным согласно настройкам
+func IsIncludeInGroupBucketImportExport(groupName, bucketName string) bool {
+	config := appSettings.M(ImportExportSecionNameKey).M(groupName)
 
 	if !config.Include(bucketName) {
 		return false
@@ -50,13 +51,13 @@ func IsSystemBucketFromImportExport(bucketName string) bool {
 	return bucketFiles.Len() > 0
 }
 
-// IsSystemFileFromImportExport является ли файл системным согласно настройкам
-func IsSystemFileFromImportExport(bucketName, fileName string) bool {
-	if !IsSystemBucketFromImportExport(bucketName) {
+// IsIncludeInGroupFileImportExport является ли файл системным согласно настройкам
+func IsIncludeInGroupFileImportExport(groupName, bucketName, fileName string) bool {
+	if !IsIncludeInGroupBucketImportExport(groupName, bucketName) {
 		return false
 	}
 
-	config := appSettings.M(ImportExportSecionNameKey).M(ImportExportSysGroupNameKey)
+	config := appSettings.M(ImportExportSecionNameKey).M(groupName)
 
 	bucketConfig := config.M(bucketName)
 
@@ -67,6 +68,11 @@ func IsSystemFileFromImportExport(bucketName, fileName string) bool {
 	bucketFiles := utils.NewA(bucketConfig.Strings("files"))
 
 	return bucketFiles.Include(fileName)
+}
+
+// ListGroupsImportExport возвращает список групп указанных в настройках приложения
+func ListGroupsImportExport() []string {
+	return appSettings.Keys(ImportExportSecionNameKey)
 }
 
 // ----------------------------
@@ -163,7 +169,7 @@ func newArchivePkg() *archivePackage {
 
 func getAllBuckets() []*store.File {
 	// all buckets
-	filter := store.NewSearchFilter("buckets")
+	filter := store.NewSearchFilter(BucketsBucketName)
 	filter.SetQueryString("")
 	filter.SetPage(0)
 	filter.SetPerPage(100)
@@ -197,29 +203,51 @@ func getAllFiles(bucket string) []*store.File {
 	return makeSearch(filter).GetFiles()
 }
 
-func AppImport_SpecialHandler(ctx *ContextWrap) error {
-	fileData := ctx.FormFileData("BinData")
-
-	archive := newArchivePkg()
-	err := archive.Import(fileData.Data)
+// AppImportFromLastArchive загрузить последнюю версию консоль панели и загрузить ее
+func AppImportFromLastArchive() error {
+	data, err := loadLatestArchive(ImportExportLatestVersionArchiveURL)
 
 	if err != nil {
-		return ctx.String(http.StatusBadRequest, err.Error())
+		// error download
+		return err
+	}
+
+	return makeImportImportExport(data)
+}
+
+// makeImportImportExport выполнить импорт из архива
+func makeImportImportExport(data []byte) error {
+	archive := newArchivePkg()
+	err := archive.Import(data)
+
+	if err != nil {
+		return err
 	}
 
 	for _, _bucket := range archive.Buckets {
 		bucket, err := store.BucketByName(_bucket.Name)
 
 		if err == dbox.ErrNotFound {
+			logrus.Infof("create bucket %q", _bucket.Name)
+
 			bucket.SetID(_bucket.ID)
 			bucket.SetName(_bucket.Name)
 			bucket.SetBucket(_bucket.Bucket)
 			bucket.Import(_bucket.Data)
+
+			bucket.InitRawDataStore(bucket.GetRawDataStoreType(),
+				bucket.GetRawDataStoreNameWithoutPostfix())
+			bucket.InitMetaDataStore(bucket.GetMetaDataStoreType(),
+				bucket.GetMetaDataStoreNameWithoutPostfix())
+			bucket.InitMapDataStore(bucket.GetMapDataStoreType(),
+				bucket.GetMapDataStoreNameWithoutPostfix())
+
+			bucket.UpdateMapping()
 			bucket.Sync()
 		}
 	}
 
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Second * 3)
 
 	for _, _file := range archive.Files {
 		file, err := store.LoadOrNewFile(_file.Bucket, _file.Name)
@@ -230,8 +258,22 @@ func AppImport_SpecialHandler(ctx *ContextWrap) error {
 			file.SetBucket(_file.Bucket)
 		}
 
+		logrus.Infof("update file %q@%q", _file.Bucket, _file.Name)
+
 		file.Import(_file.Data)
 		file.Sync()
+	}
+
+	return nil
+}
+
+func AppImport_SpecialHandler(ctx *ContextWrap) error {
+	fileData := ctx.FormFileData("BinData")
+
+	err := makeImportImportExport(fileData.Data)
+
+	if err != nil {
+		return ctx.String(http.StatusBadRequest, err.Error())
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -239,14 +281,11 @@ func AppImport_SpecialHandler(ctx *ContextWrap) error {
 
 func AppExport_SpecialHandler(ctx *ContextWrap) error {
 	archive := newArchivePkg()
-	onlySystemFiles, _ := strconv.ParseBool(ctx.QueryParam("sys"))
-
-	if onlySystemFiles {
-		archive.GroupName = "sys"
-	}
+	archive.GroupName = ctx.QueryParam("group")
+	byGroupName := len(archive.GroupName) > 0
 
 	for _, bucket := range getAllBuckets() {
-		if onlySystemFiles && !IsSystemBucketFromImportExport(bucket.Name()) {
+		if byGroupName && !IsIncludeInGroupBucketImportExport(archive.GroupName, bucket.Name()) {
 			continue
 		}
 
@@ -256,7 +295,7 @@ func AppExport_SpecialHandler(ctx *ContextWrap) error {
 
 		for _, file := range getAllFiles(bucket.Name()) {
 
-			if onlySystemFiles && !IsSystemFileFromImportExport(bucket.Name(), file.Name()) {
+			if byGroupName && !IsIncludeInGroupFileImportExport(archive.GroupName, bucket.Name(), file.Name()) {
 				continue
 			}
 
@@ -280,4 +319,24 @@ func AppExport_SpecialHandler(ctx *ContextWrap) error {
 	_, err = ctx.Response().Write(b)
 
 	return err
+}
+
+// helper functions
+
+// loadLatestArchive load latest version archive
+func loadLatestArchive(url string) ([]byte, error) {
+	req, err := http.NewRequest("GET", url, nil)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return []byte{}, fmt.Errorf("not successful request, got %q, want `200 OK`", resp.Status)
+	}
+
+	return ioutil.ReadAll(resp.Body)
 }
