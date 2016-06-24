@@ -1,5 +1,5 @@
 GO=go
-ENTIRYPOINTFILES ?= src/fader.go src/config.go src/fixtures.go
+ENTIRYPOINTFILES ?= src/fader.go src/config.go src/fixtures.go src/fixturex.go
 GOPATH:=${GOPATH}:${PWD}
 
 RUNARGS ?= -workspace="./_workspace/" \
@@ -15,7 +15,7 @@ build: build-linux
 run:
 	$(GO) run $(ENTIRYPOINTFILES) $(RUNARGS)
 test:
-	go test -v -bench=. -benchmem -run=. ./src/...
+	go test -v -bench=. -benchmem -run=. ./src/api/...
 testx:
 	go test -v -run=TestImporter_simple ./src/...
 
