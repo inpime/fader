@@ -14,8 +14,8 @@ var (
 	FileContentByNameSpecialHandlerName = "filecontent.byname"
 	FileContentByIDSpecialHandlerName   = "filecontent.byid"
 
-	FileContentByNameHandlerName = "FileContentByName"
-	FileContentByIDHandlerName   = "FileContentByID"
+	FileContentByNameRouteName = "FileContentByName"
+	FileContentByIDRouteName   = "FileContentByID"
 )
 
 // FileContentByNameHandler returns the file content by name (raw data file) without access checks

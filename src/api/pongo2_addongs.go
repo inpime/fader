@@ -45,10 +45,10 @@ func pongo2InitAddons() {
 
 func filterFileContentByNameURL(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	// TODO: get the URL based on the name route (after the routs will have the names)
-	route := router.Get(FileContentByNameHandlerName)
+	route := router.Get(FileContentByNameRouteName)
 
 	if route == nil {
-		reason := fmt.Sprintf("not found route %q", FileContentByNameHandlerName)
+		reason := fmt.Sprintf("not found route %q", FileContentByNameRouteName)
 		return nil, &pongo2.Error{ErrorMsg: reason}
 	}
 
