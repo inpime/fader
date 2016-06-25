@@ -30,6 +30,8 @@ func initStroes() {
 	// * Console
 	// ---------------------
 
+	flagInitViaFixtures := false // to dev a variable
+
 	isNewInstallation := false
 
 	// root bucket buckets
@@ -47,13 +49,24 @@ func initStroes() {
 		isNewInstallation = true
 	}
 
-	if isNewInstallation {
-		if err := api.AppImportFromLastArchive(); err != nil {
-			panic(err)
+	if !flagInitViaFixtures {
+		if isNewInstallation {
+			logrus.Info("The first run. Installation of the console panel...")
+
+			if err := api.AppImportFromLastArchive(); err != nil {
+				panic(err)
+			}
+		} else {
+			logrus.Info("Existing application. Initializing settings....")
+			if err := api.AppStoresInitFromExistBuckets(); err != nil {
+				panic(err)
+			}
 		}
+
+		return
 	}
 
-	return
+	// if flagInitViaFixtures == true
 
 	// TODO: anything below removed after careful testing
 

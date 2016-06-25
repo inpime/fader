@@ -167,50 +167,19 @@ func newArchivePkg() *archivePackage {
 	}
 }
 
-func getAllBuckets() []*store.File {
-	// all buckets
-	filter := store.NewSearchFilter(BucketsBucketName)
-	filter.SetQueryString("")
-	filter.SetPage(0)
-	filter.SetPerPage(100)
-
-	queryRaw := buildSearchQueryFilesByBycket(
-		filter.Bucket(),
-		filter.QueryString(),
-		filter.Page(),
-		filter.PerPage(),
-	)
-	filter.SetQueryRaw(queryRaw)
-
-	return makeSearch(filter).GetFiles()
-}
-
-func getAllFiles(bucket string) []*store.File {
-	// all buckets
-	filter := store.NewSearchFilter(bucket)
-	filter.SetQueryString("")
-	filter.SetPage(0)
-	filter.SetPerPage(1000)
-
-	queryRaw := buildSearchQueryFilesByBycket(
-		filter.Bucket(),
-		filter.QueryString(),
-		filter.Page(),
-		filter.PerPage(),
-	)
-	filter.SetQueryRaw(queryRaw)
-
-	return makeSearch(filter).GetFiles()
-}
-
 // AppImportFromLastArchive загрузить последнюю версию консоль панели и загрузить ее
 func AppImportFromLastArchive() error {
+
+	logrus.Infof("Downloading on link %q...", ImportExportLatestVersionArchiveURL)
+
 	data, err := loadLatestArchive(ImportExportLatestVersionArchiveURL)
 
 	if err != nil {
-		// error download
+		logrus.Errorf("Error download, more details: %q", err)
 		return err
 	}
+
+	logrus.Info("OK. Importing...")
 
 	return makeImportImportExport(data)
 }
@@ -228,7 +197,7 @@ func makeImportImportExport(data []byte) error {
 		bucket, err := store.BucketByName(_bucket.Name)
 
 		if err == dbox.ErrNotFound {
-			logrus.Infof("create bucket %q", _bucket.Name)
+			logrus.Infof("import: Create a bucket %q", _bucket.Name)
 
 			bucket.SetID(_bucket.ID)
 			bucket.SetName(_bucket.Name)
@@ -258,7 +227,7 @@ func makeImportImportExport(data []byte) error {
 			file.SetBucket(_file.Bucket)
 		}
 
-		logrus.Infof("update file %q@%q", _file.Bucket, _file.Name)
+		logrus.Infof("import: Upsert a file %q@%q", _file.Bucket, _file.Name)
 
 		file.Import(_file.Data)
 		file.Sync()
