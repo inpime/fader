@@ -36,7 +36,13 @@ func pongo2InitAddons() {
 		pongo2.RegisterFilter("split", filterSplit)
 		pongo2.RegisterFilter("btos", filterBytesToString)
 		pongo2.RegisterFilter("stob", filterStringToBytes)
+		pongo2.RegisterFilter("append", filterAppend)
 	})
+}
+
+func filterAppend(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+
+	return pongo2.AsValue(append(in.Interface().([]interface{}), param.Interface())), nil
 }
 
 // ------

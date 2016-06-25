@@ -61,3 +61,10 @@ func (f File) IsText() bool {
 func (f File) IsRaw() bool {
 	return getTypeNameFromContentType(f.ContentType()) == "raw"
 }
+
+// for pongo2 (must have exactly 1 output argument)
+
+func (f File) SetName(name string) File {
+	f.File.SetName(name)
+	return f
+}

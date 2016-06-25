@@ -14,6 +14,10 @@ func pongo2InitGlobalCustoms() {
 
 	var emptyURL, _ = url.Parse("")
 
+	tpls.Globals["clear"] = func(args ...*pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue("")
+	}
+
 	tpls.Globals["DeleteFile"] = func(bucketId, fileId *pongo2.Value) *pongo2.Value {
 
 		return pongo2.AsValue(store.DeleteFileID(bucketId.String(), fileId.String()))
@@ -42,6 +46,16 @@ func pongo2InitGlobalCustoms() {
 		filter.SetQueryRaw(queryRaw)
 
 		return pongo2.AsValue(makeSearch(filter))
+	}
+
+	tpls.Globals["NewUUID"] = func() *pongo2.Value {
+		return pongo2.AsValue(dbox.NewUUID())
+	}
+
+	tpls.Globals["NewFile"] = func(bucketName *pongo2.Value) *pongo2.Value {
+		file, _ := store.LoadOrNewFileID(bucketName.String(), "")
+
+		return pongo2.AsValue(file)
 	}
 
 	// LoadByID load file by ID
@@ -149,6 +163,10 @@ func pongo2InitGlobalCustoms() {
 
 	tpls.Globals["A"] = func() *pongo2.Value {
 		return pongo2.AsValue(utils.NewA([]string{}))
+	}
+
+	tpls.Globals["AIface"] = func() *pongo2.Value {
+		return pongo2.AsValue([]interface{}{})
 	}
 
 	// CreateBucket special function (used only to create a bucket)
