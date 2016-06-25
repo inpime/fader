@@ -14,6 +14,11 @@ func pongo2InitGlobalCustoms() {
 
 	var emptyURL, _ = url.Parse("")
 
+	tpls.Globals["DeleteFile"] = func(bucketId, fileId *pongo2.Value) *pongo2.Value {
+
+		return pongo2.AsValue(store.DeleteFileID(bucketId.String(), fileId.String()))
+	}
+
 	// SearchFiles search files in bucket
 	// (the request is formed in buildSearchQueryFilesByBycket)
 	tpls.Globals["SearchFiles"] = func(

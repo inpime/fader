@@ -37,6 +37,8 @@ func RegistryStore(_type dbox.StoreType, bucketname string, args ...string) stri
 		logrus.Errorf("registry store: not supported type %q", _type)
 	}
 
+	logrus.Debugf("stores: registred store %q, type %q", key, _type)
+
 	return key
 }
 
@@ -55,6 +57,15 @@ func BucketByName(name string) (file *Bucket, err error) {
 	}
 
 	return
+}
+
+// BucketByName return bucket from name
+// if not exist file, file accepts values nil, err accepts values ErrNotFound
+func BucketByID(id string) (file *Bucket, err error) {
+
+	file = NewBucket()
+
+	return file, dbox.BucketStore.Get(id, file)
 }
 
 // LoadOrNewFileIDViaStores загрузка файла через указанные store name
@@ -146,4 +157,20 @@ func LoadOrNewFileID(bucketName string, fileId string) (*File, error) {
 	}
 
 	return &File{File: file}, nil
+}
+
+func DeleteFileID(bucketId, fileId string) error {
+	bucket, err := BucketByID(bucketId)
+
+	if err != nil {
+		return err
+	}
+
+	file, err := LoadOrNewFileID(bucket.Name(), fileId)
+
+	if err != nil {
+		return err
+	}
+
+	return file.Delete()
 }
