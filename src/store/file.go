@@ -31,3 +31,11 @@ func (f *File) Sync() error {
 
 	return UpdateSearchDocument(f.Bucket(), f.ID(), FileSearchFromFile(f))
 }
+
+func (f *File) Delete() error {
+	if err := f.File.Delete(); err != nil {
+		return err
+	}
+
+	return DeleteSearchDocument(f.Bucket(), f.ID())
+}
