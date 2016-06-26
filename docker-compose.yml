@@ -17,7 +17,7 @@ services:
             FADER_ES_ADDR_DOCKER: "elasticsearch"
             FADER_ES_INDEX:: "fader_v1"
             FADER_SESSION_SECRET: "secure-key"
-            FADER_MODE: dev
+            FADER_MODE: info
         links:
             - elasticsearch
     elasticsearch:
@@ -25,4 +25,4 @@ services:
         volumes:
             # - ./state/app_es/config:/usr/share/elasticsearch/config
             - ./state/app_es/data:/usr/share/elasticsearch/data:rw
-            - ./state/logs/app_es:/usr/share/elasticsearch/log
+            # - ./state/logs/app_es:/usr/share/elasticsearch/log
