@@ -15,18 +15,22 @@ var routerMutex sync.Mutex
 var appSettings utils.M
 var appSettingsMutex sync.Mutex
 
+func AppSettings() utils.M {
+	return utils.M(appSettings)
+}
+
 // IsPageCaching
 func IsPageCaching() bool {
-	return appSettings.Bool("pageCaching")
+	return AppSettings().Bool("pageCaching")
 }
 
 // AppRouts
 func AppRouts() []string {
-	return appSettings.Strings("routs")
+	return AppSettings().Strings("routs")
 }
 
 func AppSettingsIncludeFiles() []string {
-	return appSettings.Strings("include")
+	return AppSettings().Strings("include")
 }
 
 type Rout struct {

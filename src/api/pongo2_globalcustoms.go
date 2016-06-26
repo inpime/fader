@@ -23,6 +23,10 @@ func pongo2InitGlobalCustoms() {
 		return pongo2.AsValue(store.DeleteFileID(bucketId.String(), fileId.String()))
 	}
 
+	tpls.Globals["SectionAppConfig"] = func(sectionName *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(AppSettings().M(sectionName.String()))
+	}
+
 	// SearchFiles search files in bucket
 	// (the request is formed in buildSearchQueryFilesByBycket)
 	tpls.Globals["SearchFiles"] = func(

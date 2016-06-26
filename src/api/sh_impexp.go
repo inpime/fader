@@ -34,7 +34,7 @@ var (
 
 // IsIncludeInGroupBucketImportExport является ли файл системным согласно настройкам
 func IsIncludeInGroupBucketImportExport(groupName, bucketName string) bool {
-	config := appSettings.M(ImportExportSecionNameKey).M(groupName)
+	config := AppSettings().M(ImportExportSecionNameKey).M(groupName)
 
 	if !config.Include(bucketName) {
 		return false
@@ -57,7 +57,7 @@ func IsIncludeInGroupFileImportExport(groupName, bucketName, fileName string) bo
 		return false
 	}
 
-	config := appSettings.M(ImportExportSecionNameKey).M(groupName)
+	config := AppSettings().M(ImportExportSecionNameKey).M(groupName)
 
 	bucketConfig := config.M(bucketName)
 
@@ -72,7 +72,7 @@ func IsIncludeInGroupFileImportExport(groupName, bucketName, fileName string) bo
 
 // ListGroupsImportExport возвращает список групп указанных в настройках приложения
 func ListGroupsImportExport() []string {
-	return appSettings.Keys(ImportExportSecionNameKey)
+	return AppSettings().Keys(ImportExportSecionNameKey)
 }
 
 // ----------------------------

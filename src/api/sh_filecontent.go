@@ -29,7 +29,7 @@ func FileContentByName_SpecialHandler(ctx *ContextWrap) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := appSettings.M(FileContentSectionNameKey).String(FileContentBucketNameKey)
+	bucketName := AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
 
 	file, err := store.LoadOrNewFile(bucketName, fileName)
 
@@ -53,7 +53,7 @@ func FileContentByID_SpecialHandler(ctx *ContextWrap) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := appSettings.M(FileContentSectionNameKey).String(FileContentBucketNameKey)
+	bucketName := AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
 
 	file, err := store.LoadOrNewFileID(bucketName, fileId)
 
