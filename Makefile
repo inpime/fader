@@ -28,7 +28,7 @@ prebuild:
 	go get github.com/inpime/dbox
 	go get gopkg.in/olivere/elastic.v3
 
-	go get github.com/labstack/echo
+	go get github.com/labstack/echo/...
 	go get github.com/yosssi/boltstore/reaper
 	go get github.com/yosssi/boltstore/store
 
@@ -38,7 +38,7 @@ prebuild:
 	go get github.com/gebv/echo-session
 	go get github.com/gorilla/sessions
 
-	go get github.com/BurntSushi/toml
+	go get github.com/BurntSushi/toml 
 
 	mkdir -p releases
 
