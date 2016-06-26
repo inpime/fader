@@ -6,7 +6,8 @@ RUNARGS ?= -workspace="./_workspace/" \
 	-address="192.168.1.36:3322" \
 	-es_address="https://es.idheap.com" \
 	-es_index="fader" \
-	-session_secret="secure-key"
+	-session_secret="secure-key" \
+	-mode="info"
 
 STAMP = `date +%Y%m%d_%H%M%S`
 
