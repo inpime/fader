@@ -300,6 +300,10 @@ func (m M) Int(k string) int {
 	return 0
 }
 
+func (m M) Float(k string) float64 {
+	return m.Float64(k)
+}
+
 // Float64 return value as float64
 func (m M) Float64(k string) float64 {
 	v := m.GetOrNil(k)
