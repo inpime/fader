@@ -15,6 +15,7 @@ var flagApiAddress = flag.String("address", ":3322", "path to the static folder"
 var flagElasticSearchAddress = flag.String("es_address", "https://es.idheap.com", "url elasticsearch")
 var flagElasticSearchIndex = flag.String("es_index", "fader", "elasticsearch index name")
 var flagSessionSecret = flag.String("session_secret", "secure-key", "sessions secure key")
+var flagLoggerMode = flag.String("mode", "info", "logger mode")
 
 func initConfig() {
 	flag.Parse()
@@ -84,6 +85,18 @@ func initConfig() {
 
 	// Config logger
 
-	logrus.SetLevel(logrus.DebugLevel)
+	appLoggerStr := os.Getenv("FADER_MODE")
+	if len(appLoggerStr) == 0 {
+		appLoggerStr = *flagLoggerMode
+	}
+
+	var appLoggerLevel, err = logrus.ParseLevel(appLoggerStr)
+
+	if err != nil {
+		appLoggerLevel = logrus.ErrorLevel
+	}
+
+	logrus.SetLevel(appLoggerLevel)
+	logrus.SetFormatter(&logrus.JSONFormatter{})
 	// logrus.SetLevel(logrus.DebugLevel)
 }

@@ -14,7 +14,7 @@ func main() {
 	logrus.Info("Init elasticsearch...")
 	initElasticSearch()
 
-	logrus.Infof("[DEBUG]: Config %#v", api.Cfg)
+	logrus.Debugf("Current config: %#v", api.Cfg)
 
 	logrus.Info("Init stores...")
 	initStroes()

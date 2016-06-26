@@ -1,10 +1,10 @@
 package api
 
 import (
-	"fmt"
+	"github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
-	// "github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/middleware"
 	"github.com/yosssi/boltstore/reaper"
 )
 
@@ -45,9 +45,20 @@ func Run() {
 
 	var e = echo.New()
 
+	// logger
+	if logrus.GetLevel() >= logrus.InfoLevel {
+		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: `{"_service": "api", "time":"${time_rfc3339}","remote_ip":"${remote_ip}",` +
+				`"method":"${method}","uri":"${uri}","status":${status}, "latency":${latency},` +
+				`"latency_human":"${latency_human}","rx_bytes":${rx_bytes},` +
+				`"tx_bytes":${tx_bytes}}` + "\n",
+			Output: logrus.StandardLogger().Out,
+		}))
+
+		e.Use(middleware.Recover())
+	}
+
 	e.Use(constructSessionMiddleware, MiddlewareInitSession())
-	// e.Use(middleware.Logger())
-	// e.Use(middleware.Recover())
 
 	e.Get("/", ExecuteWidget)
 	e.Get("/*", ExecuteWidget)
@@ -55,7 +66,7 @@ func Run() {
 
 	// TODO: e.Get("/content/*", UserContentEntryPointHandler)
 
-	fmt.Printf("api: listener %q\n", Cfg.Address)
+	logrus.Infof("Api listener %q", Cfg.Address)
 
 	e.Run(standard.New(Cfg.Address))
 }

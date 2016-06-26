@@ -36,6 +36,7 @@ func initStroes() {
 
 	// root bucket buckets
 	bucket, err := store.BucketByName(api.BucketsBucketName)
+	logrus.Debugf("buckets: meta %#v, %v\n", bucket.MapData(), err)
 	bucket.InitInOneStore(dbox.BoltDBStoreType)
 	if err == dbox.ErrNotFound {
 		logrus.Infof("buckets: create bucket %q\n", bucket.Name())

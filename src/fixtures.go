@@ -34,10 +34,20 @@ func initElasticSearch() error {
 		}
 	}
 
+	var esLoggerOption elastic.ClientOptionFunc
+	switch logrus.GetLevel() {
+	case logrus.InfoLevel:
+		esLoggerOption = elastic.SetInfoLog(logrus.StandardLogger().WithField("_service", "es"))
+	case logrus.DebugLevel:
+		esLoggerOption = elastic.SetTraceLog(logrus.StandardLogger().WithField("_service", "es"))
+	case logrus.WarnLevel, logrus.ErrorLevel:
+		esLoggerOption = elastic.SetErrorLog(logrus.StandardLogger().WithField("_service", "es"))
+	}
+
 	db, err := elastic.NewClient(
 		// elastic.SetSniff(false),
 		elastic.SetURL(api.Cfg.Search.Host),
-		elastic.SetInfoLog(logrus.New()),
+		esLoggerOption,
 		elastic.SetHealthcheckTimeoutStartup(time.Second*60),
 		// elastic.SetTraceLog(logrus.New()),
 	)
