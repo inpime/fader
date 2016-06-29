@@ -40,6 +40,11 @@ prebuild:
 
 	go get github.com/BurntSushi/toml 
 
+	# pongo2 addons - urlpreviewer
+	go get github.com/levigross/grequests
+
+	go get github.com/lionelbarrow/braintree-go
+
 	mkdir -p releases
 
 .PHONY: prebuild

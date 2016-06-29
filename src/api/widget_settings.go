@@ -57,6 +57,9 @@ func initWidgetVirtualRouts() {
 	RegistedSpecialHandler(ImportExportImportSpecialHandlerName, AppImport_SpecialHandler)
 	RegistedSpecialHandler(ImportExportExportSpecialHandlerName, AppExport_SpecialHandler)
 
+	RegistedSpecialHandler("urloembed", UrlPreview_SpecialHandler)
+	UrlPreviewWorkersInit()
+
 	go RefreshEvery(3*time.Second, reloadAppSettings)
 	go RefreshEvery(3*time.Second, reloadAppRouts)
 }
