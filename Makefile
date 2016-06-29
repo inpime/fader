@@ -42,6 +42,9 @@ prebuild:
 
 	# pongo2 addons - urlpreviewer
 	go get github.com/levigross/grequests
+	go get github.com/dyatlov/go-oembed/...
+	go get github.com/dyatlov/go-url2oembed/...
+	go get github.com/jeffail/tunny
 
 	go get github.com/lionelbarrow/braintree-go
 
