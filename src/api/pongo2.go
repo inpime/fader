@@ -8,16 +8,16 @@ import (
 var tplsLoader = MustNewBoltdDBLoader()
 
 // virtual templates
-var tpls = pongo2.NewSet("vtpl", tplsLoader)
+// var tpls = pongo2.NewSet("vtpl", tplsLoader)
 
 func initTemplates() {
+	pongo2.DefaultSet = pongo2.NewSet("vtpl", tplsLoader)
+	pongo2.FromString = pongo2.DefaultSet.FromString
+	pongo2.FromFile = pongo2.DefaultSet.FromFile
+	pongo2.FromCache = ExecuteFromCache
+	pongo2.RenderTemplateString = pongo2.DefaultSet.RenderTemplateString
+	pongo2.RenderTemplateFile = pongo2.DefaultSet.RenderTemplateFile
+
 	pongo2InitGlobalCustoms()
 	pongo2InitAddons()
-
-	pongo2.DefaultSet = tpls
-	pongo2.FromString = tpls.FromString
-	pongo2.FromFile = tpls.FromFile
-	pongo2.FromCache = ExecuteFromCache
-	pongo2.RenderTemplateString = tpls.RenderTemplateString
-	pongo2.RenderTemplateFile = tpls.RenderTemplateFile
 }

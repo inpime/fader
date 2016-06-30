@@ -15,22 +15,22 @@ func pongo2InitGlobalCustoms() {
 
 	var emptyURL, _ = url.Parse("")
 
-	tpls.Globals["clear"] = func(args ...*pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["clear"] = func(args ...*pongo2.Value) *pongo2.Value {
 		return pongo2.AsValue("")
 	}
 
-	tpls.Globals["DeleteFile"] = func(bucketId, fileId *pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["DeleteFile"] = func(bucketId, fileId *pongo2.Value) *pongo2.Value {
 
 		return pongo2.AsValue(store.DeleteFileID(bucketId.String(), fileId.String()))
 	}
 
-	tpls.Globals["SectionAppConfig"] = func(sectionName *pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["SectionAppConfig"] = func(sectionName *pongo2.Value) *pongo2.Value {
 		return pongo2.AsValue(AppSettings().M(sectionName.String()))
 	}
 
 	// SearchFiles search files in bucket
 	// (the request is formed in buildSearchQueryFilesByBycket)
-	tpls.Globals["SearchFiles"] = func(
+	pongo2.DefaultSet.Globals["SearchFiles"] = func(
 		bucketName,
 		queryStr,
 		page,
@@ -53,18 +53,18 @@ func pongo2InitGlobalCustoms() {
 		return pongo2.AsValue(makeSearch(filter))
 	}
 
-	tpls.Globals["NewUUID"] = func() *pongo2.Value {
+	pongo2.DefaultSet.Globals["NewUUID"] = func() *pongo2.Value {
 		return pongo2.AsValue(dbox.NewUUID())
 	}
 
-	tpls.Globals["NewFile"] = func(bucketName *pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["NewFile"] = func(bucketName *pongo2.Value) *pongo2.Value {
 		file, _ := store.LoadOrNewFileID(bucketName.String(), "")
 
 		return pongo2.AsValue(file)
 	}
 
 	// LoadByID load file by ID
-	tpls.Globals["LoadByID"] = func(
+	pongo2.DefaultSet.Globals["LoadByID"] = func(
 		bucketName,
 		fileID *pongo2.Value,
 	) *pongo2.Value {
@@ -81,7 +81,7 @@ func pongo2InitGlobalCustoms() {
 	}
 
 	// Load load file by name
-	tpls.Globals["Load"] = func(
+	pongo2.DefaultSet.Globals["Load"] = func(
 		bucketName,
 		fileName *pongo2.Value,
 	) *pongo2.Value {
@@ -96,7 +96,7 @@ func pongo2InitGlobalCustoms() {
 		return pongo2.AsValue(file)
 	}
 
-	tpls.Globals["URLQuery"] = func(args ...*pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["URLQuery"] = func(args ...*pongo2.Value) *pongo2.Value {
 		if len(args) == 0 {
 			return pongo2.AsValue(emptyURL)
 		}
@@ -127,7 +127,7 @@ func pongo2InitGlobalCustoms() {
 	}
 
 	// builds the path part of the URL
-	tpls.Globals["URL"] = func(args ...*pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["URL"] = func(args ...*pongo2.Value) *pongo2.Value {
 		if len(args) == 0 {
 			return pongo2.AsValue(emptyURL)
 		}
@@ -161,21 +161,21 @@ func pongo2InitGlobalCustoms() {
 	}
 
 	// Load load file by name
-	tpls.Globals["M"] = func() *pongo2.Value {
+	pongo2.DefaultSet.Globals["M"] = func() *pongo2.Value {
 
 		return pongo2.AsValue(utils.Map())
 	}
 
-	tpls.Globals["A"] = func() *pongo2.Value {
+	pongo2.DefaultSet.Globals["A"] = func() *pongo2.Value {
 		return pongo2.AsValue(utils.NewA([]string{}))
 	}
 
-	tpls.Globals["AIface"] = func() *pongo2.Value {
+	pongo2.DefaultSet.Globals["AIface"] = func() *pongo2.Value {
 		return pongo2.AsValue([]interface{}{})
 	}
 
 	// CreateBucket special function (used only to create a bucket)
-	tpls.Globals["CreateBucket"] = func(_opt *pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["CreateBucket"] = func(_opt *pongo2.Value) *pongo2.Value {
 		opt := utils.Map().LoadFrom(_opt.Interface())
 
 		bucketName := opt.String("Name")
@@ -218,11 +218,11 @@ func pongo2InitGlobalCustoms() {
 	}
 
 	// ListGroupsImportExport возвращает список групп указанных в настройках приложения
-	tpls.Globals["ListGroupsImportExport"] = func() *pongo2.Value {
+	pongo2.DefaultSet.Globals["ListGroupsImportExport"] = func() *pongo2.Value {
 		return pongo2.AsValue(ListGroupsImportExport())
 	}
 
-	tpls.Globals["PayViaBraintreegateway"] = func(orderId, amount, opt *pongo2.Value) *pongo2.Value {
+	pongo2.DefaultSet.Globals["PayViaBraintreegateway"] = func(orderId, amount, opt *pongo2.Value) *pongo2.Value {
 		orderOpt := OrderInfoFromM(
 			orderId.String(),
 			int64(amount.Integer()),

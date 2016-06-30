@@ -220,7 +220,7 @@ func tagSSI(doc *pongo2.Parser, start *pongo2.Token, arguments *pongo2.Parser) (
 
 		if arguments.Match(pongo2.TokenIdentifier, "parsed") != nil {
 			// parsed
-			temporaryTpl, err := tpls.FromFile(fileToken.Val)
+			temporaryTpl, err := pongo2.DefaultSet.FromFile(fileToken.Val)
 			if err != nil {
 				return nil, err.(*pongo2.Error)
 			}

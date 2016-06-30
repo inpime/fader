@@ -18,12 +18,12 @@ func ClearWidgetTemplatesCache() {
 
 // ExecuteFromCache wraper pongo2 template executor
 func ExecuteFromCache(filename string) (*pongo2.Template, error) {
-	if tpls.Debug {
+	if pongo2.DefaultSet.Debug {
 		// Recompile on any request
-		return tpls.FromFile(filename)
+		return pongo2.DefaultSet.FromFile(filename)
 	}
 	// Cache the template
-	cleanedFilename := tplsLoader.Abs("", filename)
+	cleanedFilename := filename
 
 	templateCacheMutex.Lock()
 	defer templateCacheMutex.Unlock()
@@ -32,7 +32,7 @@ func ExecuteFromCache(filename string) (*pongo2.Template, error) {
 
 	// Cache miss
 	if !has {
-		tpl, err := tpls.FromFile(cleanedFilename)
+		tpl, err := pongo2.DefaultSet.FromFile(cleanedFilename)
 		if err != nil {
 			return nil, err
 		}
