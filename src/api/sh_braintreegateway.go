@@ -1,6 +1,7 @@
 package api
 
 import (
+	"api/config"
 	braintree "github.com/lionelbarrow/braintree-go"
 	"utils"
 )
@@ -85,15 +86,15 @@ type TxAddress struct {
 func PayViaBraintreegateway(opt OrderInfo) (string, error) {
 	var env = braintree.Sandbox
 
-	if AppSettings().M("braintree").Bool("prod") {
+	if config.AppSettings().M("braintree").Bool("prod") {
 		env = braintree.Production
 	}
 
 	bt := braintree.New(
 		env,
-		AppSettings().M("braintree").String("merchantId"),
-		AppSettings().M("braintree").String("publicKey"),
-		AppSettings().M("braintree").String("privateKey"),
+		config.AppSettings().M("braintree").String("merchantId"),
+		config.AppSettings().M("braintree").String("publicKey"),
+		config.AppSettings().M("braintree").String("privateKey"),
 	)
 
 	tx, err := bt.Transaction().Create(&braintree.Transaction{

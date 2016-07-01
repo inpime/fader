@@ -1,6 +1,7 @@
 package api
 
 import (
+	"api/config"
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
 	"github.com/inpime/dbox"
@@ -25,7 +26,7 @@ func pongo2InitGlobalCustoms() {
 	}
 
 	pongo2.DefaultSet.Globals["SectionAppConfig"] = func(sectionName *pongo2.Value) *pongo2.Value {
-		return pongo2.AsValue(AppSettings().M(sectionName.String()))
+		return pongo2.AsValue(config.AppSettings().M(sectionName.String()))
 	}
 
 	// SearchFiles search files in bucket
@@ -132,7 +133,7 @@ func pongo2InitGlobalCustoms() {
 			return pongo2.AsValue(emptyURL)
 		}
 
-		route := router.Get(args[0].String())
+		route := config.Router.Get(args[0].String())
 
 		if route == nil {
 			return pongo2.AsValue(emptyURL)

@@ -7,8 +7,10 @@ import (
 	"strings"
 	"sync"
 
+	"api/config"
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
+	apptpl "tpl"
 )
 
 var pongo2InitAddonsOnce sync.Once
@@ -51,7 +53,7 @@ func filterAppend(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2
 
 func filterFileContentByNameURL(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	// TODO: get the URL based on the name route (after the routs will have the names)
-	route := router.Get(FileContentByNameRouteName)
+	route := config.Router.Get(FileContentByNameRouteName)
 
 	if route == nil {
 		reason := fmt.Sprintf("not found route %q", FileContentByNameRouteName)
@@ -228,7 +230,7 @@ func tagSSI(doc *pongo2.Parser, start *pongo2.Token, arguments *pongo2.Parser) (
 		} else {
 			// plaintext
 
-			fileReader, err := tplsLoader.Get(fileToken.Val)
+			fileReader, err := apptpl.TplDefaultLoader.Get(fileToken.Val)
 
 			if err != nil {
 

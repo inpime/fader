@@ -2,6 +2,8 @@ package api
 
 import (
 	// "github.com/Sirupsen/logrus"
+	"api/config"
+	"api/vrouter"
 	"github.com/flosch/pongo2"
 	"github.com/labstack/echo"
 	"net/http"
@@ -13,11 +15,11 @@ func initWidgets() {
 }
 
 func ExecuteWidget(c echo.Context) error {
-	var match RouteMatch
+	var match vrouter.RouteMatch
 
 	_u, _ := url.Parse(c.Request().URI())
 
-	if router.Match(&Request{_u, c.Request().Method()}, &match) {
+	if config.Router.Match(&vrouter.Request{_u, c.Request().Method()}, &match) {
 		// Init context
 
 		widgetCtx := NewContextWrap(c)
@@ -50,7 +52,7 @@ func ExecuteWidget(c echo.Context) error {
 
 		var tpl *pongo2.Template
 
-		if IsPageCaching() {
+		if config.IsPageCaching() {
 			tpl = pongo2.Must(pongo2.FromCache(match.Handler.Bucket + "/" + match.Handler.File))
 		} else {
 			ClearWidgetTemplatesCache()

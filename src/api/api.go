@@ -1,6 +1,7 @@
 package api
 
 import (
+	"api/config"
 	"github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -10,17 +11,21 @@ import (
 
 // Run init tempaltes and start server
 func Run() {
+	config.Init()
+
+	pongo2InitGlobalCustoms()
+	pongo2InitAddons()
 
 	// TODO: make easier the init
 
 	// init templates
-	initTemplates()
+	// initTemplates()
 
 	if err := InitSession(); err != nil {
 		panic(err)
 	}
 
-	initWidgets()
+	initWidgetVirtualRouts()
 
 	// Init session
 

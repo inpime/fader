@@ -1,6 +1,7 @@
 package api
 
 import (
+	"api/config"
 	"github.com/labstack/echo"
 	"net/http"
 	"store"
@@ -29,7 +30,7 @@ func FileContentByName_SpecialHandler(ctx *ContextWrap) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
+	bucketName := config.AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
 
 	file, err := store.LoadOrNewFile(bucketName, fileName)
 
@@ -53,7 +54,7 @@ func FileContentByID_SpecialHandler(ctx *ContextWrap) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
+	bucketName := config.AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
 
 	file, err := store.LoadOrNewFileID(bucketName, fileId)
 

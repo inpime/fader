@@ -1,4 +1,4 @@
-package api
+package vrouter
 
 import "strings"
 import "net/url"
@@ -13,25 +13,6 @@ type matcher interface {
 type Request struct {
 	URL    *url.URL
 	Method string
-}
-
-func NewHandlerFromRoute(r Rout) Handler {
-	var h Handler
-	if r.IsSpecial {
-		h = Handler{
-			Bucket:         "",
-			File:           "",
-			SpecialHandler: r.Handler,
-		}
-	} else {
-		h = NewHandlerFromString(r.Handler)
-	}
-
-	h.Licenses = r.Licenses
-	h.Path = r.Path
-	h.Methods = r.Methods
-
-	return h
 }
 
 func NewHandlerFromString(str string) Handler {

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"api/config"
 	"archive/zip"
 	"bytes"
 	"encoding/json"
@@ -34,7 +35,7 @@ var (
 
 // IsIncludeInGroupBucketImportExport является ли файл системным согласно настройкам
 func IsIncludeInGroupBucketImportExport(groupName, bucketName string) bool {
-	config := AppSettings().M(ImportExportSecionNameKey).M(groupName)
+	config := config.AppSettings().M(ImportExportSecionNameKey).M(groupName)
 
 	if !config.Include(bucketName) {
 		return false
@@ -57,7 +58,7 @@ func IsIncludeInGroupFileImportExport(groupName, bucketName, fileName string) bo
 		return false
 	}
 
-	config := AppSettings().M(ImportExportSecionNameKey).M(groupName)
+	config := config.AppSettings().M(ImportExportSecionNameKey).M(groupName)
 
 	bucketConfig := config.M(bucketName)
 
@@ -72,7 +73,7 @@ func IsIncludeInGroupFileImportExport(groupName, bucketName, fileName string) bo
 
 // ListGroupsImportExport возвращает список групп указанных в настройках приложения
 func ListGroupsImportExport() []string {
-	return AppSettings().Keys(ImportExportSecionNameKey)
+	return config.AppSettings().Keys(ImportExportSecionNameKey)
 }
 
 // ----------------------------
