@@ -237,19 +237,19 @@ func makeImportImportExport(data []byte) error {
 	return nil
 }
 
-func AppImport_SpecialHandler(ctx *ContextWrap) error {
-	fileData := ctx.FormFileData("BinData")
+func AppImport_SpecialHandler(ctx echo.Context) error {
+	// fileData := ctx.FormFileData("BinData")
 
-	err := makeImportImportExport(fileData.Data)
+	// err := makeImportImportExport(fileData.Data)
 
-	if err != nil {
-		return ctx.String(http.StatusBadRequest, err.Error())
-	}
+	// if err != nil {
+	// 	return ctx.String(http.StatusBadRequest, err.Error())
+	// }
 
 	return ctx.NoContent(http.StatusOK)
 }
 
-func AppExport_SpecialHandler(ctx *ContextWrap) error {
+func AppExport_SpecialHandler(ctx echo.Context) error {
 	archive := newArchivePkg()
 	archive.GroupName = ctx.QueryParam("group")
 	byGroupName := len(archive.GroupName) > 0

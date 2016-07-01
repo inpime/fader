@@ -1,7 +1,9 @@
 package main
 
 import (
+	"addons/session"
 	"api"
+	"api/config"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
@@ -102,7 +104,7 @@ func _initStroes() {
 	}
 
 	// set default buckets store for buckets
-	dbox.BucketStore = store.NewBoltDBStore(db, api.BucketsBucketName)
+	dbox.BucketStore = store.NewBoltDBStore(db, config.BucketsBucketName)
 
 	// main boltdb client for stores
 	store.BoltDBClient = db
@@ -125,7 +127,7 @@ func _initStroes() {
 	// Setup buckets
 	// ------------------
 
-	bucket, err := store.BucketByName(api.BucketsBucketName)
+	bucket, err := store.BucketByName(config.BucketsBucketName)
 	bucket.InitInOneStore(dbox.BoltDBStoreType) // store key - boltdb.buckets
 
 	if err == dbox.ErrNotFound {
@@ -144,7 +146,7 @@ func _initStroes() {
 		bucket.Sync()
 	}
 
-	bucket, err = store.BucketByName(api.SettingsBucketName)
+	bucket, err = store.BucketByName(config.SettingsBucketName)
 	bucket.InitRawDataStore(dbox.LocalStoreType, false)  // store key - fs.settings.rawdata
 	bucket.InitMetaDataStore(dbox.BoltDBStoreType, true) // store key - boltdb.settings
 	bucket.InitMapDataStore(dbox.BoltDBStoreType, true)  // store key - boltdb.settings
@@ -165,7 +167,7 @@ func _initStroes() {
 		bucket.Sync()
 	}
 
-	bucket, err = store.BucketByName(api.StaticBucketName)
+	bucket, err = store.BucketByName(config.StaticBucketName)
 	bucket.InitRawDataStore(dbox.LocalStoreType, false)  // store key - fs.static.rawdata
 	bucket.InitMetaDataStore(dbox.BoltDBStoreType, true) // store key - boltdb.static
 	bucket.InitMapDataStore(dbox.BoltDBStoreType, true)  // store key - boltdb.static
@@ -186,7 +188,7 @@ func _initStroes() {
 		bucket.Sync()
 	}
 
-	bucket, err = store.BucketByName(api.PagesBucketName)
+	bucket, err = store.BucketByName(config.PagesBucketName)
 	bucket.InitRawDataStore(dbox.LocalStoreType, false)  // store key - fs.pages.rawdata
 	bucket.InitMetaDataStore(dbox.BoltDBStoreType, true) // store key - boltdb.pages
 	bucket.InitMapDataStore(dbox.BoltDBStoreType, true)  // store key - boltdb.pages
@@ -207,7 +209,7 @@ func _initStroes() {
 		bucket.Sync()
 	}
 
-	bucket, err = store.BucketByName(api.UsersBucketName)
+	bucket, err = store.BucketByName(config.UsersBucketName)
 	bucket.InitInOneStore(dbox.BoltDBStoreType) // store key - boltdb.users
 
 	if err == dbox.ErrNotFound {
@@ -229,7 +231,7 @@ func _initStroes() {
 		bucket.Sync()
 	}
 
-	bucket, err = store.BucketByName(api.ConsoleBucketName)
+	bucket, err = store.BucketByName(config.ConsoleBucketName)
 	bucket.InitRawDataStore(dbox.LocalStoreType, false)  // store key - fs.console.rawdata
 	bucket.InitMetaDataStore(dbox.BoltDBStoreType, true) // store key - boltdb.console
 	bucket.InitMapDataStore(dbox.BoltDBStoreType, true)  // store key - boltdb.console
@@ -254,7 +256,7 @@ func _initStroes() {
 	// Settings
 	// --------------------
 
-	file, err := store.LoadOrNewFile(api.SettingsBucketName, api.MainSettingsFileName)
+	file, err := store.LoadOrNewFile(config.SettingsBucketName, config.MainSettingsFileName)
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -269,7 +271,7 @@ bucket="static"`))
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.SettingsBucketName, api.RoutingSettingsFileName)
+	file, err = store.LoadOrNewFile(config.SettingsBucketName, config.RoutingSettingsFileName)
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -425,25 +427,25 @@ licenses = ["admin"]
 	// Users
 	// --------------------
 
-	file, err = store.LoadOrNewFile(api.UsersBucketName, api.GuestUserFileName)
+	file, err = store.LoadOrNewFile(config.UsersBucketName, config.GuestUserFileName)
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
 		utils.M(file.MapData()).Set("fullName", "Guest")
-		user := api.FileAsUser(file)
-		user.AddLicense(api.GuestLicense)
+		user := session.FileAsUser(file)
+		user.AddLicense(session.GuestLicense)
 
 		user.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.UsersBucketName, "demo")
+	file, err = store.LoadOrNewFile(config.UsersBucketName, "demo")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
 		utils.M(file.MapData()).Set("fullName", "Demo")
-		user := api.FileAsUser(file)
-		user.AddLicense(api.UserLicense)
-		user.AddLicense(api.AdminLicense)
+		user := session.FileAsUser(file)
+		user.AddLicense(session.UserLicense)
+		user.AddLicense(session.AdminLicense)
 
 		user.Sync()
 	}
@@ -452,7 +454,7 @@ licenses = ["admin"]
 	// Pages
 	// --------------------
 
-	file, err = store.LoadOrNewFile(api.PagesBucketName, "index")
+	file, err = store.LoadOrNewFile(config.PagesBucketName, "index")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -487,7 +489,7 @@ licenses = ["admin"]
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.PagesBucketName, "login")
+	file, err = store.LoadOrNewFile(config.PagesBucketName, "login")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -510,7 +512,7 @@ licenses = ["admin"]
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.PagesBucketName, "logout")
+	file, err = store.LoadOrNewFile(config.PagesBucketName, "logout")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -527,7 +529,7 @@ licenses = ["admin"]
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.PagesBucketName, "sessioninfo")
+	file, err = store.LoadOrNewFile(config.PagesBucketName, "sessioninfo")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -548,7 +550,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 	// Console
 	// --------------------
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "layout")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "layout")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -639,7 +641,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "navbar")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "navbar")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -670,7 +672,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "footer")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "footer")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -699,7 +701,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "dashboard")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "dashboard")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -775,7 +777,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "bucketslist")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "bucketslist")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -841,7 +843,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "fileslist")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "fileslist")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -909,7 +911,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "viewfile")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "viewfile")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1207,7 +1209,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "putfile_textdata")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "putfile_textdata")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1238,7 +1240,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "putfile_structdata")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "putfile_structdata")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1272,7 +1274,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "putfile_properties")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "putfile_properties")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1498,7 +1500,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 	// 		file.Sync()
 	// 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "newfileform")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "newfileform")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1693,7 +1695,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "newbucketform")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "newbucketform")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1852,7 +1854,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "newfile")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "newfile")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1883,7 +1885,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "newbucket")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "newbucket")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1907,7 +1909,7 @@ Licenses: {{ user.Licenses()|stringformat:"%#v" }}
 		file.Sync()
 	}
 
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "putfile_rawdata_viauploader")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "putfile_rawdata_viauploader")
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 

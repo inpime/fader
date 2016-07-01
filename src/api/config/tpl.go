@@ -16,7 +16,4 @@ func InitTpl() {
 	pongo2.FromCache = tpl.ExecuteFromMemCache
 	pongo2.RenderTemplateString = pongo2.DefaultSet.RenderTemplateString
 	pongo2.RenderTemplateFile = pongo2.DefaultSet.RenderTemplateFile
-
-	// pongo2InitGlobalCustoms()
-	// pongo2InitAddons()
 }

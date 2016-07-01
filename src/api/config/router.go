@@ -39,7 +39,7 @@ func ReloadAppRouts() {
 
 func routeUpdate(fileName string) {
 
-	file, err := store.LoadOrNewFile("settings", fileName)
+	file, err := store.LoadOrNewFile(SettingsBucketName, fileName)
 
 	if err != nil {
 		logrus.WithField("_service", loggerKey).Errorf("load %q error, %v", fileName, err)

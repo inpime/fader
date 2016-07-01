@@ -43,6 +43,18 @@ type Handler struct {
 	Path     string
 }
 
+// String `PATH `
+func (h Handler) String() string {
+	return fmt.Sprintf("%q [%q](%q): %q:%q:%q",
+		h.Path,
+		strings.Join(h.Methods, ","),
+		strings.Join(h.Licenses, ","),
+		h.Bucket,
+		h.File,
+		h.SpecialHandler,
+	)
+}
+
 func (h Handler) IsEmpty() bool {
 
 	return len(h.Bucket) == 0 && len(h.File) == 0

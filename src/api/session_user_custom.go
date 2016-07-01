@@ -1,64 +1,64 @@
 package api
 
-import (
-	"fmt"
-	"github.com/gorilla/sessions"
-	"store"
-	"utils"
-)
+// import (
+// 	"fmt"
+// 	"github.com/gorilla/sessions"
+// 	"store"
+// 	"utils"
+// )
 
-type gorillaSessionIface interface {
-	Session() *sessions.Session
-}
+// type gorillaSessionIface interface {
+// 	Session() *sessions.Session
+// }
 
-func (s Session) IsGuest() bool {
+// func (s Session) IsGuest() bool {
 
-	return s.User().HasLicense(GuestLicense)
-}
+// 	return s.User().HasLicense(GuestLicense)
+// }
 
-func (s Session) IsUser() bool {
-	return s.User().HasLicense(UserLicense)
-}
+// func (s Session) IsUser() bool {
+// 	return s.User().HasLicense(UserLicense)
+// }
 
-func (s Session) IsAuth() bool {
-	return !s.HasLicense(GuestLicense)
-}
+// func (s Session) IsAuth() bool {
+// 	return !s.HasLicense(GuestLicense)
+// }
 
-func (s Session) HasLicense(name string) bool {
-	return s.User().HasLicense(name)
-}
+// func (s Session) HasLicense(name string) bool {
+// 	return s.User().HasLicense(name)
+// }
 
-//HasOneLicense has at least one license
-func (s Session) HasOneLicense(names []string) bool {
+// //HasOneLicense has at least one license
+// func (s Session) HasOneLicense(names []string) bool {
 
-	for _, name := range names {
-		if s.User().HasLicense(name) {
-			return true
-		}
-	}
+// 	for _, name := range names {
+// 		if s.User().HasLicense(name) {
+// 			return true
+// 		}
+// 	}
 
-	return false
-}
+// 	return false
+// }
 
-func (s Session) Props() utils.M {
-	return utils.Map(s.Session.(gorillaSessionIface).Session().Values)
-}
+// func (s Session) Props() utils.M {
+// 	return utils.Map(s.Session.(gorillaSessionIface).Session().Values)
+// }
 
-// Signin the user authorization via key and password
-func (s *Session) Signin(primaryKey, password string) error {
+// // Signin the user authorization via key and password
+// func (s *Session) Signin(primaryKey, password string) error {
 
-	file, err := store.LoadOrNewFile(UsersBucketName, toLower(primaryKey))
+// 	file, err := store.LoadOrNewFile(UsersBucketName, toLower(primaryKey))
 
-	if err != nil {
-		return err
-	}
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if file.MMapData().String("pwd") != password {
+// 	if file.MMapData().String("pwd") != password {
 
-		return fmt.Errorf("invalid credentials")
-	}
+// 		return fmt.Errorf("invalid credentials")
+// 	}
 
-	// TODO: encrypt a password and check password
+// 	// TODO: encrypt a password and check password
 
-	return s.Auth(file)
-}
+// 	return s.Auth(file)
+// }

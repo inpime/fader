@@ -57,8 +57,9 @@ func initConfig() {
 		Session: api.ApiSessionConfig{
 			Path: "/",
 
-			SecretKey:  sessionSecureKey,
-			BucketName: "sessions",
+			SecretKey:   sessionSecureKey,
+			BucketName:  "sessions",
+			SessionName: "fds",
 
 			Store: api.StoreConfig{
 				Provider:       "boltdb",
@@ -97,6 +98,6 @@ func initConfig() {
 	}
 
 	logrus.SetLevel(appLoggerLevel)
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetFormatter(&logrus.TextFormatter{})
 	// logrus.SetLevel(logrus.DebugLevel)
 }

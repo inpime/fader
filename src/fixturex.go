@@ -1,7 +1,9 @@
 package main
 
 import (
+	"addons/session"
 	"api"
+	"api/config"
 	"encoding/base64"
 	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
@@ -19,7 +21,7 @@ func initStroes() {
 	}
 
 	// set default buckets store for buckets
-	dbox.BucketStore = store.NewBoltDBStore(db, api.BucketsBucketName)
+	dbox.BucketStore = store.NewBoltDBStore(db, config.BucketsBucketName)
 	store.BoltDBClient = db
 
 	// ---------------------
@@ -35,7 +37,7 @@ func initStroes() {
 	isNewInstallation := false
 
 	// root bucket buckets
-	bucket, err := store.BucketByName(api.BucketsBucketName)
+	bucket, err := store.BucketByName(config.BucketsBucketName)
 	logrus.Debugf("buckets: meta %#v, %v\n", bucket.MapData(), err)
 	bucket.InitInOneStore(dbox.BoltDBStoreType)
 	if err == dbox.ErrNotFound {
@@ -75,7 +77,7 @@ func initStroes() {
 	// Bucket: Settings
 	// ----------------
 
-	bucket, err = store.BucketByName(api.SettingsBucketName)
+	bucket, err = store.BucketByName(config.SettingsBucketName)
 	bucket.InitRawDataStore(dbox.BoltDBStoreType, true)  // store key - fs.settings.rawdata
 	bucket.InitMetaDataStore(dbox.BoltDBStoreType, true) // store key - boltdb.settings
 	bucket.InitMapDataStore(dbox.BoltDBStoreType, true)  // store key - boltdb.settings
@@ -93,7 +95,7 @@ func initStroes() {
 	// Bucket: Static
 	// ----------------
 
-	bucket, err = store.BucketByName(api.StaticBucketName)
+	bucket, err = store.BucketByName(config.StaticBucketName)
 	bucket.InitRawDataStore(dbox.LocalStoreType, false)
 	bucket.InitMetaDataStore(dbox.BoltDBStoreType, true)
 	bucket.InitMapDataStore(dbox.BoltDBStoreType, true)
@@ -111,7 +113,7 @@ func initStroes() {
 	// Bucket: Users
 	// ----------------
 
-	bucket, err = store.BucketByName(api.UsersBucketName)
+	bucket, err = store.BucketByName(config.UsersBucketName)
 	bucket.InitInOneStore(dbox.BoltDBStoreType)
 
 	if err == dbox.ErrNotFound {
@@ -136,7 +138,7 @@ func initStroes() {
 	// Bucket: Console
 	// ----------------
 
-	bucket, err = store.BucketByName(api.ConsoleBucketName)
+	bucket, err = store.BucketByName(config.ConsoleBucketName)
 	bucket.InitRawDataStore(dbox.LocalStoreType, false)
 	bucket.InitMetaDataStore(dbox.BoltDBStoreType, true)
 	bucket.InitMapDataStore(dbox.BoltDBStoreType, true)
@@ -186,7 +188,7 @@ func initStroes() {
 	// ------------------------
 
 	// console.route
-	file, err := store.LoadOrNewFile(api.SettingsBucketName, "console.route")
+	file, err := store.LoadOrNewFile(config.SettingsBucketName, "console.route")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -340,7 +342,7 @@ licenses = ["admin"]
 	}
 
 	// filecontent.route
-	file, err = store.LoadOrNewFile(api.SettingsBucketName, "filecontent.route")
+	file, err = store.LoadOrNewFile(config.SettingsBucketName, "filecontent.route")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -371,7 +373,7 @@ licenses = ["guest", "user", "admin"]
 	}
 
 	// main
-	file, err = store.LoadOrNewFile(api.SettingsBucketName, api.MainSettingsFileName)
+	file, err = store.LoadOrNewFile(config.SettingsBucketName, config.MainSettingsFileName)
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -402,7 +404,7 @@ bucket="static"
 	// ------------------------
 
 	// logo.png
-	file, err = store.LoadOrNewFile(api.StaticBucketName, "logo.png")
+	file, err = store.LoadOrNewFile(config.StaticBucketName, "logo.png")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -419,30 +421,30 @@ bucket="static"
 	// ------------------------
 
 	// guestuser
-	file, err = store.LoadOrNewFile(api.UsersBucketName, api.GuestUserFileName)
+	file, err = store.LoadOrNewFile(config.UsersBucketName, config.GuestUserFileName)
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
-		user := api.FileAsUser(file)
+		user := session.FileAsUser(file)
 		user.MMapData().Set("fullname", "Guest").
 			Set("pwd", "console")
 		user.SetContentType("text/toml")
-		user.AddLicense(api.GuestLicense)
+		user.AddLicense(session.GuestLicense)
 
 		file.Sync()
 	}
 
 	// console
-	file, err = store.LoadOrNewFile(api.UsersBucketName, "console")
+	file, err = store.LoadOrNewFile(config.UsersBucketName, "console")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
-		user := api.FileAsUser(file)
+		user := session.FileAsUser(file)
 		user.MMapData().Set("fullname", "Console admin").
 			Set("pwd", "console")
 		user.SetContentType("text/toml")
-		user.AddLicense(api.UserLicense)
-		user.AddLicense(api.AdminLicense)
+		user.AddLicense(session.UserLicense)
+		user.AddLicense(session.AdminLicense)
 
 		file.Sync()
 	}
@@ -452,7 +454,7 @@ bucket="static"
 	// ------------------------
 
 	// login.form
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "login.form")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "login.form")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -501,7 +503,7 @@ bucket="static"
 	}
 
 	// login
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "login")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "login")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -526,7 +528,7 @@ bucket="static"
 	}
 
 	// logout
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "logout")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "logout")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -544,7 +546,7 @@ bucket="static"
 	}
 
 	// layout
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "layout")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "layout")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -639,7 +641,7 @@ bucket="static"
 	}
 
 	// navbar
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "navbar")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "navbar")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -673,7 +675,7 @@ bucket="static"
 	}
 
 	// footer
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "footer")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "footer")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -705,7 +707,7 @@ bucket="static"
 	}
 
 	// dashboard
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "dashboard")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "dashboard")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -790,7 +792,7 @@ bucket="static"
 	}
 
 	// list.buckets
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "list.buckets")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "list.buckets")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -859,7 +861,7 @@ bucket="static"
 	}
 
 	// list.files
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "list.files")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "list.files")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -929,7 +931,7 @@ bucket="static"
 	}
 
 	// file.view
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "file.view")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "file.view")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1229,7 +1231,7 @@ bucket="static"
 	}
 
 	// file.new.form
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "file.new.form")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "file.new.form")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1426,7 +1428,7 @@ bucket="static"
 	}
 
 	// bucket.new.form
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "bucket.new.form")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "bucket.new.form")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1587,7 +1589,7 @@ bucket="static"
 	}
 
 	// file.put.textdata
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "file.put.textdata")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "file.put.textdata")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1618,7 +1620,7 @@ bucket="static"
 	}
 
 	// file.put.rawdata.via_uploader
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "file.put.rawdata.via_uploader")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "file.put.rawdata.via_uploader")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1653,7 +1655,7 @@ bucket="static"
 	}
 
 	// file.put.structdata
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "file.put.structdata")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "file.put.structdata")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1687,7 +1689,7 @@ bucket="static"
 	}
 
 	// file.put.properties
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "file.put.properties")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "file.put.properties")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1719,7 +1721,7 @@ bucket="static"
 	}
 
 	// file.new
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "file.new")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "file.new")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 
@@ -1749,7 +1751,7 @@ bucket="static"
 	}
 
 	// bucket.new
-	file, err = store.LoadOrNewFile(api.ConsoleBucketName, "bucket.new")
+	file, err = store.LoadOrNewFile(config.ConsoleBucketName, "bucket.new")
 	if err == dbox.ErrNotFound {
 		logrus.Infof("%v: create %q\n", file.Bucket(), file.Name())
 

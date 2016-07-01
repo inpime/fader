@@ -51,14 +51,14 @@ func initWidgetVirtualRouts() {
 	// reloadAppSettings()
 	// reloadAppRouts()
 
-	RegistedSpecialHandler(FileContentByNameSpecialHandlerName, FileContentByName_SpecialHandler)
-	RegistedSpecialHandler(FileContentByIDSpecialHandlerName, FileContentByID_SpecialHandler)
+	// AddSpecialHandler(FileContentByNameSpecialHandlerName, FileContentByName_SpecialHandler)
+	// AddSpecialHandler(FileContentByIDSpecialHandlerName, FileContentByID_SpecialHandler)
 
-	RegistedSpecialHandler(ImportExportImportSpecialHandlerName, AppImport_SpecialHandler)
-	RegistedSpecialHandler(ImportExportExportSpecialHandlerName, AppExport_SpecialHandler)
+	// AddSpecialHandler(ImportExportImportSpecialHandlerName, AppImport_SpecialHandler)
+	// AddSpecialHandler(ImportExportExportSpecialHandlerName, AppExport_SpecialHandler)
 
-	RegistedSpecialHandler("urloembed", UrlPreview_SpecialHandler)
-	UrlPreviewWorkersInit()
+	// AddSpecialHandler("urloembed", UrlPreview_SpecialHandler)
+	// UrlPreviewWorkersInit()
 
 	// go RefreshEvery(3*time.Second, reloadAppSettings)
 	// go RefreshEvery(3*time.Second, reloadAppRouts)

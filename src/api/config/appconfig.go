@@ -12,10 +12,9 @@ import (
 var appSettings utils.M
 var appSettingsMutex sync.Mutex
 
-// settings@main
-// settings@routs
-
 var (
+	// Section names of file settings@main
+
 	PageCachingKey = "pageCaching"
 	RoutsKey       = "routs"
 	IncludeKey     = "include"
@@ -42,9 +41,9 @@ func AppSettingsIncludeFiles() []string {
 
 // ReloadAppSettings reload app settings
 func ReloadAppSettings() {
-	file, err := store.LoadOrNewFile("settings", "main")
+	file, err := store.LoadOrNewFile(SettingsBucketName, MainSettingsFileName)
 
-	_filename := "settings@main"
+	_filename := SettingsBucketName + "@" + MainSettingsFileName
 
 	if err != nil {
 		logrus.WithField("_service", loggerKey).Errorf("load error file=%q, %v", _filename, err)
@@ -61,7 +60,7 @@ func ReloadAppSettings() {
 	}
 
 	for _, includeFileName := range AppSettingsIncludeFiles() {
-		includeFile, err := store.LoadOrNewFile("settings", includeFileName)
+		includeFile, err := store.LoadOrNewFile(SettingsBucketName, includeFileName)
 
 		if err != nil {
 			logrus.WithField("_service", loggerKey).WithError(err).Info("find include file %q", includeFileName)

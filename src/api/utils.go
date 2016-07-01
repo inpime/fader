@@ -1,6 +1,7 @@
 package api
 
 import (
+	"api/config"
 	"github.com/Sirupsen/logrus"
 	"github.com/inpime/dbox"
 	"store"
@@ -8,7 +9,7 @@ import (
 
 func getAllBuckets() []*store.File {
 	// all buckets
-	filter := store.NewSearchFilter(BucketsBucketName)
+	filter := store.NewSearchFilter(config.BucketsBucketName)
 	filter.SetQueryString("")
 	filter.SetPage(0)
 	filter.SetPerPage(100)

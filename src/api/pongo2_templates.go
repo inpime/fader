@@ -1,45 +1,45 @@
 package api
 
-import (
-	"github.com/flosch/pongo2"
-	"sync"
-)
+// import (
+// 	"github.com/flosch/pongo2"
+// 	"sync"
+// )
 
-var templateCacheMutex sync.Mutex
-var templateCache = make(map[string]*pongo2.Template)
+// var templateCacheMutex sync.Mutex
+// var templateCache = make(map[string]*pongo2.Template)
 
-func ClearWidgetTemplatesCache() {
+// func ClearWidgetTemplatesCache() {
 
-	templateCacheMutex.Lock()
-	defer templateCacheMutex.Unlock()
+// 	templateCacheMutex.Lock()
+// 	defer templateCacheMutex.Unlock()
 
-	templateCache = make(map[string]*pongo2.Template)
-}
+// 	templateCache = make(map[string]*pongo2.Template)
+// }
 
-// ExecuteFromCache wraper pongo2 template executor
-func ExecuteFromCache(filename string) (*pongo2.Template, error) {
-	if pongo2.DefaultSet.Debug {
-		// Recompile on any request
-		return pongo2.DefaultSet.FromFile(filename)
-	}
-	// Cache the template
-	cleanedFilename := filename
+// // ExecuteFromCache wraper pongo2 template executor
+// func ExecuteFromCache(filename string) (*pongo2.Template, error) {
+// 	if pongo2.DefaultSet.Debug {
+// 		// Recompile on any request
+// 		return pongo2.DefaultSet.FromFile(filename)
+// 	}
+// 	// Cache the template
+// 	cleanedFilename := filename
 
-	templateCacheMutex.Lock()
-	defer templateCacheMutex.Unlock()
+// 	templateCacheMutex.Lock()
+// 	defer templateCacheMutex.Unlock()
 
-	tpl, has := templateCache[cleanedFilename]
+// 	tpl, has := templateCache[cleanedFilename]
 
-	// Cache miss
-	if !has {
-		tpl, err := pongo2.DefaultSet.FromFile(cleanedFilename)
-		if err != nil {
-			return nil, err
-		}
-		templateCache[cleanedFilename] = tpl
-		return tpl, nil
-	}
+// 	// Cache miss
+// 	if !has {
+// 		tpl, err := pongo2.DefaultSet.FromFile(cleanedFilename)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		templateCache[cleanedFilename] = tpl
+// 		return tpl, nil
+// 	}
 
-	// Cache hit
-	return tpl, nil
-}
+// 	// Cache hit
+// 	return tpl, nil
+// }
