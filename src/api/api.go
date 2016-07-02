@@ -2,6 +2,7 @@ package api
 
 import (
 	_ "addons/filestatic"
+	_ "addons/importexport"
 	_ "addons/search"
 	"addons/session"
 	_ "addons/standard"
@@ -27,19 +28,19 @@ func Run() error {
 
 	// ------------------------
 	// Special addons
-	// 	* session
-	// 	* logger
+	// 	* 1. session
+	// 	* 2. logger
 	// ------------------------
 
 	// ------------------------
-	// Addon: session
+	// 1. session
 	// ------------------------
 
-	if Cfg.Session.Store.Provider != "boltdb" {
-		return fmt.Errorf("not supported session store %s", Cfg.Session.Store)
+	if config.Cfg.Session.Store.Provider != "boltdb" {
+		return fmt.Errorf("not supported session store %s", config.Cfg.Session.Store)
 	}
-	utils.EnsureDir(filepath.Dir(Cfg.Session.Store.BoltDBFilePath))
-	db, err := bolt.Open(Cfg.Session.Store.BoltDBFilePath, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	utils.EnsureDir(filepath.Dir(config.Cfg.Session.Store.BoltDBFilePath))
+	db, err := bolt.Open(config.Cfg.Session.Store.BoltDBFilePath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		return err
 	}
@@ -52,27 +53,34 @@ func Run() error {
 
 	session.DefaultGuestSession = file
 
-	sessionAddon := &session.SessionExtension{}
+	sessionAddon := &session.Extension{}
 	sessionAddon.SetAppConfig(session.Config{
-		Path: Cfg.Session.Path,
+		Path: config.Cfg.Session.Path,
 
 		DB:       db,
-		HttpOnly: Cfg.Session.HttpOnly,
-		Secure:   Cfg.Session.Secure,
-		Domain:   Cfg.Session.Domain,
-		MaxAge:   Cfg.Session.MaxAge,
+		HttpOnly: config.Cfg.Session.HttpOnly,
+		Secure:   config.Cfg.Session.Secure,
+		Domain:   config.Cfg.Session.Domain,
+		MaxAge:   config.Cfg.Session.MaxAge,
 
-		BucketName:  Cfg.Session.BucketName,
-		SecretKey:   Cfg.Session.SecretKey,
-		SessionName: Cfg.Session.SessionName,
+		BucketName:  config.Cfg.Session.BucketName,
+		SecretKey:   config.Cfg.Session.SecretKey,
+		SessionName: config.Cfg.Session.SessionName,
 	})
-	logrus.WithField("_service", "api").Infof("add extension: %q", sessionAddon.Name())
+
+	logrus.WithFields(logrus.Fields{
+		"_service":      "api",
+		"_target":       "initaddon",
+		"addon":         sessionAddon.Name(),
+		"addon_version": sessionAddon.Version(),
+	}).Infof("add extension")
+
 	e.Use(sessionAddon.Middlewares()...)
 	sessionAddon.RegEchoHandlers(AddSpecialHandler)
 	sessionAddon.InjectTplAddons()
 
 	// ------------------------
-	// Addon: logger
+	// 2. logger
 	// ------------------------
 
 	if logrus.GetLevel() >= logrus.InfoLevel {
@@ -89,18 +97,21 @@ func Run() error {
 	}
 
 	// ------------------------
-	// Registered addons
+	// Registered addons (enterprise addons)
 	// ------------------------
 
 	for _, ext := range config.ListOfExtensions() {
-		logrus.WithField("_service", "api").Infof("add extension: %q", ext.Name())
+		logrus.WithFields(logrus.Fields{
+			"_service":      "api",
+			"_target":       "initaddon",
+			"addon":         ext.Name(),
+			"addon_version": ext.Version(),
+		}).Infof("add extension")
 		// ext.SetLogger(logrus.StandardLogger().Out)
 		e.Use(ext.Middlewares()...)
 		ext.RegEchoHandlers(AddSpecialHandler)
 		ext.InjectTplAddons()
 	}
-
-	// ------------------------
 
 	// ------------------------
 	// App routs
@@ -112,9 +123,13 @@ func Run() error {
 	e.Put("/*", AppEntryPointHandler)
 	e.Delete("/*", AppEntryPointHandler)
 
-	logrus.WithField("_service", "api").Infof("HTTP Listener %q", Cfg.Address)
+	logrus.WithFields(logrus.Fields{
+		"_service": "api",
+		"_target":  "httplistener",
+		"address":  config.Cfg.Address,
+	}).Infof("Run API HTTP Listener")
 
-	e.Run(standard.New(Cfg.Address))
+	e.Run(standard.New(config.Cfg.Address))
 
 	return nil
 }

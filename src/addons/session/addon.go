@@ -10,28 +10,33 @@ import (
 )
 
 var addonName = "fader.addons.session"
+var version = "0.1.0"
 
 func init() {
 	// manual init
-	// config.AddExtension(&SessionExtension{})
+	// config.AddExtension(&Extension{})
 }
 
-type SessionExtension struct {
+type Extension struct {
 	config Config
 
 	reaperQuitC chan<- struct{}
 	reaperDoneC <-chan struct{}
 }
 
-func (SessionExtension) Name() string {
+func (Extension) Version() string {
+	return version
+}
+
+func (Extension) Name() string {
 	return addonName
 }
 
-func (s SessionExtension) Destroy() {
+func (s Extension) Destroy() {
 	reaper.Quit(s.reaperQuitC, s.reaperDoneC)
 }
 
-func (s *SessionExtension) SetAppConfig(config Config) {
+func (s *Extension) SetAppConfig(config Config) {
 	s.config = config
 
 	// cleaner expiring sessions
@@ -42,14 +47,14 @@ func (s *SessionExtension) SetAppConfig(config Config) {
 	})
 }
 
-func (s *SessionExtension) Middlewares() []echo.MiddlewareFunc {
+func (s *Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{
 		SessionStoreMiddleware(s.config.SessionName, s.config),
 		InitializerUserSessionMiddleware(),
 	}
 }
 
-func (*SessionExtension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
+func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
 	fnReg(addonName+".logout_handler", func(ctx echo.Context) error {
 
 		if _session := GetSession(ctx); _session != nil {
@@ -60,6 +65,6 @@ func (*SessionExtension) RegEchoHandlers(fnReg func(string, func(ctx echo.Contex
 	})
 }
 
-func (*SessionExtension) InjectTplAddons() error {
+func (*Extension) InjectTplAddons() error {
 	return nil
 }

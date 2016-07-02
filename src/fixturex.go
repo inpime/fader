@@ -1,6 +1,7 @@
 package main
 
 import (
+	"addons/importexport"
 	"addons/session"
 	"api"
 	"api/config"
@@ -14,7 +15,7 @@ import (
 )
 
 func initStroes() {
-	db, err := bolt.Open(api.Cfg.Store.BoltDBFilePath, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open(config.Cfg.Store.BoltDBFilePath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 
 	if err != nil {
 		panic(err)
@@ -56,7 +57,7 @@ func initStroes() {
 		if isNewInstallation {
 			logrus.Info("The first run. Installation of the console panel...")
 
-			if err := api.AppImportFromLastArchive(); err != nil {
+			if err := importexport.AppImportFromLastArchive(); err != nil {
 				panic(err)
 			}
 		} else {

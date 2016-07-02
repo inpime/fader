@@ -2,7 +2,6 @@ package main
 
 import (
 	"addons/session"
-	"api"
 	"api/config"
 	"fmt"
 	"github.com/Sirupsen/logrus"
@@ -30,7 +29,7 @@ func initElasticSearch() error {
 		}
 		log.Printf("Lookup for elasticsearch returns the following IPs:")
 		for _, ip := range ips {
-			api.Cfg.Search.Host = "http://" + ip.String() + ":9200"
+			config.Cfg.Search.Host = "http://" + ip.String() + ":9200"
 			log.Printf("%v", ip)
 			break
 		}
@@ -48,7 +47,7 @@ func initElasticSearch() error {
 
 	db, err := elastic.NewClient(
 		// elastic.SetSniff(false),
-		elastic.SetURL(api.Cfg.Search.Host),
+		elastic.SetURL(config.Cfg.Search.Host),
 		esLoggerOption,
 		elastic.SetHealthcheckTimeoutStartup(time.Second*60),
 		// elastic.SetTraceLog(logrus.New()),
@@ -97,7 +96,7 @@ func initElasticSearch() error {
 
 // TODO: removed after careful testing
 func _initStroes() {
-	db, err := bolt.Open(api.Cfg.Store.BoltDBFilePath, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open(config.Cfg.Store.BoltDBFilePath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 
 	if err != nil {
 		panic(err)

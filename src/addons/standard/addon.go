@@ -7,6 +7,7 @@ import (
 )
 
 var addonName = "fader.addons.standard"
+var version = "0.1.0"
 
 var (
 	ErrNotValidData = fmt.Errorf(addonName + ": not_valid_data")
@@ -14,29 +15,33 @@ var (
 
 func init() {
 	// manual init
-	config.AddExtension(&StandardExtension{})
+	config.AddExtension(&Extension{})
 }
 
-type StandardExtension struct {
+type Extension struct {
 }
 
-func (StandardExtension) Destroy() {
+func (Extension) Version() string {
+	return version
+}
+
+func (Extension) Destroy() {
 
 }
 
-func (StandardExtension) Name() string {
+func (Extension) Name() string {
 	return addonName
 }
 
-func (*StandardExtension) Middlewares() []echo.MiddlewareFunc {
+func (*Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{}
 }
 
-func (*StandardExtension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
+func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
 
 }
 
-func (s *StandardExtension) InjectTplAddons() error {
+func (s *Extension) InjectTplAddons() error {
 	s.initTplContext()
 	s.initTplFilters()
 	s.initTplTags()

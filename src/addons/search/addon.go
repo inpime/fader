@@ -10,32 +10,37 @@ import (
 
 var (
 	addonName = "fader.addons.search"
+	version   = "0.1.0"
 )
 
 func init() {
-	config.AddExtension(&SearchExtension{})
+	config.AddExtension(&Extension{})
 }
 
-type SearchExtension struct {
+type Extension struct {
 }
 
-func (SearchExtension) Name() string {
+func (Extension) Name() string {
 	return addonName
 }
 
-func (s SearchExtension) Destroy() {
+func (Extension) Version() string {
+	return version
+}
+
+func (s Extension) Destroy() {
 
 }
 
-func (s SearchExtension) Middlewares() []echo.MiddlewareFunc {
+func (s Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{}
 }
 
-func (*SearchExtension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
+func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
 
 }
 
-func (*SearchExtension) InjectTplAddons() error {
+func (*Extension) InjectTplAddons() error {
 	pongo2.DefaultSet.Globals["SearchFiles"] = func(
 		bucketName,
 		queryStr,
@@ -58,5 +63,6 @@ func (*SearchExtension) InjectTplAddons() error {
 
 		return pongo2.AsValue(makeSearch(filter))
 	}
+
 	return nil
 }

@@ -11,7 +11,7 @@ import (
 	"utils"
 )
 
-func (StandardExtension) initTplContext() {
+func (Extension) initTplContext() {
 	pongo2.DefaultSet.Globals["NewUUID"] = func() *pongo2.Value {
 		return pongo2.AsValue(dbox.NewUUID())
 	}

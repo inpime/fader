@@ -2,6 +2,7 @@ package main
 
 import (
 	"api"
+	"api/config"
 	"github.com/Sirupsen/logrus"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	logrus.Info("Init elasticsearch...")
 	initElasticSearch()
 
-	logrus.Debugf("Current config: %#v", api.Cfg)
+	logrus.Debugf("Current config: %#v", config.Cfg)
 
 	logrus.Info("Init stores...")
 	initStroes()

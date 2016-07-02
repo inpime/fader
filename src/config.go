@@ -1,7 +1,7 @@
 package main
 
 import (
-	"api"
+	"api/config"
 	"flag"
 	"github.com/Sirupsen/logrus"
 	"os"
@@ -47,28 +47,28 @@ func initConfig() {
 
 	// TODO: if empty values then stop
 
-	api.Cfg = &api.Config{
+	config.Cfg = &config.Config{
 		Address:       address,
 		WorkspacePath: workspace,
-		Search: api.SearchStore{
+		Search: config.SearchStore{
 			Host:      esAddress,
 			IndexName: esIndexName,
 		},
-		Session: api.ApiSessionConfig{
+		Session: config.ApiSessionConfig{
 			Path: "/",
 
 			SecretKey:   sessionSecureKey,
 			BucketName:  "sessions",
 			SessionName: "fds",
 
-			Store: api.StoreConfig{
+			Store: config.StoreConfig{
 				Provider:       "boltdb",
 				BoltDBFilePath: filepath.Clean(workspace + string(filepath.Separator) + "session.db"),
 			},
 		},
 
-		Store: api.AppStoreConfig{
-			StoreConfig: api.StoreConfig{
+		Store: config.AppStoreConfig{
+			StoreConfig: config.StoreConfig{
 				Provider:       "boltdb",
 				BoltDBFilePath: filepath.Clean(workspace + string(filepath.Separator) + "app.db"),
 			},
@@ -76,13 +76,13 @@ func initConfig() {
 		},
 	}
 
-	store.ElasticSearchIndexName = api.Cfg.Search.IndexName
-	store.WorkspacePath = api.Cfg.WorkspacePath
+	store.ElasticSearchIndexName = config.Cfg.Search.IndexName
+	store.WorkspacePath = config.Cfg.WorkspacePath
 
-	utils.EnsureDir(api.Cfg.WorkspacePath)
-	utils.EnsureDir(api.Cfg.Session.Store.BoltDBFilePath)
+	utils.EnsureDir(config.Cfg.WorkspacePath)
+	utils.EnsureDir(config.Cfg.Session.Store.BoltDBFilePath)
 
-	utils.EnsureDir(api.Cfg.Store.StaticPath)
+	utils.EnsureDir(config.Cfg.Store.StaticPath)
 
 	// Config logger
 

@@ -7,7 +7,7 @@ import (
 	apptpl "tpl"
 )
 
-func (StandardExtension) initTplTags() {
+func (Extension) initTplTags() {
 	pongo2.ReplaceTag("ssi", tagSSI)
 }
 

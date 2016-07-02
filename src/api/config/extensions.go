@@ -16,6 +16,7 @@ var extensions = make(Extensions)
 
 type FaderExtension interface {
 	Name() string
+	Version() string
 
 	// SetLogger(io.Writer)
 	Middlewares() []echo.MiddlewareFunc

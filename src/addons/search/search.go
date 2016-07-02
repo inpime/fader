@@ -1,6 +1,7 @@
 package search
 
 import (
+	"api/config"
 	"github.com/Sirupsen/logrus"
 	"store"
 	"strings"
@@ -18,7 +19,7 @@ func makeSearch(filter store.SearchQueryIface) store.SearchResultIface {
 	}
 
 	query := store.MustSearchService()
-	query.Index("fader")
+	query.Index(config.Cfg.Search.IndexName)
 	query.Type(bucket.Name())
 	query.SetQueryRaw(filter.QueryRaw())
 
@@ -125,4 +126,16 @@ func buildSearchQueryFilesByBycket(bucketName, qstr string, page, perpage int) m
 	}
 
 	return query
+}
+
+// --------------
+// Public
+// --------------
+
+func MakeSearch(filter store.SearchQueryIface) store.SearchResultIface {
+	return makeSearch(filter)
+}
+
+func BuildSearchQueryFilesByBucket(bucketName, qstr string, page, perpage int) map[string]interface{} {
+	return buildSearchQueryFilesByBycket(bucketName, qstr, page, perpage)
 }

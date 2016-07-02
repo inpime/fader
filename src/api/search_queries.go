@@ -1,69 +1,69 @@
 package api
 
-import (
-	"strings"
-	"utils"
-)
+// import (
+// 	"strings"
+// 	"utils"
+// )
 
-// buildSearchQueryFilesByBycket
-// поиск всех файлов в указанном бакете по текстовому запросу (по умолчанию по RawData)
-// Sorted by CreatedAt desc
-func buildSearchQueryFilesByBycket(bucketName, qstr string, page, perpage int) map[string]interface{} {
-	query := utils.Map()
+// // buildSearchQueryFilesByBycket
+// // поиск всех файлов в указанном бакете по текстовому запросу (по умолчанию по RawData)
+// // Sorted by CreatedAt desc
+// func buildSearchQueryFilesByBycket(bucketName, qstr string, page, perpage int) map[string]interface{} {
+// 	query := utils.Map()
 
-	// filter arguments
+// 	// filter arguments
 
-	qstr = strings.TrimSpace(qstr)
-	bucketName = strings.TrimSpace(bucketName)
+// 	qstr = strings.TrimSpace(qstr)
+// 	bucketName = strings.TrimSpace(bucketName)
 
-	from := perpage * page
-	if page <= 0 {
-		from = 0
-	}
+// 	from := perpage * page
+// 	if page <= 0 {
+// 		from = 0
+// 	}
 
-	size := perpage
+// 	size := perpage
 
-	// prepare arguments of query
+// 	// prepare arguments of query
 
-	queryFileter := utils.Map().
-		Set("term", utils.Map().Set("Bucket", bucketName))
+// 	queryFileter := utils.Map().
+// 		Set("term", utils.Map().Set("Bucket", bucketName))
 
-	querySort := utils.Map().
-		Set("Meta.CreatedAt", utils.Map().Set("order", "desc"))
+// 	querySort := utils.Map().
+// 		Set("Meta.CreatedAt", utils.Map().Set("order", "desc"))
 
-	_query := utils.Map().
-		Set("query_string", utils.Map().
-			Set("default_field", "TextData").
-			Set("query", qstr))
+// 	_query := utils.Map().
+// 		Set("query_string", utils.Map().
+// 			Set("default_field", "TextData").
+// 			Set("query", qstr))
 
-	// build query
+// 	// build query
 
-	// 1. sort
-	// 2. from
-	// 3. size
-	// 4. filter
-	// 5. fields
-	// 6. query
+// 	// 1. sort
+// 	// 2. from
+// 	// 3. size
+// 	// 4. filter
+// 	// 5. fields
+// 	// 6. query
 
-	// 1. sort
-	query.Set("sort", []interface{}{querySort})
+// 	// 1. sort
+// 	query.Set("sort", []interface{}{querySort})
 
-	// 2. from
-	query.Set("from", from)
+// 	// 2. from
+// 	query.Set("from", from)
 
-	// 3. size
-	query.Set("size", size)
+// 	// 3. size
+// 	query.Set("size", size)
 
-	// 4. filter
-	query.Set("filter", queryFileter)
+// 	// 4. filter
+// 	query.Set("filter", queryFileter)
 
-	// 5. filter
-	query.Set("fields", []string{})
+// 	// 5. filter
+// 	query.Set("fields", []string{})
 
-	// 6. filter
-	if len(qstr) > 0 {
-		query.Set("query", _query)
-	}
+// 	// 6. filter
+// 	if len(qstr) > 0 {
+// 		query.Set("query", _query)
+// 	}
 
-	return query
-}
+// 	return query
+// }

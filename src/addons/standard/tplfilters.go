@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (StandardExtension) initTplFilters() {
+func (Extension) initTplFilters() {
 
 	// pongo2.RegisterFilter("fc", filterFileContentByNameURL)
 	// pongo2.RegisterFilter("filecontenturl", filterFileContentByNameURL) // alias fc

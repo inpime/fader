@@ -218,10 +218,10 @@ func pongo2InitGlobalCustoms() {
 		return pongo2.AsValue(bucket)
 	}
 
-	// ListGroupsImportExport возвращает список групп указанных в настройках приложения
-	pongo2.DefaultSet.Globals["ListGroupsImportExport"] = func() *pongo2.Value {
-		return pongo2.AsValue(ListGroupsImportExport())
-	}
+	// // ListGroupsImportExport возвращает список групп указанных в настройках приложения
+	// pongo2.DefaultSet.Globals["ListGroupsImportExport"] = func() *pongo2.Value {
+	// 	return pongo2.AsValue(ListGroupsImportExport())
+	// }
 
 	pongo2.DefaultSet.Globals["PayViaBraintreegateway"] = func(orderId, amount, opt *pongo2.Value) *pongo2.Value {
 		orderOpt := OrderInfoFromM(

@@ -62,7 +62,8 @@ func AppEntryPointHandler(ctx echo.Context) error {
 
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
-				"_service": "app_handler",
+				"_service": "api",
+				"_target":  "specialhandler",
 				"handler":  match.Handler.String(),
 			}).WithError(err).Error("get tempalte file")
 
@@ -76,7 +77,8 @@ func AppEntryPointHandler(ctx echo.Context) error {
 		if err != nil {
 			// TODO: Custom error
 			logrus.WithFields(logrus.Fields{
-				"_service": "app_handler",
+				"_service": "api",
+				"_target":  "specialhandler",
 				"handler":  match.Handler.String(),
 			}).WithError(err).Error("execute template")
 			return err
@@ -104,7 +106,11 @@ type SpecialHandler echo.HandlerFunc
 var registredSpecialHandlers = map[string]SpecialHandler{}
 
 func AddSpecialHandler(name string, fn func(ctx echo.Context) error) {
-	logrus.WithField("_service", "special_handlers").Infof("add special handler %q", name)
+	logrus.WithFields(logrus.Fields{
+		"_service": "api",
+		"_target":  "initspecialhandler",
+		"handler":  name,
+	}).Info("add special handler")
 
 	registredSpecialHandlers[name] = fn
 }

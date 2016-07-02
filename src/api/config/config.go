@@ -2,10 +2,46 @@ package config
 
 var loggerKey = "config"
 
-func Init() {
-	InitApp()
+var Cfg *Config
+var AppVersion string = "dev"
 
-	InitTpl()
+type Config struct {
+	AppVersion string
 
-	InitRoute()
+	Address       string
+	WorkspacePath string
+
+	Session ApiSessionConfig
+	Store   AppStoreConfig
+	Search  SearchStore
+}
+
+type ApiSessionConfig struct {
+	Path     string
+	Domain   string
+	MaxAge   int
+	Secure   bool
+	HttpOnly bool
+
+	SecretKey   string
+	BucketName  string
+	SessionName string
+
+	Store StoreConfig
+}
+
+type StoreConfig struct {
+	Provider       string // boltdb
+	BoltDBFilePath string
+}
+
+type AppStoreConfig struct {
+	StoreConfig
+
+	StaticPath string
+}
+
+type SearchStore struct {
+	Host      string
+	IndexName string
 }

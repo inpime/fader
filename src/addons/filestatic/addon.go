@@ -8,6 +8,7 @@ import (
 
 var (
 	addonName = "fader.addons.filestatic"
+	version   = "0.1.0"
 	// secion name of file settings@main
 	FileContentSectionNameKey = "filecontent"
 	// bucket name
@@ -18,30 +19,34 @@ var (
 )
 
 func init() {
-	config.AddExtension(&FileStatisExtension{})
+	config.AddExtension(&Extension{})
 }
 
-type FileStatisExtension struct {
+type Extension struct {
 }
 
-func (FileStatisExtension) Name() string {
+func (Extension) Version() string {
+	return version
+}
+
+func (Extension) Name() string {
 	return addonName
 }
 
-func (s FileStatisExtension) Destroy() {
+func (s Extension) Destroy() {
 
 }
 
-func (s FileStatisExtension) Middlewares() []echo.MiddlewareFunc {
+func (s Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{}
 }
 
-func (*FileStatisExtension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
+func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
 	fnReg(addonName+".filtestatic_byname", FileContentByNameHandler)
 	fnReg(addonName+".filtestatic_byid", FileContentByNameHandler)
 }
 
-func (*FileStatisExtension) InjectTplAddons() error {
+func (*Extension) InjectTplAddons() error {
 	pongo2.RegisterFilter("fc", filterUrlFileByName)
 	pongo2.RegisterFilter("filecontenturl", filterUrlFileByName)
 	pongo2.RegisterFilter("urlfile", filterUrlFileByName) // OLD
