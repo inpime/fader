@@ -44,6 +44,14 @@ func AppEntryPointHandler(ctx echo.Context) error {
 			ctx.Set(key, value)
 		}
 
+		var _ctx = context.NewContext(ctx)
+
+		// Check access
+		if !_ctx.Session().HasOneLicense(match.Handler.Licenses) {
+
+			return ForbiddenHandler(ctx)
+		}
+
 		// If special handler transfer control him
 
 		if specialHandler, err := GetSpecialHandler(match.Handler.SpecialHandler); err == nil {
@@ -53,7 +61,6 @@ func AppEntryPointHandler(ctx echo.Context) error {
 		// Template page
 
 		var tpl *pongo2.Template
-		var _ctx = context.NewContext(ctx)
 
 		pongo2.DefaultSet.Debug = !config.IsPageCaching()
 
