@@ -55,7 +55,7 @@ func AppEntryPointHandler(ctx echo.Context) error {
 		var tpl *pongo2.Template
 		var _ctx = context.NewContext(ctx)
 
-		pongo2.DefaultSet.Debug = config.IsPageCaching()
+		pongo2.DefaultSet.Debug = !config.IsPageCaching()
 
 		// if Debug true then recompile tpl on any request
 		tpl, err := pongo2.FromCache(match.Handler.Bucket + "/" + match.Handler.File)
