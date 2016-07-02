@@ -11,11 +11,12 @@ var (
 	version   = "0.1.0"
 	// secion name of file settings@main
 	FileContentSectionNameKey = "filecontent"
+
+	ByNameRouteName = addonName + ".byname"
+	ByIDRouteName   = addonName + ".byid"
+
 	// bucket name
 	FileContentBucketNameKey = "bucket"
-
-	ByNameHandlerName = "FileContentByName"
-	ByIDHandlerName   = "FileContentByID"
 )
 
 func init() {
@@ -42,8 +43,8 @@ func (s Extension) Middlewares() []echo.MiddlewareFunc {
 }
 
 func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
-	fnReg(addonName+".filtestatic_byname", FileContentByNameHandler)
-	fnReg(addonName+".filtestatic_byid", FileContentByNameHandler)
+	fnReg(addonName+".byname", FileContentByNameHandler)
+	fnReg(addonName+".byid", FileContentByNameHandler)
 }
 
 func (*Extension) InjectTplAddons() error {

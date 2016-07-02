@@ -89,13 +89,17 @@ func (Extension) initTplContext() {
 		_url, ok := args[0].Interface().(*url.URL)
 
 		if !ok {
-			logrus.Warningf("not expected type %T, want '*url.URL'", args[0].Interface())
+			logrus.WithFields(logrus.Fields{
+				"_service": addonName,
+			}).Warningf("not expected type %T, want '*url.URL'", args[0].Interface())
 
 			return pongo2.AsValue(emptyUrl)
 		}
 
 		if (len(args)-1)%2 != 0 {
-			logrus.Warningf("args expected in multiples of two, want %d", len(args)-1)
+			logrus.WithFields(logrus.Fields{
+				"_service": addonName,
+			}).Warningf("args expected in multiples of two, want %d", len(args)-1)
 			return pongo2.AsValue(emptyUrl)
 		}
 
@@ -119,14 +123,17 @@ func (Extension) initTplContext() {
 			return pongo2.AsValue(emptyUrl)
 		}
 
-		route := config.Router.Get(args[0].String())
+		routeName := args[0].String()
+		route := config.Router.Get(routeName)
 
 		if route == nil {
 			return pongo2.AsValue(emptyUrl)
 		}
 
 		if (len(args)-1)%2 != 0 {
-			logrus.Warningf("args expected in multiples of two, want %d", len(args)-1)
+			logrus.WithFields(logrus.Fields{
+				"_service": addonName,
+			}).Warningf("args expected in multiples of two, want %d", len(args)-1)
 			return pongo2.AsValue(emptyUrl)
 		}
 
@@ -139,7 +146,10 @@ func (Extension) initTplContext() {
 		_url, err := route.URLPath(stringArgs...)
 
 		if err != nil {
-			logrus.WithError(err).Warning("build url")
+			logrus.WithError(err).WithFields(logrus.Fields{
+				"_service": addonName,
+				"args":     stringArgs,
+			}).Warning("build url")
 
 			return pongo2.AsValue(emptyUrl)
 		}
