@@ -78,6 +78,7 @@ Name `fader.addons.standard`
 |`M`|   |   |
 |`A`|   |   |
 |`AIface`|   |   |
+|`CreateBucket`|   |   |
 
 
 ### Template filters

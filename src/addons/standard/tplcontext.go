@@ -170,4 +170,47 @@ func (Extension) initTplContext() {
 	pongo2.DefaultSet.Globals["AIface"] = func() *pongo2.Value {
 		return pongo2.AsValue([]interface{}{})
 	}
+
+	// CreateBucket special function (used only to create a bucket)
+	pongo2.DefaultSet.Globals["CreateBucket"] = func(_opt *pongo2.Value) *pongo2.Value {
+		opt := utils.Map().LoadFrom(_opt.Interface())
+
+		bucketName := opt.String("Name")
+		bucket, err := store.BucketByName(bucketName)
+
+		if opt.Bool("SameAsMetaStoreType") {
+			bucket.InitInOneStore(dbox.StoreType(opt.String("MetaDataStoreType")))
+		} else {
+
+			bucket.InitMetaDataStore(
+				dbox.StoreType(opt.String("MetaDataStoreType")),
+				opt.Bool("MetaHaveSuffix")) // store key - <type>.<name>.meta
+			bucket.InitMapDataStore(
+				dbox.StoreType(opt.String("MapDataStoreType")),
+				opt.Bool("MapDataHaveSuffix")) // store key - <type>.<name>.mapdata
+			bucket.InitRawDataStore(
+				dbox.StoreType(opt.String("RawDataStoreType")),
+				opt.Bool("RawDataHaveSuffix")) // store key - <type>.<name>.rawdata
+		}
+
+		// Only create new bucket
+		if err != dbox.ErrNotFound {
+			return pongo2.AsValue(err)
+		}
+
+		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMapDataFilesMapping().LoadFrom(opt.String("MappingMapDataFiles"))
+
+		if err := bucket.UpdateMapping(); err != nil {
+			logrus.WithError(err).Errorf("create new bucket %q: update mapping", bucketName)
+			return pongo2.AsValue(err)
+		}
+
+		if err := bucket.Sync(); err != nil {
+			logrus.WithError(err).Errorf("create new bucket %q: save bucket", bucketName)
+			return pongo2.AsValue(err)
+		}
+
+		return pongo2.AsValue(bucket)
+	}
 }

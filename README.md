@@ -16,6 +16,14 @@ Download
 
 ## Quick start
 
+```
+mkdir -p state/app
+curl https://raw.githubusercontent.com/inpime/fader/master/state/app/Production.Dockerfile > state/app/Dockerfile
+curl https://raw.githubusercontent.com/inpime/fader/master/state/app/entrypoint.sh > state/app/entrypoint.sh
+curl https://raw.githubusercontent.com/inpime/fader/master/docker-compose.yml > docker-compose.yml
+docker-compose up -d
+```
+
 ## Support
 
 # Contributing

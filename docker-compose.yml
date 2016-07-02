@@ -9,7 +9,7 @@ services:
             - ./state/logs/app:/app/logs
         # tty: true
         ports:
-            - 8080:3322
+            - 8081:3322
         environment:
             FADER_WORKSPACE: "/app/_workspace/"
             FADER_API_ADDR:: ":3322"
