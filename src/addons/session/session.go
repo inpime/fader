@@ -86,6 +86,7 @@ func (s *Session) User() *User {
 		file := store.MustFile(_file)
 
 		logrus.WithFields(logrus.Fields{
+			"_service":             addonName,
 			"from_session:user_id": userId,
 			"_loaded:user_id":      file.ID(),
 			"_loaded:name":         file.Name(),
@@ -137,8 +138,13 @@ func (s *Session) AddFlash(value interface{}, vars ...string) *Session {
 }
 
 func (s Session) Flashes(vars ...string) []interface{} {
-
-	return s.Session.Flashes(vars...)
+	messages := s.Session.Flashes(vars...)
+	if err := s.Save(); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"_service": addonName,
+		}).WithError(err).Error("save session after get the flash messages")
+	}
+	return messages
 }
 
 func (s *Session) Save() error {
