@@ -94,6 +94,8 @@ func InitializerUserSessionMiddleware() echo.MiddlewareFunc {
 
 			uri := ctx.Request().URI()
 
+			logrus.WithField("uri", uri).Infof("session init")
+
 			if ctx.Get(session.DefaultKey) == nil {
 				// TODO: clear session or panic?
 
@@ -131,6 +133,11 @@ func InitializerUserSessionMiddleware() echo.MiddlewareFunc {
 			ctx.Set(SessionNameContextKey, _session)
 
 			if _session.IsNew() {
+				logrus.WithFields(logrus.Fields{
+					"_service": addonName,
+					"url":      uri,
+				}).Debug("save new session")
+
 				if err := _session.Save(); err != nil {
 					logrus.WithFields(logrus.Fields{
 						"_service": addonName,

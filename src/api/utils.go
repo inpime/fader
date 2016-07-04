@@ -1,48 +1,11 @@
 package api
 
 import (
-	// "api/config"
 	"addons/search"
 	"github.com/Sirupsen/logrus"
 	"github.com/inpime/dbox"
 	"store"
 )
-
-// func getAllBuckets() []*store.File {
-// 	// all buckets
-// 	filter := store.NewSearchFilter(config.BucketsBucketName)
-// 	filter.SetQueryString("")
-// 	filter.SetPage(0)
-// 	filter.SetPerPage(100)
-
-// 	queryRaw := buildSearchQueryFilesByBycket(
-// 		filter.Bucket(),
-// 		filter.QueryString(),
-// 		filter.Page(),
-// 		filter.PerPage(),
-// 	)
-// 	filter.SetQueryRaw(queryRaw)
-
-// 	return makeSearch(filter).GetFiles()
-// }
-
-// func getAllFiles(bucket string) []*store.File {
-// 	// all buckets
-// 	filter := store.NewSearchFilter(bucket)
-// 	filter.SetQueryString("")
-// 	filter.SetPage(0)
-// 	filter.SetPerPage(1000)
-
-// 	queryRaw := buildSearchQueryFilesByBycket(
-// 		filter.Bucket(),
-// 		filter.QueryString(),
-// 		filter.Page(),
-// 		filter.PerPage(),
-// 	)
-// 	filter.SetQueryRaw(queryRaw)
-
-// 	return makeSearch(filter).GetFiles()
-// }
 
 func AppStoresInitFromExistBuckets() error {
 	for _, bucket := range search.GetAllBuckets() {

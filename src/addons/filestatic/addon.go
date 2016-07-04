@@ -1,7 +1,7 @@
 package filestatic
 
 import (
-	"api/config"
+	"api/addons"
 	"github.com/flosch/pongo2"
 	"github.com/labstack/echo"
 )
@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	config.AddExtension(&Extension{})
+	addons.AddAddon(&Extension{})
 }
 
 type Extension struct {

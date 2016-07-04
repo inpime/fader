@@ -3,105 +3,101 @@ package api
 import (
 	"api/config"
 	"api/context"
-	"api/vrouter"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
 	"github.com/labstack/echo"
 	"net/http"
-	"net/url"
 )
 
-var (
-	NotFoundHandler = func(c echo.Context) error {
-
-		return c.String(http.StatusNotFound, "Not Found")
-	}
-
-	ForbiddenHandler = func(c echo.Context) error {
-
-		return c.String(http.StatusForbidden, "Forbidden")
-	}
-
-	MaintenanceHandler = func(c echo.Context) error {
-		c.Response().Header().Set("Retry-After", "3600") // retry after 1 hourse
-		return c.String(http.StatusServiceUnavailable, "Service Unavailable")
-	}
-
-	InternalErrorHandler = func(c echo.Context) error {
-		return c.String(http.StatusInternalServerError, "Internal Server Error")
-	}
-)
-
+// AppEntryPointHandler the entry point for the application
+// 	* Check access licenses
+//	* Special handler if exist
+// 	* Execute template
+// 	* Flush session data
+// 	* Custom repsone type
 func AppEntryPointHandler(ctx echo.Context) error {
-	var match vrouter.RouteMatch
 
-	_url, _ := url.Parse(ctx.Request().URI())
+	var _ctx = context.NewContext(ctx)
+	var match = _ctx.CurrentRoute()
 
-	if config.Router.Match(&vrouter.Request{_url, ctx.Request().Method()}, &match) {
+	// ------------------------
+	// Check access licenses
+	// ------------------------
 
-		for key, value := range match.Vars {
-			ctx.Set(key, value)
-		}
+	if !_ctx.Session().HasOneLicense(match.Handler.Licenses) {
 
-		var _ctx = context.NewContext(ctx)
-
-		// Check access
-		if !_ctx.Session().HasOneLicense(match.Handler.Licenses) {
-
-			return ForbiddenHandler(ctx)
-		}
-
-		// If special handler transfer control him
-
-		if specialHandler, err := GetSpecialHandler(match.Handler.SpecialHandler); err == nil {
-			return specialHandler(ctx)
-		}
-
-		// Template page
-
-		var tpl *pongo2.Template
-
-		pongo2.DefaultSet.Debug = !config.IsPageCaching()
-
-		// if Debug true then recompile tpl on any request
-		tpl, err := pongo2.FromCache(match.Handler.Bucket + "/" + match.Handler.File)
-
-		if err != nil {
-			logrus.WithFields(logrus.Fields{
-				"_service": "api",
-				"_target":  "specialhandler",
-				"handler":  match.Handler.String(),
-			}).WithError(err).Error("get tempalte file")
-
-			return InternalErrorHandler(ctx)
-		}
-
-		res, err := tpl.Execute(pongo2.Context{
-			"ctx": _ctx,
-		})
-
-		if err != nil {
-			// TODO: Custom error
-			logrus.WithFields(logrus.Fields{
-				"_service": "api",
-				"_target":  "specialhandler",
-				"handler":  match.Handler.String(),
-			}).WithError(err).Error("execute template")
-			return err
-		}
-
-		// Custom response if exist
-		// TODO:
-
-		// TODO: Custom header
-
-		return ctx.HTML(http.StatusOK, res)
+		return config.ForbiddenHandler(ctx)
 	}
 
-	// TODO: HandlerNotFound
+	// ------------------------
+	// Special handler if exist
+	// ------------------------
 
-	return NotFoundHandler(ctx)
+	if specialHandler, err := GetSpecialHandler(match.Handler.SpecialHandler); err == nil {
+		return specialHandler(ctx)
+	}
+
+	// ------------------------
+	// Execute template page
+	// ------------------------
+
+	var tpl *pongo2.Template
+
+	pongo2.DefaultSet.Debug = !config.IsPageCaching()
+
+	// if Debug true then recompile tpl on any request
+	tpl, err := pongo2.FromCache(match.Handler.Bucket + "/" + match.Handler.File)
+
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"_service": "api",
+			"handler":  match.Handler.String(),
+		}).WithError(err).Error("get tempalte file")
+
+		return config.InternalErrorHandler(ctx)
+	}
+
+	res, err := tpl.Execute(pongo2.Context{
+		"ctx": _ctx,
+	})
+
+	if err != nil {
+		// TODO: Custom error
+		logrus.WithFields(logrus.Fields{
+			"_service": "api",
+			"handler":  match.Handler.String(),
+		}).WithError(err).Error("execute template")
+		return err
+	}
+
+	// ------------------------
+	// Flush session data
+	// ------------------------
+
+	if err := _ctx.Session().Save(); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"_service": "api",
+		}).WithError(err).Error("save session after get the flash messages")
+	}
+
+	// redirect if specified
+
+	if _ctx.IsRedirect() {
+
+		return _ctx.Redirect(http.StatusFound, _ctx.RedirectTo())
+	}
+
+	// ------------------------
+	// Custom repsone type
+	// 	* JSON
+	// 	* Text
+	// 	* Byte
+	// ------------------------
+
+	// TODO: Custom header
+
+	return ctx.HTML(http.StatusOK, res)
 }
 
 // -----------------------------------
@@ -126,7 +122,7 @@ func GetSpecialHandler(name string) (SpecialHandler, error) {
 	fn, exists := registredSpecialHandlers[name]
 
 	if !exists {
-		return NotFoundHandler, fmt.Errorf("not_found")
+		return config.NotFoundHandler, fmt.Errorf("not_found")
 	}
 
 	return fn, nil

@@ -4,6 +4,4 @@ func Init() {
 	InitApp()
 
 	InitTpl()
-
-	InitRoute()
 }

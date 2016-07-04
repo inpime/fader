@@ -17,7 +17,7 @@ services:
             FADER_ES_ADDR_DOCKER: "elasticsearch"
             FADER_ES_INDEX:: "fader_v1"
             FADER_SESSION_SECRET: "secure-key"
-            FADER_MODE: info
+            FADER_MODE: error
         links:
             - elasticsearch
     elasticsearch:

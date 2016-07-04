@@ -2,10 +2,12 @@ package session
 
 import (
 	"api/config"
+	"encoding/gob"
 	"github.com/Sirupsen/logrus"
 	"github.com/gebv/echo-session"
 	"github.com/inpime/dbox"
 	"store"
+	"utils"
 )
 
 var (
@@ -17,6 +19,11 @@ var (
 	// DefaultGuestSession
 	DefaultGuestSession *store.File
 )
+
+func init() {
+	gob.Register(map[string]interface{}{})
+	gob.Register(utils.Map())
+}
 
 func NewSession(s session.Session) *Session {
 
@@ -139,12 +146,19 @@ func (s *Session) AddFlash(value interface{}, vars ...string) *Session {
 
 func (s Session) Flashes(vars ...string) []interface{} {
 	messages := s.Session.Flashes(vars...)
-	if err := s.Save(); err != nil {
-		logrus.WithFields(logrus.Fields{
-			"_service": addonName,
-		}).WithError(err).Error("save session after get the flash messages")
-	}
+
 	return messages
+}
+
+// FirstFlash return the first of messages. All messages are cleared
+func (s Session) FirstFlash(vars ...string) interface{} {
+	messages := s.Flashes(vars...)
+
+	if len(messages) > 0 {
+		return messages[0]
+	}
+
+	return nil
 }
 
 func (s *Session) Save() error {

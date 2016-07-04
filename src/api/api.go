@@ -6,6 +6,8 @@ import (
 	_ "addons/search"
 	"addons/session"
 	_ "addons/standard"
+	"api/addons"
+	"api/vrouter"
 
 	"api/config"
 	"fmt"
@@ -26,14 +28,35 @@ func Run() error {
 
 	var e = echo.New()
 
+	if logrus.GetLevel() >= logrus.InfoLevel {
+		e.Use(middleware.Recover())
+
+		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: `{"_service": "api", "time":"${time_rfc3339}","remote_ip":"${remote_ip}",` +
+				`"method":"${method}","uri":"${uri}","status":${status}, "latency":${latency},` +
+				`"latency_human":"${latency_human}","rx_bytes":${rx_bytes},` +
+				`"tx_bytes":${tx_bytes}}` + "\n",
+			Output: logrus.StandardLogger().Out,
+		}))
+	}
+
 	// ------------------------
 	// Special addons
-	// 	* 1. session
-	// 	* 2. logger
+	//  * 1. vrouter
+	// 	* 2. session
 	// ------------------------
 
 	// ------------------------
-	// 1. session
+	// 1. vrouter
+	// ------------------------
+
+	vrouterAddon := &vrouter.Extension{}
+	e.Use(vrouterAddon.Middlewares()...)
+	vrouterAddon.RegEchoHandlers(AddSpecialHandler)
+	vrouterAddon.InjectTplAddons()
+
+	// ------------------------
+	// 2. session
 	// ------------------------
 
 	if config.Cfg.Session.Store.Provider != "boltdb" {
@@ -80,27 +103,10 @@ func Run() error {
 	sessionAddon.InjectTplAddons()
 
 	// ------------------------
-	// 2. logger
-	// ------------------------
-
-	if logrus.GetLevel() >= logrus.InfoLevel {
-		// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		// 	Format: `{"_service": "api", "time":"${time_rfc3339}","remote_ip":"${remote_ip}",` +
-		// 		`"method":"${method}","uri":"${uri}","status":${status}, "latency":${latency},` +
-		// 		`"latency_human":"${latency_human}","rx_bytes":${rx_bytes},` +
-		// 		`"tx_bytes":${tx_bytes}}` + "\n",
-		// 	Output: logrus.StandardLogger().Out,
-		// }))
-		e.Use(middleware.Logger())
-
-		e.Use(middleware.Recover())
-	}
-
-	// ------------------------
 	// Registered addons (enterprise addons)
 	// ------------------------
 
-	for _, ext := range config.ListOfExtensions() {
+	for _, ext := range addons.ListOfAddons() {
 		logrus.WithFields(logrus.Fields{
 			"_service":      "api",
 			"_target":       "initaddon",
@@ -108,7 +114,7 @@ func Run() error {
 			"addon_version": ext.Version(),
 		}).Infof("add extension")
 		// ext.SetLogger(logrus.StandardLogger().Out)
-		e.Use(ext.Middlewares()...)
+		e.Use(append(ext.Middlewares(), debugMiddleware(ext.Name()))...)
 		ext.RegEchoHandlers(AddSpecialHandler)
 		ext.InjectTplAddons()
 	}
@@ -132,4 +138,16 @@ func Run() error {
 	e.Run(standard.New(config.Cfg.Address))
 
 	return nil
+}
+
+func debugMiddleware(servicename string) echo.MiddlewareFunc {
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			uri := ctx.Request().URI()
+
+			logrus.WithField("uri", uri).WithField("_service", servicename).Debug("debug")
+
+			return h(ctx)
+		}
+	}
 }

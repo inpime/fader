@@ -1,6 +1,7 @@
 package config
 
 import (
+	apiutils "api/utils"
 	"github.com/BurntSushi/toml"
 	"github.com/Sirupsen/logrus"
 	"store"
@@ -16,7 +17,6 @@ var (
 	// Section names of file settings@main
 
 	PageCachingKey = "pageCaching"
-	RoutsKey       = "routs"
 	IncludeKey     = "include"
 )
 
@@ -28,11 +28,6 @@ func AppSettings() utils.M {
 // IsPageCaching
 func IsPageCaching() bool {
 	return AppSettings().Bool(PageCachingKey)
-}
-
-// AppRouts
-func AppRouts() []string {
-	return AppSettings().Strings(RoutsKey)
 }
 
 func AppSettingsIncludeFiles() []string {
@@ -50,9 +45,9 @@ func ReloadAppSettings() {
 		return
 	}
 
-	routerMutex.Lock()
+	appSettingsMutex.Lock()
 	appSettings = utils.Map() // clear the previous values
-	defer routerMutex.Unlock()
+	defer appSettingsMutex.Unlock()
 
 	if _, err := toml.Decode(string(file.RawData().Bytes()), &appSettings); err != nil {
 		logrus.Errorf("main settings: decode toml error, %v, %q", err, string(file.RawData().Bytes()))
@@ -79,5 +74,5 @@ func InitApp() {
 	ReloadAppSettings()
 
 	// TODO: synchronization with the previous launch
-	go refreshEvery(3*time.Second, ReloadAppSettings)
+	go apiutils.RefreshEvery(3*time.Second, ReloadAppSettings)
 }

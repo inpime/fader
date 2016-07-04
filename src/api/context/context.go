@@ -1,6 +1,7 @@
 package context
 
 import (
+	"api/vrouter"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -21,6 +22,8 @@ func NewContext(ctx echo.Context) *Context {
 
 type Context struct {
 	echo.Context
+
+	Route *vrouter.RouteMatch
 
 	// Props utils.M
 }

@@ -41,6 +41,9 @@ type Handler struct {
 	Licenses []string
 	Methods  []string
 	Path     string
+
+	CSRF            bool
+	CSRFTokenLookup string
 }
 
 // String `PATH `

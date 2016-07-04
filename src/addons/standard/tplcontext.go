@@ -115,47 +115,47 @@ func (Extension) initTplContext() {
 		return pongo2.AsValue(_url)
 	}
 
-	// builds the path part of the URL
-	pongo2.DefaultSet.Globals["URL"] = func(args ...*pongo2.Value) *pongo2.Value {
-		emptyUrl, _ := url.Parse("")
+	// // builds the path part of the URL
+	// pongo2.DefaultSet.Globals["URL"] = func(args ...*pongo2.Value) *pongo2.Value {
+	// 	emptyUrl, _ := url.Parse("")
 
-		if len(args) == 0 {
-			return pongo2.AsValue(emptyUrl)
-		}
+	// 	if len(args) == 0 {
+	// 		return pongo2.AsValue(emptyUrl)
+	// 	}
 
-		routeName := args[0].String()
-		route := config.Router.Get(routeName)
+	// 	routeName := args[0].String()
+	// 	route := config.Router.Get(routeName)
 
-		if route == nil {
-			return pongo2.AsValue(emptyUrl)
-		}
+	// 	if route == nil {
+	// 		return pongo2.AsValue(emptyUrl)
+	// 	}
 
-		if (len(args)-1)%2 != 0 {
-			logrus.WithFields(logrus.Fields{
-				"_service": addonName,
-			}).Warningf("args expected in multiples of two, want %d", len(args)-1)
-			return pongo2.AsValue(emptyUrl)
-		}
+	// 	if (len(args)-1)%2 != 0 {
+	// 		logrus.WithFields(logrus.Fields{
+	// 			"_service": addonName,
+	// 		}).Warningf("args expected in multiples of two, want %d", len(args)-1)
+	// 		return pongo2.AsValue(emptyUrl)
+	// 	}
 
-		stringArgs := []string{}
+	// 	stringArgs := []string{}
 
-		for _, arg := range args[1:] {
-			stringArgs = append(stringArgs, arg.String())
-		}
+	// 	for _, arg := range args[1:] {
+	// 		stringArgs = append(stringArgs, arg.String())
+	// 	}
 
-		_url, err := route.URLPath(stringArgs...)
+	// 	_url, err := route.URLPath(stringArgs...)
 
-		if err != nil {
-			logrus.WithError(err).WithFields(logrus.Fields{
-				"_service": addonName,
-				"args":     stringArgs,
-			}).Warning("build url")
+	// 	if err != nil {
+	// 		logrus.WithError(err).WithFields(logrus.Fields{
+	// 			"_service": addonName,
+	// 			"args":     stringArgs,
+	// 		}).Warning("build url")
 
-			return pongo2.AsValue(emptyUrl)
-		}
+	// 		return pongo2.AsValue(emptyUrl)
+	// 	}
 
-		return pongo2.AsValue(_url)
-	}
+	// 	return pongo2.AsValue(_url)
+	// }
 
 	// Load load file by name
 	pongo2.DefaultSet.Globals["M"] = func() *pongo2.Value {
@@ -169,6 +169,11 @@ func (Extension) initTplContext() {
 
 	pongo2.DefaultSet.Globals["AIface"] = func() *pongo2.Value {
 		return pongo2.AsValue([]interface{}{})
+	}
+
+	pongo2.DefaultSet.Globals["Validator"] = func() *pongo2.Value {
+
+		return pongo2.AsValue(NewValidatorData())
 	}
 
 	// CreateBucket special function (used only to create a bucket)

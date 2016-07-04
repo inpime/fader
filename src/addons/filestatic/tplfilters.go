@@ -1,7 +1,7 @@
 package filestatic
 
 import (
-	"api/config"
+	"api/vrouter"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
@@ -10,7 +10,7 @@ import (
 // filterFileContentByNameURL
 func filterUrlFileByName(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	// TODO: get the URL based on the name route (after the routs will have the names)
-	route := config.Router.Get(ByNameRouteName)
+	route := vrouter.AppRouter.Get(ByNameRouteName)
 
 	if route == nil {
 		logrus.WithError(fmt.Errorf("not found route")).WithFields(logrus.Fields{

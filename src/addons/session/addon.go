@@ -1,8 +1,7 @@
 package session
 
 import (
-	// "github.com/flosch/pongo2"
-	// "api/config"
+	// "api/addons"
 	"github.com/labstack/echo"
 	"github.com/yosssi/boltstore/reaper"
 	"net/http"
@@ -13,8 +12,8 @@ var addonName = "fader.addons.session"
 var version = "0.1.0"
 
 func init() {
-	// manual init
-	// config.AddExtension(&Extension{})
+	// manual init with app config
+	// addons.AddExtension(&Extension{})
 }
 
 type Extension struct {

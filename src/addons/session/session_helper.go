@@ -42,6 +42,8 @@ type gorillaSessionIface interface {
 }
 
 func (s Session) Props() utils.M {
+	// TODO: change Values type as map[string]interface{}
+
 	return utils.Map(s.Session.(gorillaSessionIface).Session().Values)
 }
 
