@@ -5,6 +5,7 @@ import "net/url"
 import log "github.com/Sirupsen/logrus"
 import "fmt"
 import "errors"
+import "sync"
 
 type matcher interface {
 	Match(*Request, *RouteMatch) bool
@@ -389,7 +390,8 @@ type Router struct {
 
 	parent parentRoute
 
-	routes []*Route
+	routes      []*Route
+	routesMutex sync.RWMutex
 
 	// If true, when the path pattern is "/path/", accessing "/path" will
 	// redirect to the former and vice versa.

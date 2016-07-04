@@ -10,8 +10,16 @@ import (
 	"sync"
 )
 
-var AppRouter *Router
-var routerMutex sync.Mutex
+var appRouter *Router
+var appRouterMutex sync.Mutex
+
+func AppRouter() *Router {
+	if appRouter == nil {
+		appRouter = NewRouter()
+	}
+
+	return appRouter
+}
 
 func RouterMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -20,7 +28,9 @@ func RouterMiddleware() echo.MiddlewareFunc {
 
 			_url, _ := url.Parse(ctx.Request().URI())
 
-			if AppRouter.Match(&Request{_url, ctx.Request().Method()}, &match) {
+			logrus.WithField("_service", addonName).Debugf("count routs %d", len(AppRouter().routes))
+
+			if AppRouter().Match(&Request{_url, ctx.Request().Method()}, &match) {
 				for key, value := range match.Vars {
 					ctx.Set(key, value)
 				}
@@ -97,6 +107,8 @@ func RouterMiddleware() echo.MiddlewareFunc {
 				return next(ctx)
 			}
 
+			logrus.WithField("_service", addonName).Debugf("NOTFOUND count routs %d", len(AppRouter().routes))
+
 			return config.NotFoundHandler(ctx)
 		}
 	}
@@ -142,17 +154,20 @@ type Routing struct {
 }
 
 func ReloadAppRouts() {
-	routerMutex.Lock()
-	defer routerMutex.Unlock()
+	newAppRouter := NewRouter()
 
-	AppRouter = NewRouter()
+	if len(AppRouts()) == 0 {
+		logrus.WithField("_serivce", addonName).Debugf("app config empty routs %d", len(AppRouts()))
+	}
 
 	for _, fileName := range AppRouts() {
-		routeUpdate(fileName)
+		routeUpdate(newAppRouter, fileName)
 	}
+
+	appRouter = newAppRouter
 }
 
-func routeUpdate(fileName string) {
+func routeUpdate(router *Router, fileName string) {
 
 	file, err := store.LoadOrNewFile(config.SettingsBucketName, fileName)
 
@@ -173,9 +188,9 @@ func routeUpdate(fileName string) {
 		handler := NewHandlerFromRoute(_r)
 
 		if len(_r.Methods) == 0 {
-			AppRouter.Handle(_r.Path, handler).Methods("GET").Name(_r.Name)
+			router.Handle(_r.Path, handler).Methods("GET").Name(_r.Name)
 		} else {
-			AppRouter.Handle(_r.Path, handler).Methods(_r.Methods...).Name(_r.Name)
+			router.Handle(_r.Path, handler).Methods(_r.Methods...).Name(_r.Name)
 		}
 	}
 }

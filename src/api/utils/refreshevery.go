@@ -5,7 +5,12 @@ import (
 )
 
 func RefreshEvery(d time.Duration, f func()) {
-	for _ = range time.Tick(d) {
-		f()
+
+	for {
+		select {
+		case <-time.After(d):
+			f()
+		}
 	}
+
 }

@@ -5,13 +5,11 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/Sirupsen/logrus"
 	"store"
-	"sync"
 	"time"
 	"utils"
 )
 
 var appSettings utils.M
-var appSettingsMutex sync.Mutex
 
 var (
 	// Section names of file settings@main
@@ -22,7 +20,12 @@ var (
 
 // AppSettings
 func AppSettings() utils.M {
-	return utils.M(appSettings)
+	if appSettings == nil {
+		// TODO: default setting (safe mode)
+		appSettings = utils.Map()
+	}
+
+	return appSettings
 }
 
 // IsPageCaching
@@ -45,11 +48,9 @@ func ReloadAppSettings() {
 		return
 	}
 
-	appSettingsMutex.Lock()
-	appSettings = utils.Map() // clear the previous values
-	defer appSettingsMutex.Unlock()
+	newAppSettings := utils.Map() // TODO: default setting (safe mode)
 
-	if _, err := toml.Decode(string(file.RawData().Bytes()), &appSettings); err != nil {
+	if _, err := toml.Decode(string(file.RawData().Bytes()), &newAppSettings); err != nil {
 		logrus.Errorf("main settings: decode toml error, %v, %q", err, string(file.RawData().Bytes()))
 		return
 	}
@@ -62,11 +63,13 @@ func ReloadAppSettings() {
 			continue
 		}
 
-		if _, err := toml.Decode(string(includeFile.RawData().Bytes()), &appSettings); err != nil {
+		if _, err := toml.Decode(string(includeFile.RawData().Bytes()), &newAppSettings); err != nil {
 			logrus.WithField("_service", loggerKey).Errorf("decode toml file=%q error, %v, %q", includeFileName, err, string(includeFile.RawData().Bytes()))
 			return
 		}
 	}
+
+	appSettings = newAppSettings
 }
 
 // InitApp

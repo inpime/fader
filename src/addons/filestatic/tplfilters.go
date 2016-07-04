@@ -10,7 +10,7 @@ import (
 // filterFileContentByNameURL
 func filterUrlFileByName(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	// TODO: get the URL based on the name route (after the routs will have the names)
-	route := vrouter.AppRouter.Get(ByNameRouteName)
+	route := vrouter.AppRouter().Get(ByNameRouteName)
 
 	if route == nil {
 		logrus.WithError(fmt.Errorf("not found route")).WithFields(logrus.Fields{

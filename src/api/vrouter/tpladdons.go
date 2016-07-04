@@ -17,7 +17,7 @@ func tplContext() {
 		}
 
 		routeName := args[0].String()
-		route := AppRouter.Get(routeName)
+		route := AppRouter().Get(routeName)
 
 		if route == nil {
 			return pongo2.AsValue(emptyUrl)
