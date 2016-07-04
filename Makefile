@@ -48,6 +48,8 @@ prebuild:
 
 	go get github.com/lionelbarrow/braintree-go
 
+	go get gopkg.in/go-playground/validator.v8
+
 	mkdir -p releases
 
 .PHONY: prebuild
