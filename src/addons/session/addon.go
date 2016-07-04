@@ -46,6 +46,9 @@ func (s *Extension) SetAppConfig(config Config) {
 	})
 }
 
+func (Extension) Setup() {
+}
+
 func (s *Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{
 		SessionStoreMiddleware(s.config.SessionName, s.config),

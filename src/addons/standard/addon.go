@@ -40,6 +40,9 @@ func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) erro
 
 }
 
+func (Extension) Setup() {
+}
+
 func (s *Extension) InjectTplAddons() error {
 	s.initTplContext()
 	s.initTplFilters()

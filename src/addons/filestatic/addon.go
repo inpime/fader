@@ -38,6 +38,9 @@ func (s Extension) Destroy() {
 
 }
 
+func (Extension) Setup() {
+}
+
 func (s Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{}
 }

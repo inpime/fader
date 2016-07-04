@@ -4,6 +4,7 @@ import (
 	// "api/addons"
 	"api/utils"
 	"github.com/labstack/echo"
+	"sync"
 	"time"
 )
 
@@ -16,6 +17,7 @@ func init() {
 }
 
 type Extension struct {
+	setupOnce sync.Once
 }
 
 func (Extension) Version() string {
@@ -30,11 +32,16 @@ func (Extension) Name() string {
 	return addonName
 }
 
-func (*Extension) Middlewares() []echo.MiddlewareFunc {
-	ReloadAppRouts()
+func (e Extension) Setup() {
+	e.setupOnce.Do(func() {
+		ReloadAppRouts()
 
-	// TODO: synchronization with the previous launch
-	go utils.RefreshEvery(3*time.Second, ReloadAppRouts)
+		// TODO: synchronization with the previous launch
+		go utils.RefreshEvery(3*time.Second, ReloadAppRouts)
+	})
+}
+
+func (*Extension) Middlewares() []echo.MiddlewareFunc {
 
 	return []echo.MiddlewareFunc{RouterMiddleware()}
 }

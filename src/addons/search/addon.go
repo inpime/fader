@@ -36,6 +36,9 @@ func (s Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{}
 }
 
+func (Extension) Setup() {
+}
+
 func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
 
 }

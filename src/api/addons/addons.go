@@ -16,6 +16,7 @@ type Addon interface {
 
 	InjectTplAddons() error
 
+	Setup()
 	Destroy()
 }
 
