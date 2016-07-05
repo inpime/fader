@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	addonName = "fader.addons.filestatic"
+	addonName = "filestatic"
 	version   = "0.1.0"
 	// secion name of file settings@main
 	FileContentSectionNameKey = "filecontent"
@@ -39,6 +39,10 @@ func (s Extension) Destroy() {
 }
 
 func (Extension) Setup() {
+}
+
+func (s Extension) TemplateSettings() addons.Configuration {
+	return Settings{&settings{}}
 }
 
 func (s Extension) Middlewares() []echo.MiddlewareFunc {

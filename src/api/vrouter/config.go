@@ -6,30 +6,9 @@ import (
 	"github.com/labstack/echo"
 	"strings"
 	"time"
-	"utils"
 )
 
 var (
-	RoutsKey = "routs"
-
-	CSRFKey         = "csrf"
-	CSRFEnabledKey  = "enabled" //boolean
-	CSRFSecretKey   = "secret"  // string
-	CSRFTokenLookup = "lookup"  // string
-	// header:"X-CSRF-Token"
-	// form:"csrf"
-	// json:"csrf"
-	// skip only in route
-
-	// Cookie section
-	CSRFCookieSectionKey = "cookie"
-	CookieNameKey        = "name"
-	CookiePathKey        = "path"     // string
-	CookieDomainKey      = "domain"   // string
-	CookieAgeKey         = "age"      // int
-	CookieSecureKey      = "secure"   // bool
-	CookieHTTPOnlyKey    = "httponly" // bool
-
 	RouteMatchCtxKey    = addonName + ".RouteMatch"
 	CSRFCtxKey          = addonName + ".CSRF"
 	CSRFFieldNameCtxKey = addonName + ".CSRFFieldName"
@@ -44,9 +23,15 @@ var (
 	lookupForm   = "form:"
 )
 
+func MainSettings() Settings {
+
+	return config.Cfgx.Config(addonName).(Settings)
+}
+
 // AppRouts
-func AppRouts() []string {
-	return config.AppSettings().Strings(RoutsKey)
+func AppRouts() []Rout {
+
+	return MainSettings().Routs
 }
 
 // IsSkipOrEmpty true if mode=skip or value is empty
@@ -86,35 +71,25 @@ func ExtractorCSRFToken(mode string) (func(echo.Context) (string, error), string
 	}, ""
 }
 
-//
-
-func CSRFConfig() utils.M {
-	return config.AppSettings().M(CSRFKey)
-}
-
-func CSRFCookieConfig() utils.M {
-	return CSRFConfig().M(CSRFCookieSectionKey)
-}
-
 // CSRFEnabled
 func CSRFEnabled() bool {
-	return CSRFConfig().Bool(CSRFEnabledKey)
+	return MainSettings().CSRF.Enabled
 }
 
 // CSRFSecretKey
 func CSRFSecret() string {
-	return CSRFConfig().String(CSRFSecretKey)
+	return MainSettings().CSRF.Secret
 }
 
 // CSRFSecretKey
 func CSRFLookup() string {
-	return CSRFConfig().String(CSRFTokenLookup)
+	return MainSettings().CSRF.TokenLookup
 }
 
 // Cookie
 
 func CSRFCookieName() string {
-	name := CSRFCookieConfig().String(CookieNameKey)
+	name := MainSettings().CSRF.Cookie.Name
 
 	if len(strings.TrimSpace(name)) == 0 {
 		name = DefaultCookieName
@@ -124,7 +99,7 @@ func CSRFCookieName() string {
 }
 
 func CSRFCookiePath() string {
-	path := CSRFCookieConfig().String(CookiePathKey)
+	path := MainSettings().CSRF.Cookie.Path
 
 	if len(path) == 0 {
 		path = DefaultCookiePath
@@ -134,23 +109,23 @@ func CSRFCookiePath() string {
 }
 
 func CSRFCookieDomain() string {
-	return CSRFCookieConfig().String(CookieDomainKey)
+	return MainSettings().CSRF.Cookie.Domain
 }
 
 func CSRFCookieExpireDate() time.Time {
-	maxage := CSRFCookieConfig().Int(CookieAgeKey)
+	maxage := MainSettings().CSRF.Cookie.MaxAge
 
 	if maxage == 0 {
-		maxage = DefaultCookieMaxAge
+		maxage = time.Duration(DefaultCookieMaxAge)
 	}
 
-	return time.Now().Add(time.Duration(maxage) * time.Second)
+	return time.Now().Add(maxage * time.Second)
 }
 
 func CSRFCookieSecure() bool {
-	return CSRFCookieConfig().Bool(CookieSecureKey)
+	return MainSettings().CSRF.Cookie.Secure
 }
 
 func CSRFHTTPOnly() bool {
-	return CSRFCookieConfig().Bool(CookieHTTPOnlyKey)
+	return MainSettings().CSRF.Cookie.HTTPOnly
 }

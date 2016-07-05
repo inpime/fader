@@ -1,81 +1,30 @@
 package config
 
 import (
-	apiutils "api/utils"
-	"github.com/BurntSushi/toml"
-	"github.com/Sirupsen/logrus"
-	"store"
-	"time"
-	"utils"
+	"api/utils"
 )
 
-var appSettings utils.M
+var sectionName = "main"
 
-var (
-	// Section names of file settings@main
+// MainSettings
+func MainSettings() Settings {
 
-	PageCachingKey = "pageCaching"
-	IncludeKey     = "include"
-)
-
-// AppSettings
-func AppSettings() utils.M {
-	if appSettings == nil {
-		// TODO: default setting (safe mode)
-		appSettings = utils.Map()
-	}
-
-	return appSettings
+	return Cfgx.Config(sectionName).(Settings)
 }
 
-// IsPageCaching
-func IsPageCaching() bool {
-	return AppSettings().Bool(PageCachingKey)
+// Wraper setting
+type Settings struct {
+	*settings `toml:"main" json:"main"`
 }
 
-func AppSettingsIncludeFiles() []string {
-	return AppSettings().Strings(IncludeKey)
+func (s Settings) Merge(cfg interface{}) error {
+	return utils.AppendOrReplace(s.settings, *cfg.(Settings).settings)
 }
 
-// ReloadAppSettings reload app settings
-func ReloadAppSettings() {
-	file, err := store.LoadOrNewFile(SettingsBucketName, MainSettingsFileName)
-
-	_filename := SettingsBucketName + "@" + MainSettingsFileName
-
-	if err != nil {
-		logrus.WithField("_service", loggerKey).Errorf("load error file=%q, %v", _filename, err)
-		return
-	}
-
-	newAppSettings := utils.Map() // TODO: default setting (safe mode)
-
-	if _, err := toml.Decode(string(file.RawData().Bytes()), &newAppSettings); err != nil {
-		logrus.Errorf("main settings: decode toml error, %v, %q", err, string(file.RawData().Bytes()))
-		return
-	}
-
-	for _, includeFileName := range AppSettingsIncludeFiles() {
-		includeFile, err := store.LoadOrNewFile(SettingsBucketName, includeFileName)
-
-		if err != nil {
-			logrus.WithField("_service", loggerKey).WithError(err).Info("find include file %q", includeFileName)
-			continue
-		}
-
-		if _, err := toml.Decode(string(includeFile.RawData().Bytes()), &newAppSettings); err != nil {
-			logrus.WithField("_service", loggerKey).Errorf("decode toml file=%q error, %v, %q", includeFileName, err, string(includeFile.RawData().Bytes()))
-			return
-		}
-	}
-
-	appSettings = newAppSettings
+type settings struct {
+	IncludeFiles []string `toml:"include" json:"include"`
 }
 
-// InitApp
-func InitApp() {
-	ReloadAppSettings()
-
-	// TODO: synchronization with the previous launch
-	go apiutils.RefreshEvery(3*time.Second, ReloadAppSettings)
+func (s Settings) Include() []string {
+	return s.IncludeFiles
 }

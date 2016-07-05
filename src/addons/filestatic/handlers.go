@@ -1,7 +1,6 @@
 package filestatic
 
 import (
-	"api/config"
 	"github.com/labstack/echo"
 	"net/http"
 	"store"
@@ -19,7 +18,7 @@ func FileContentByNameHandler(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := config.AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
+	bucketName := MainSettings().BucketSource
 
 	file, err := store.LoadOrNewFile(bucketName, fileName)
 
@@ -43,7 +42,7 @@ func FileContentByIDHandler(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := config.AppSettings().M(FileContentSectionNameKey).String(FileContentBucketNameKey)
+	bucketName := MainSettings().BucketSource
 
 	file, err := store.LoadOrNewFileID(bucketName, fileId)
 

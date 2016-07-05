@@ -2,21 +2,14 @@ package vrouter
 
 import (
 	"api/config"
-	"github.com/BurntSushi/toml"
 	"github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"net/url"
-	"store"
-	"sync"
 )
 
-var appRouter *Router
-var appRouterMutex sync.Mutex
+var appRouter = NewRouter()
 
 func AppRouter() *Router {
-	if appRouter == nil {
-		appRouter = NewRouter()
-	}
 
 	return appRouter
 }
@@ -43,7 +36,7 @@ func RouterMiddleware() echo.MiddlewareFunc {
 
 				if !CSRFEnabled() {
 					logrus.WithField("_service", addonName).
-						Info("next")
+						Debug("csrf disabled, next")
 					return next(ctx)
 				}
 
@@ -107,7 +100,7 @@ func RouterMiddleware() echo.MiddlewareFunc {
 				return next(ctx)
 			}
 
-			logrus.WithField("_service", addonName).Debugf("NOTFOUND count routs %d", len(AppRouter().routes))
+			logrus.WithField("_service", addonName).Infof("NOTFOUND. count routs %d", len(AppRouter().routes))
 
 			return config.NotFoundHandler(ctx)
 		}
@@ -135,57 +128,31 @@ func csrfCookie(token string) *echo.Cookie {
 	return cookie
 }
 
-// Config routes
-
-type Rout struct {
-	Path            string   `toml:"path"`
-	Name            string   `toml:"name"`
-	Handler         string   `toml:"handler"`
-	Methods         []string `toml:"methods"`
-	Licenses        []string `toml:"licenses"`
-	IsSpecial       bool     `toml:"special"`
-	CSRF            bool     `toml:"csrf"`
-	CSRFTokenLookup string   `toml:"csrflookup"`
-}
-
-// Routing settings@main#routs
-type Routing struct {
-	Routs []Rout `toml:"routs"`
-}
+// Config routs
 
 func ReloadAppRouts() {
-	newAppRouter := NewRouter()
+	router := NewRouter()
+
+	refreshRouter(router)
+
+	appRouter = router
+}
+
+// refreshRouter returns the current routing based on app settings
+func refreshRouter(router *Router) {
 
 	if len(AppRouts()) == 0 {
 		logrus.WithField("_serivce", addonName).Debugf("app config empty routs %d", len(AppRouts()))
 	}
 
-	for _, fileName := range AppRouts() {
-		routeUpdate(newAppRouter, fileName)
-	}
-
-	appRouter = newAppRouter
-}
-
-func routeUpdate(router *Router, fileName string) {
-
-	file, err := store.LoadOrNewFile(config.SettingsBucketName, fileName)
-
-	if err != nil {
-		logrus.WithField("_service", addonName).Errorf("load %q error, %v", fileName, err)
-		return
-	}
-
-	var routing = &Routing{}
-
-	if _, err := toml.Decode(string(file.RawData().Bytes()), routing); err != nil {
-		logrus.WithField("_service", addonName).Errorf("%q decode toml error, %v, %q", fileName, err, string(file.RawData().Bytes()))
-		return
-	}
-
-	for _, _r := range routing.Routs {
+	for _, _r := range AppRouts() {
 
 		handler := NewHandlerFromRoute(_r)
+
+		logrus.WithFields(logrus.Fields{
+			"_service": addonName,
+			"handler":  handler,
+		}).Debug("Add route")
 
 		if len(_r.Methods) == 0 {
 			router.Handle(_r.Path, handler).Methods("GET").Name(_r.Name)

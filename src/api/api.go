@@ -20,7 +20,20 @@ import (
 	"store"
 	"time"
 	"utils"
+
+	apiutils "api/utils"
 )
+
+// InitAppSettings
+func InitAppSettings() {
+	config.Reload()
+	vrouter.ReloadAppRouts()
+
+	go apiutils.RefreshEvery(3*time.Second, func() {
+		config.Reload()
+		vrouter.ReloadAppRouts()
+	})
+}
 
 // Run init tempaltes and start server
 func Run() error {
@@ -42,16 +55,20 @@ func Run() error {
 
 	// ------------------------
 	// Special addons
-	//  * 1. vrouter
+	//  * 1. routing
 	// 	* 2. session
 	// ------------------------
 
 	// ------------------------
-	// 1. vrouter
+	// 1. routing
 	// ------------------------
 
 	vrouterAddon := &vrouter.Extension{}
+	config.Cfgx.AddConfig(
+		vrouterAddon.Name(), // routing
+		vrouterAddon.TemplateSettings())
 	e.Use(vrouterAddon.Middlewares()...)
+	vrouterAddon.Setup()
 	vrouterAddon.RegEchoHandlers(AddSpecialHandler)
 	vrouterAddon.InjectTplAddons()
 
@@ -77,6 +94,9 @@ func Run() error {
 	session.DefaultGuestSession = file
 
 	sessionAddon := &session.Extension{}
+	config.Cfgx.AddConfig(
+		sessionAddon.Name(), // session
+		sessionAddon.TemplateSettings())
 	sessionAddon.SetAppConfig(session.Config{
 		Path: config.Cfg.Session.Path,
 
@@ -107,14 +127,26 @@ func Run() error {
 	// ------------------------
 
 	for _, ext := range addons.ListOfAddons() {
+		if vrouter.NAME == ext.Name() || session.NAME == ext.Name() {
+			// игнорируем вручную установленные расширения
+			continue
+		}
+
 		logrus.WithFields(logrus.Fields{
 			"_service":      "api",
 			"_target":       "initaddon",
 			"addon":         ext.Name(),
 			"addon_version": ext.Version(),
 		}).Infof("add extension")
-		// ext.SetLogger(logrus.StandardLogger().Out)
-		e.Use(append(ext.Middlewares(), debugMiddleware(ext.Name()))...)
+
+		config.Cfgx.AddConfig(
+			ext.Name(), // component name
+			ext.TemplateSettings())
+
+		e.Use(ext.Middlewares()...)
+		if logrus.GetLevel() >= logrus.InfoLevel {
+			e.Use(debugMiddleware(ext.Name()))
+		}
 		ext.RegEchoHandlers(AddSpecialHandler)
 		ext.InjectTplAddons()
 	}
@@ -134,6 +166,9 @@ func Run() error {
 		"_target":  "httplistener",
 		"address":  config.Cfg.Address,
 	}).Infof("Run API HTTP Listener")
+
+	// Init app settings
+	InitAppSettings()
 
 	e.Run(standard.New(config.Cfg.Address))
 

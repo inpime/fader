@@ -94,8 +94,6 @@ func InitializerUserSessionMiddleware() echo.MiddlewareFunc {
 
 			uri := ctx.Request().URI()
 
-			logrus.WithField("uri", uri).Infof("session init")
-
 			if ctx.Get(session.DefaultKey) == nil {
 				// TODO: clear session or panic?
 

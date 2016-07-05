@@ -1,6 +1,6 @@
 package config
 
-var loggerKey = "config"
+var loggerKey = "app_settings"
 
 var Cfg *Config
 var AppVersion string = "dev"

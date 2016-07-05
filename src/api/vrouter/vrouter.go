@@ -5,7 +5,6 @@ import "net/url"
 import log "github.com/Sirupsen/logrus"
 import "fmt"
 import "errors"
-import "sync"
 
 type matcher interface {
 	Match(*Request, *RouteMatch) bool
@@ -390,8 +389,7 @@ type Router struct {
 
 	parent parentRoute
 
-	routes      []*Route
-	routesMutex sync.RWMutex
+	routes []*Route
 
 	// If true, when the path pattern is "/path/", accessing "/path" will
 	// redirect to the former and vice versa.
@@ -420,6 +418,11 @@ func NewRouter() *Router {
 	return &Router{namedRoutes: make(map[string]*Route)}
 }
 
+func (r *Router) Clear() {
+	r.routes = []*Route{}
+	r.namedRoutes = make(map[string]*Route)
+}
+
 func (r *Router) NewRoute() *Route {
 	route := &Route{parent: r, strictSlash: r.strictSlash, skipClean: r.skipClean}
 	r.routes = append(r.routes, route)
@@ -432,7 +435,7 @@ func (r *Router) Handle(path string, h Handler) *Route {
 	return r.NewRoute().Path(path).Handler(h)
 }
 
-func (r *Router) Match(req *Request, match *RouteMatch) bool {
+func (r Router) Match(req *Request, match *RouteMatch) bool {
 	for _, route := range r.routes {
 		if route.Match(req, match) {
 			return true

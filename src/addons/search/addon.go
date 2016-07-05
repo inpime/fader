@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	addonName = "fader.addons.search"
+	addonName = "search"
 	version   = "0.1.0"
 )
 
@@ -37,6 +37,10 @@ func (s Extension) Middlewares() []echo.MiddlewareFunc {
 }
 
 func (Extension) Setup() {
+}
+
+func (Extension) TemplateSettings() addons.Configuration {
+	return Settings{&settings{}}
 }
 
 func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"addons/standard"
 	"api/config"
 	"api/context"
 	"fmt"
@@ -44,7 +45,7 @@ func AppEntryPointHandler(ctx echo.Context) error {
 
 	var tpl *pongo2.Template
 
-	pongo2.DefaultSet.Debug = !config.IsPageCaching()
+	pongo2.DefaultSet.Debug = !standard.MainSettings().TplCache
 
 	// if Debug true then recompile tpl on any request
 	tpl, err := pongo2.FromCache(match.Handler.Bucket + "/" + match.Handler.File)

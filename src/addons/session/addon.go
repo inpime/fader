@@ -1,19 +1,23 @@
 package session
 
 import (
-	// "api/addons"
+	"api/addons"
 	"github.com/labstack/echo"
 	"github.com/yosssi/boltstore/reaper"
 	"net/http"
 	"time"
 )
 
-var addonName = "fader.addons.session"
+const (
+	NAME = "session"
+)
+
+var addonName = NAME
 var version = "0.1.0"
 
 func init() {
 	// manual init with app config
-	// addons.AddExtension(&Extension{})
+	addons.AddAddon(&Extension{})
 }
 
 type Extension struct {
@@ -47,6 +51,10 @@ func (s *Extension) SetAppConfig(config Config) {
 }
 
 func (Extension) Setup() {
+}
+
+func (s Extension) TemplateSettings() addons.Configuration {
+	return Settings{&settings{}}
 }
 
 func (s *Extension) Middlewares() []echo.MiddlewareFunc {

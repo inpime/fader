@@ -1,10 +1,11 @@
 package addons
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 
-type Addons map[string]Addon
+var Addons = make(addons)
 
 type Addon interface {
 	Name() string
@@ -16,16 +17,32 @@ type Addon interface {
 
 	InjectTplAddons() error
 
+	TemplateSettings() Configuration
+
 	Setup()
 	Destroy()
 }
 
-var addons = make(Addons)
+type addons map[string]Addon
 
+// AddAddon
 func AddAddon(a Addon) {
-	addons[a.Name()] = a
+	if _, exists := Addons[a.Name()]; exists {
+		logrus.WithField("_service", "addons_registrator").
+			Warningf("replace addons %q settings", a.Name())
+	}
+
+	Addons[a.Name()] = a
 }
 
-func ListOfAddons() Addons {
-	return addons
+func GetAddon(name string) Addon {
+
+	return Addons[name]
+}
+
+// ListOfAddons
+func ListOfAddons() addons {
+	// TODO: Sort by priority
+
+	return Addons
 }

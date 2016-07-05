@@ -8,7 +8,7 @@ import (
 
 var (
 	version        = "0.1.0"
-	addonName      = "fader.addons.importexport"
+	addonName      = "importexport"
 	filenamePrefix = "FADER"
 
 	SettingsSectionNameKey = "importexport"
@@ -45,6 +45,10 @@ func (Extension) Setup() {
 
 func (s Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{}
+}
+
+func (s Extension) TemplateSettings() addons.Configuration {
+	return Settings{&settings{}}
 }
 
 func (e Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {

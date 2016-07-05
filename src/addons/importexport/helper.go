@@ -1,12 +1,10 @@
 package importexport
 
 import (
-	"api/config"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
-	"utils"
 )
 
 // loadLatestArchive load latest version archive
@@ -31,21 +29,17 @@ func loadLatestArchive(url string) ([]byte, error) {
 
 // IsIncludeInGroupBucketImportExport является ли файл системным согласно настройкам
 func IsIncludeInGroupBucketImportExport(groupName, bucketName string) bool {
-	config := config.AppSettings().M(SettingsSectionNameKey).M(groupName)
+	config := MainSettings().SettingsForBucket(groupName, bucketName)
 
-	if !config.Include(bucketName) {
+	if config.BucketName == "" {
 		return false
 	}
 
-	bucketConfig := config.M(bucketName)
-
-	if bucketConfig.Bool("all") {
+	if config.All {
 		return true
 	}
 
-	bucketFiles := utils.NewA(bucketConfig.Strings("files"))
-
-	return bucketFiles.Len() > 0
+	return len(config.Files) > 0
 }
 
 // IsIncludeInGroupFileImportExport является ли файл системным согласно настройкам
@@ -54,20 +48,16 @@ func IsIncludeInGroupFileImportExport(groupName, bucketName, fileName string) bo
 		return false
 	}
 
-	config := config.AppSettings().M(SettingsSectionNameKey).M(groupName)
+	config := MainSettings().SettingsForBucket(groupName, bucketName)
 
-	bucketConfig := config.M(bucketName)
-
-	if bucketConfig.Bool("all") {
+	if config.All {
 		return true
 	}
 
-	bucketFiles := utils.NewA(bucketConfig.Strings("files"))
-
-	return bucketFiles.Include(fileName)
+	return config.IncludeFile(fileName)
 }
 
 // ListGroupsImportExport возвращает список групп указанных в настройках приложения
 func ListGroupsImportExport() []string {
-	return config.AppSettings().Keys(SettingsSectionNameKey)
+	return MainSettings().GroupNames()
 }

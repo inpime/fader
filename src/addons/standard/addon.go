@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-var addonName = "fader.addons.standard"
+var addonName = "basic"
 var version = "0.1.0"
 
 var (
@@ -41,6 +41,10 @@ func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) erro
 }
 
 func (Extension) Setup() {
+}
+
+func (s Extension) TemplateSettings() addons.Configuration {
+	return Settings{&settings{}}
 }
 
 func (s *Extension) InjectTplAddons() error {

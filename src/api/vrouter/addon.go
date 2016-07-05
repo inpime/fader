@@ -1,23 +1,22 @@
 package vrouter
 
 import (
-	// "api/addons"
-	"api/utils"
+	"api/addons"
 	"github.com/labstack/echo"
-	"sync"
-	"time"
 )
 
-var addonName = "fader.addons.vrouter"
+var NAME = addonName
+
+// TODO: make public
+var addonName = "routing"
 var version = "0.1.0"
 
 func init() {
 	// manual init
-	// addons.AddAddon(&Extension{})
+	addons.AddAddon(&Extension{})
 }
 
 type Extension struct {
-	setupOnce sync.Once
 }
 
 func (Extension) Version() string {
@@ -33,12 +32,11 @@ func (Extension) Name() string {
 }
 
 func (e Extension) Setup() {
-	e.setupOnce.Do(func() {
-		ReloadAppRouts()
 
-		// TODO: synchronization with the previous launch
-		go utils.RefreshEvery(3*time.Second, ReloadAppRouts)
-	})
+}
+
+func (Extension) TemplateSettings() addons.Configuration {
+	return Settings{&settings{}}
 }
 
 func (*Extension) Middlewares() []echo.MiddlewareFunc {
