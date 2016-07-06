@@ -31,7 +31,7 @@ func loadLatestArchive(url string) ([]byte, error) {
 func IsIncludeInGroupBucketImportExport(groupName, bucketName string) bool {
 	config := MainSettings().SettingsForBucket(groupName, bucketName)
 
-	if config.BucketName == "" {
+	if config == nil || config.BucketName == "" {
 		return false
 	}
 
@@ -49,6 +49,8 @@ func IsIncludeInGroupFileImportExport(groupName, bucketName, fileName string) bo
 	}
 
 	config := MainSettings().SettingsForBucket(groupName, bucketName)
+
+	// не проверяем потому что выше IsIncludeInGroupBucketImportExport
 
 	if config.All {
 		return true

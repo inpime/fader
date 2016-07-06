@@ -6,17 +6,15 @@ import (
 	"github.com/labstack/echo"
 )
 
+const (
+	NAME    = "filestatic"
+	VERSION = "0.1.0"
+)
+
 var (
-	addonName = "filestatic"
-	version   = "0.1.0"
-	// secion name of file settings@main
-	FileContentSectionNameKey = "filecontent"
-
-	ByNameRouteName = addonName + ".byname"
-	ByIDRouteName   = addonName + ".byid"
-
-	// bucket name
-	FileContentBucketNameKey = "bucket"
+	// route or special handler name
+	ByNameRouteName = NAME + ".byname"
+	ByIDRouteName   = NAME + ".byid"
 )
 
 func init() {
@@ -27,11 +25,11 @@ type Extension struct {
 }
 
 func (Extension) Version() string {
-	return version
+	return VERSION
 }
 
 func (Extension) Name() string {
-	return addonName
+	return NAME
 }
 
 func (s Extension) Destroy() {
@@ -49,9 +47,9 @@ func (s Extension) Middlewares() []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{}
 }
 
-func (*Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
-	fnReg(addonName+".byname", FileContentByNameHandler)
-	fnReg(addonName+".byid", FileContentByNameHandler)
+func (e *Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {
+	fnReg(ByNameRouteName, FileContentByNameHandler)
+	fnReg(ByIDRouteName, FileContentByNameHandler)
 }
 
 func (*Extension) InjectTplAddons() error {

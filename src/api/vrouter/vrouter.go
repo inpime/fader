@@ -42,8 +42,8 @@ type Handler struct {
 	Methods  []string
 	Path     string
 
-	CSRF            bool
-	CSRFTokenLookup string
+	CSRF bool
+	// CSRFTokenLookup string
 }
 
 // String `PATH `

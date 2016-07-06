@@ -30,6 +30,18 @@ func RouterMiddleware() echo.MiddlewareFunc {
 
 				ctx.Set(RouteMatchCtxKey, &match)
 
+				// token extractor
+
+				tokenLookup := CSRFLookup()
+
+				// // custom lookup
+				// if len(match.Handler.CSRFTokenLookup) > 0 {
+				// 	tokenLookup = match.Handler.CSRFTokenLookup
+				// }
+
+				extractor, fieldName := ExtractorCSRFToken(tokenLookup)
+				ctx.Set(CSRFFieldNameCtxKey, fieldName)
+
 				// -----------
 				// CSRF
 				// -----------
@@ -63,16 +75,6 @@ func RouterMiddleware() echo.MiddlewareFunc {
 				if !match.Handler.CSRF {
 					return next(ctx)
 				}
-
-				tokenLookup := CSRFLookup()
-
-				// custom lookup
-				if len(match.Handler.CSRFTokenLookup) > 0 {
-					tokenLookup = match.Handler.CSRFTokenLookup
-				}
-
-				extractor, fieldName := ExtractorCSRFToken(tokenLookup)
-				ctx.Set(CSRFFieldNameCtxKey, fieldName)
 
 				switch ctx.Request().Method() {
 				case echo.GET, echo.HEAD, echo.OPTIONS, echo.TRACE:
@@ -178,7 +180,7 @@ func NewHandlerFromRoute(r Rout) Handler {
 	h.Path = r.Path
 	h.Methods = r.Methods
 	h.CSRF = r.CSRF
-	h.CSRFTokenLookup = r.CSRFTokenLookup
+	// h.CSRFTokenLookup = r.CSRFTokenLookup
 
 	return h
 }

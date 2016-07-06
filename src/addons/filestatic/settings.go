@@ -6,11 +6,11 @@ import (
 )
 
 func MainSettings() Settings {
-	return config.Cfgx.Config(addonName).(Settings)
+	return config.Cfgx.Config(NAME).(Settings)
 }
 
 type Settings struct {
-	// same value as `addonName`
+	// same value as addon name
 	*settings `toml:"filestatic" json:"filestatic"`
 }
 

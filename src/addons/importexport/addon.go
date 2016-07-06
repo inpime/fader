@@ -6,19 +6,22 @@ import (
 	"github.com/labstack/echo"
 )
 
-var (
-	version        = "0.1.0"
-	addonName      = "importexport"
-	filenamePrefix = "FADER"
+const (
+	NAME    = "importexport"
+	VERSION = "0.1.0"
+)
 
-	SettingsSectionNameKey = "importexport"
+var (
+	version        = VERSION
+	addonName      = NAME
+	filenamePrefix = "FADER"
 
 	ArchiveFaderDataFileName = ".faderdata"
 
 	ImportKey = addonName + ".import"
 	ExportKey = addonName + ".export"
 
-	ArchiveURLLatestVersion = "https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/archives/FADER(sys).dev.latest.zip"
+	ArchiveURLLatestVersion = "https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/archives/FADER(console).dev.latest.zip"
 )
 
 func init() {
@@ -48,7 +51,9 @@ func (s Extension) Middlewares() []echo.MiddlewareFunc {
 }
 
 func (s Extension) TemplateSettings() addons.Configuration {
-	return Settings{&settings{}}
+	return Settings{&settings{
+		Groups: make(map[string][]GroupSettings),
+	}}
 }
 
 func (e Extension) RegEchoHandlers(fnReg func(string, func(ctx echo.Context) error)) {

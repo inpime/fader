@@ -14,7 +14,7 @@ func filterUrlFileByName(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, 
 
 	if route == nil {
 		logrus.WithError(fmt.Errorf("not found route")).WithFields(logrus.Fields{
-			"_service":  addonName,
+			"_service":  NAME,
 			"routename": ByNameRouteName,
 		}).Warning("not found route")
 
@@ -25,7 +25,7 @@ func filterUrlFileByName(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, 
 
 	if err != nil {
 		logrus.WithError(fmt.Errorf("error build url by file")).WithFields(logrus.Fields{
-			"_service":      addonName,
+			"_service":      NAME,
 			"args_filename": in.String(),
 		}).Warning("error build url")
 

@@ -21,14 +21,14 @@ type settings struct {
 }
 
 type Rout struct {
-	Path            string   `toml:"path" json:"path"`
-	Name            string   `toml:"name" json:"name"`
-	Handler         string   `toml:"handler" json:"handler"`
-	Methods         []string `toml:"methods" json:"methods"`
-	Licenses        []string `toml:"licenses" json:"licenses"`
-	IsSpecial       bool     `toml:"special" json:"special"`
-	CSRF            bool     `toml:"csrf" json:"csrf"`
-	CSRFTokenLookup string   `toml:"csrflookup" json:"csrflookup"`
+	Path      string   `toml:"path" json:"path"`
+	Name      string   `toml:"name" json:"name"`
+	Handler   string   `toml:"handler" json:"handler"`
+	Methods   []string `toml:"methods" json:"methods"`
+	Licenses  []string `toml:"licenses" json:"licenses"`
+	IsSpecial bool     `toml:"special" json:"special"`
+	CSRF      bool     `toml:"csrf" json:"csrf"`
+	// CSRFTokenLookup string   `toml:"csrflookup" json:"csrflookup"`
 }
 
 type CSRFSettings struct {
@@ -37,7 +37,6 @@ type CSRFSettings struct {
 	TokenLookup string `toml:"tokenlookup" json:"tokenlookup"`
 	// header:"X-CSRF-Token"
 	// form:"csrf"
-	// json:"csrf"
 
 	Cookie CSRFCookieSettings `toml:"cookie" json:"cookie"`
 }

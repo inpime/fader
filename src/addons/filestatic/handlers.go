@@ -56,8 +56,8 @@ func FileContentByIDHandler(ctx echo.Context) error {
 }
 
 func responseFileContentWithLastModifiedHeader(ctx echo.Context, file *store.File) error {
-	// TODO: check current session access
 
+	// cache
 	if t, err := time.Parse(http.TimeFormat, ctx.Request().Header().Get(echo.HeaderIfModifiedSince)); err == nil && file.UpdatedAt().Before(t.Add(1*time.Second)) {
 		ctx.Response().Header().Del(echo.HeaderContentType)
 		ctx.Response().Header().Del(echo.HeaderContentLength)
