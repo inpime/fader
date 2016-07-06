@@ -37,7 +37,7 @@ prebuild:
 		github.com/levigross/grequests \
 		github.com/dyatlov/go-oembed/... \
 		github.com/dyatlov/go-url2oembed/... \
-		github.com/jeffail/tunny \ 
+		github.com/jeffail/tunny \
 		github.com/lionelbarrow/braintree-go \
 		gopkg.in/go-playground/validator.v8
 
