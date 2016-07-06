@@ -125,7 +125,7 @@ func mergeAllAppConfigs(c *configs, src, fileName string) {
 		logrus.WithField("_service", loggerKey).
 			Debugf("merge settings for addon %q", addonName)
 
-		var addonConfig interface{}
+		var addonConfig addons.Configuration
 
 		if addonName == sectionName {
 			// TODO: refactoring main config
@@ -145,7 +145,7 @@ func mergeAllAppConfigs(c *configs, src, fileName string) {
 			continue
 		}
 
-		if err := c.MergeConfig(addonName, addonConfig.(addons.Configuration)); err != nil {
+		if err := c.MergeConfig(addonName, addonConfig); err != nil {
 			logrus.WithError(err).
 				WithFields(logrus.Fields{
 					"_service":  loggerKey,
