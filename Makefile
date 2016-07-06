@@ -27,11 +27,11 @@ prebuild:
 		github.com/inpime/dbox \
 		gopkg.in/olivere/elastic.v3 \
 		github.com/labstack/echo/... \
-		github.com/yosssi/boltstore/reaper \ 
-		github.com/yosssi/boltstore/store \ 
-		github.com/flosch/pongo2 \ 
+		github.com/yosssi/boltstore/reaper \
+		github.com/yosssi/boltstore/store \
+		github.com/flosch/pongo2 \
 		github.com/flosch/pongo2-addons \
-		github.com/gebv/echo-session \ 
+		github.com/gebv/echo-session \
 		github.com/gorilla/sessions \
 		github.com/BurntSushi/toml \
 		github.com/levigross/grequests \
