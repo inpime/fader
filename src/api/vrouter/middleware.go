@@ -68,8 +68,6 @@ func RouterMiddleware() echo.MiddlewareFunc {
 				ctx.Set(CSRFCtxKey, token)
 				ctx.SetCookie(csrfCookie(token))
 
-				logrus.WithField("uri", _url.String()).Infof("set cookie")
-
 				// extract and check
 
 				if !match.Handler.CSRF {
