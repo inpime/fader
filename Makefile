@@ -16,39 +16,30 @@ build: build-linux
 run:
 	$(GO) run $(ENTIRYPOINTFILES) $(RUNARGS)
 test:
-	go test -v -bench=. -benchmem -run=. ./src/api/...
+	$(GO) test -v -bench=. -benchmem -run=. ./src/api/...
 testx:
-	go test -v -run=TestImporter_simple ./src/...
+	$(GO) test -v -run=TestAppendOrReplace ./src/...
 
 prebuild:
-	go get github.com/Sirupsen/logrus
-	go get github.com/stretchr/testify
-	
-	go get github.com/boltdb/bolt
-	go get github.com/inpime/dbox
-	go get gopkg.in/olivere/elastic.v3
-
-	go get github.com/labstack/echo/...
-	go get github.com/yosssi/boltstore/reaper
-	go get github.com/yosssi/boltstore/store
-
-	go get github.com/flosch/pongo2
-	go get github.com/flosch/pongo2-addons
-
-	go get github.com/gebv/echo-session
-	go get github.com/gorilla/sessions
-
-	go get github.com/BurntSushi/toml 
-
-	# pongo2 addons - urlpreviewer
-	go get github.com/levigross/grequests
-	go get github.com/dyatlov/go-oembed/...
-	go get github.com/dyatlov/go-url2oembed/...
-	go get github.com/jeffail/tunny
-
-	go get github.com/lionelbarrow/braintree-go
-
-	go get gopkg.in/go-playground/validator.v8
+	$(GO) get github.com/Sirupsen/logrus \
+		github.com/stretchr/testify \
+		github.com/boltdb/bolt \
+		github.com/inpime/dbox \
+		gopkg.in/olivere/elastic.v3 \
+		github.com/labstack/echo/... \
+		github.com/yosssi/boltstore/reaper \ 
+		github.com/yosssi/boltstore/store \ 
+		github.com/flosch/pongo2 \ 
+		github.com/flosch/pongo2-addons \
+		github.com/gebv/echo-session \ 
+		github.com/gorilla/sessions \
+		github.com/BurntSushi/toml \
+		github.com/levigross/grequests \
+		github.com/dyatlov/go-oembed/... \
+		github.com/dyatlov/go-url2oembed/... \
+		github.com/jeffail/tunny \ 
+		github.com/lionelbarrow/braintree-go \
+		gopkg.in/go-playground/validator.v8
 
 	mkdir -p releases
 
@@ -71,3 +62,11 @@ build-osx: prebuild
 build-linux-dev: build-linux
 	cp ${PWD}/build/linux_amd64/fader ${PWD}/state/app/fader
 .PHONY: build-linux-dev
+
+# helper
+reload-dev: build-linux-dev
+	-docker-compose down
+	docker-compose build
+	docker-compose up -d
+
+	
