@@ -3,6 +3,7 @@ package standard
 import (
 	"api/config"
 	"api/utils"
+	gutils "utils"
 )
 
 type Settings struct {
@@ -15,7 +16,8 @@ func (s Settings) Merge(cfg interface{}) error {
 }
 
 type settings struct {
-	TplCache bool `toml:"tplcache" json:"tplcache"`
+	TplCache bool     `toml:"tplcache" json:"tplcache"`
+	Config   gutils.M `toml:"config" json:"config"`
 }
 
 func MainSettings() Settings {
