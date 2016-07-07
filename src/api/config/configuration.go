@@ -156,7 +156,7 @@ func mergeAllAppConfigs(c *configs, src, fileName string) {
 					"_service":  loggerKey,
 					"_filename": fileName,
 				}).
-				Errorf("decode settings addon %q", addonName)
+				Errorf("decode settings addon %q for merge", addonName)
 
 			continue
 		}
