@@ -10,7 +10,8 @@ import (
 var V = validator.New(&validator.Config{})
 
 func init() {
-	gob.Register(FieldError{})
+	gob.Register(FIeld{})
+	gob.Register(ValidatorData{})
 }
 
 func NewValidatorData() *ValidatorData {
@@ -45,7 +46,7 @@ func (v *ValidatorData) Valid() bool {
 		if err := V.Field(v.Data.Get(fieldName), rule.(string)); err != nil {
 
 			v.ErrorMessages.Set(fieldName,
-				NewFieldError(fieldName,
+				NewFIeld(fieldName,
 					v.Data.Get(fieldName),
 					err,
 				))
@@ -59,18 +60,32 @@ func (v *ValidatorData) Valid() bool {
 	return true
 }
 
+func (v ValidatorData) Get(fieldName string) FIeld {
+	field := v.ErrorMessages.Get(fieldName)
+
+	if field, valid := field.(FIeld); valid {
+		return field
+	}
+
+	return FIeld{
+		FieldName: fieldName,
+		Value:     v.Data.Get(fieldName),
+	}
+}
+
 func (v ValidatorData) Messages() utils.M {
 	return v.ErrorMessages
 }
 
 //
 
-// NewFieldError информация об ошибке, только для одного поля (массив содержит только одну ошибку с пустым "" ключем)
-func NewFieldError(fieldName string, value interface{}, err error) FieldError {
+// NewFIeld информация об ошибке, только для одного поля (массив содержит только одну ошибку с пустым "" ключем)
+func NewFIeld(fieldName string, value interface{}, err error) FIeld {
 	if verr, ok := err.(validator.ValidationErrors); ok {
 		if ferr, exists := verr[""]; exists {
 
-			return FieldError{
+			return FIeld{
+				IsError:   true,
 				Tag:       ferr.Tag,
 				Param:     ferr.Param,
 				FieldName: fieldName,
@@ -79,20 +94,24 @@ func NewFieldError(fieldName string, value interface{}, err error) FieldError {
 		}
 	}
 
-	return FieldError{}
+	return FIeld{}
 }
 
-type FieldError struct {
+type FIeld struct {
+	IsError   bool
 	Tag       string
 	Param     string
 	FieldName string
 	Value     interface{}
 }
 
-func (f FieldError) FormatMessage() string {
+func (f FIeld) FormatMessage() string {
 	return "Field validation for %q failed on the %q tag"
 }
 
-func (f FieldError) String() string {
-	return fmt.Sprintf(f.FormatMessage(), f.FieldName, f.Tag)
+func (f FIeld) String() string {
+	if !f.IsError {
+		return ""
+	}
+	return fmt.Sprintf(f.FormatMessage(), f.FieldName, f.Tag+" "+f.Param)
 }

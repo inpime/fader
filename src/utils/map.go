@@ -41,7 +41,7 @@ func (m M) LoadFrom(v interface{}) M {
 		if len(v) > 0 {
 			err := json.Unmarshal([]byte(v), &m)
 			if err != nil {
-				logrus.WithError(err).Error("map: load from json")
+				logrus.WithField("_service", "utils").WithError(err).Error("map: load from json")
 			}
 		}
 	case map[string]interface{}:
@@ -52,7 +52,7 @@ func (m M) LoadFrom(v interface{}) M {
 		m.LoadFromM(v)
 	default:
 		// not supported
-		panic("not supported")
+		logrus.WithField("_service", "utils").Errorf("map: not supported type %T", v)
 	}
 
 	return m

@@ -29,7 +29,6 @@ type Context struct {
 }
 
 func (c Context) IsPut() bool {
-
 	return c.Request().Method() == http.MethodPut
 }
 

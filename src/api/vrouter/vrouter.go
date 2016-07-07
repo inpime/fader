@@ -33,6 +33,8 @@ func NewHandler(bucket, file string) Handler {
 }
 
 type Handler struct {
+	Name string
+
 	Bucket string
 	File   string
 

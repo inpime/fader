@@ -222,4 +222,32 @@ func (Extension) initTplContext() {
 
 		return pongo2.AsValue(bucket)
 	}
+
+	pongo2.DefaultSet.Globals["SendEmail"] = func(to, subject, template, context *pongo2.Value) *pongo2.Value {
+		trackid, err := SendEmail(to.String(), subject.String(), template.String(), context.Interface())
+
+		if err != nil {
+			logrus.WithError(err).
+				WithFields(logrus.Fields{
+					"_service": addonName,
+					"to":       to.String(),
+					"subject":  subject.String(),
+					"template": template.String(),
+					"context":  context.Interface(),
+				}).Error("Send email")
+			return pongo2.AsValue(err)
+		}
+
+		logrus.
+			WithFields(logrus.Fields{
+				"_service": addonName,
+				"to":       to.String(),
+				"subject":  subject.String(),
+				"template": template.String(),
+				"context":  context.Interface(),
+				"trackid":  trackid,
+			}).Info("Send email")
+
+		return pongo2.AsValue(trackid)
+	}
 }

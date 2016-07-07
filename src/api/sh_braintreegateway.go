@@ -1,7 +1,7 @@
 package api
 
 // import (
-// 	"api/config"
+// 	"addons/standard"
 // 	braintree "github.com/lionelbarrow/braintree-go"
 // 	"utils"
 // )
@@ -86,15 +86,17 @@ package api
 // func PayViaBraintreegateway(opt OrderInfo) (string, error) {
 // 	var env = braintree.Sandbox
 
-// 	if config.AppSettings().M("braintree").Bool("prod") {
+// 	paymentOption := standard.MainSettings().Config.M("braintree")
+
+// 	if paymentOption.Bool("production") {
 // 		env = braintree.Production
 // 	}
 
 // 	bt := braintree.New(
 // 		env,
-// 		config.AppSettings().M("braintree").String("merchantId"),
-// 		config.AppSettings().M("braintree").String("publicKey"),
-// 		config.AppSettings().M("braintree").String("privateKey"),
+// 		paymentOption.String("merchantId"),
+// 		paymentOption.String("publicKey"),
+// 		paymentOption.String("privateKey"),
 // 	)
 
 // 	tx, err := bt.Transaction().Create(&braintree.Transaction{

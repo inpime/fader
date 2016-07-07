@@ -3,14 +3,16 @@ package config
 import (
 	"api/addons"
 	"errors"
-	// "fmt"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/Sirupsen/logrus"
 	"store"
 	"strings"
+	"sync"
 )
 
 var Cfgx *configs
+var cfgxMutex sync.RWMutex
 
 var (
 	ErrConfigNameUse = errors.New("that config name is in use")
@@ -19,6 +21,9 @@ var (
 type configs map[string]addons.Configuration
 
 func (c *configs) AddConfig(name string, conf addons.Configuration) error {
+	cfgxMutex.Lock()
+	defer cfgxMutex.Unlock()
+
 	if _, exists := (*c)[name]; exists {
 		logrus.WithField("_service", loggerKey).
 			Warningf("replace config %q settings", name)
@@ -29,12 +34,23 @@ func (c *configs) AddConfig(name string, conf addons.Configuration) error {
 	return nil
 }
 
-func (c configs) MergeConfig(name string, conf addons.Configuration) error {
+func (c configs) MergeConfig(name string, _cfg addons.Configuration) error {
+	cfg := c.Config(name)
 
-	return c.Config(name).Merge(conf)
+	if cfg == nil {
+		logrus.WithField("_service", loggerKey).
+			Warningf("not found config %q", name)
+
+		return fmt.Errorf("not found config %q", name)
+	}
+
+	return cfg.Merge(_cfg)
 }
 
 func (c configs) Config(name string) addons.Configuration {
+
+	cfgxMutex.RLock()
+	defer cfgxMutex.RUnlock()
 
 	return c[name]
 }

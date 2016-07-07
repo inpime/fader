@@ -18,6 +18,12 @@ import (
 // 	* Flush session data
 // 	* Custom repsone type
 func AppEntryPointHandler(ctx echo.Context) error {
+	uri := ctx.Request().URI()
+
+	logrus.WithFields(logrus.Fields{
+		"_breakpoint": "AppEntryPointHandler",
+		"uri":         uri,
+	}).Info("trace")
 
 	var _ctx = context.NewContext(ctx)
 	var match = _ctx.CurrentRoute()
@@ -25,6 +31,8 @@ func AppEntryPointHandler(ctx echo.Context) error {
 	// ------------------------
 	// Check access licenses
 	// ------------------------
+
+	logrus.WithFields(logrus.Fields{"_breakpoint": "HasOneLicense", "uri": uri}).Info("trace")
 
 	if !_ctx.Session().HasOneLicense(match.Handler.Licenses) {
 
@@ -34,6 +42,8 @@ func AppEntryPointHandler(ctx echo.Context) error {
 	// ------------------------
 	// Special handler if exist
 	// ------------------------
+
+	logrus.WithFields(logrus.Fields{"_breakpoint": "GetSpecialHandler", "uri": uri}).Info("trace")
 
 	if specialHandler, err := GetSpecialHandler(match.Handler.SpecialHandler); err == nil {
 		return specialHandler(ctx)
@@ -45,7 +55,11 @@ func AppEntryPointHandler(ctx echo.Context) error {
 
 	var tpl *pongo2.Template
 
+	logrus.WithFields(logrus.Fields{"_breakpoint": "get MainSettings.TplCache", "uri": uri}).Info("trace")
+
 	pongo2.DefaultSet.Debug = !standard.MainSettings().TplCache
+
+	logrus.WithFields(logrus.Fields{"_breakpoint": "get file", "uri": uri, "_file": match.Handler.Bucket + "/" + match.Handler.File}).Info("trace")
 
 	// if Debug true then recompile tpl on any request
 	tpl, err := pongo2.FromCache(match.Handler.Bucket + "/" + match.Handler.File)
@@ -59,9 +73,13 @@ func AppEntryPointHandler(ctx echo.Context) error {
 		return config.InternalErrorHandler(ctx)
 	}
 
+	logrus.WithFields(logrus.Fields{"_breakpoint": "before execute file", "uri": uri, "_file": match.Handler.Bucket + "/" + match.Handler.File}).Info("trace")
+
 	res, err := tpl.Execute(pongo2.Context{
 		"ctx": _ctx,
 	})
+
+	logrus.WithFields(logrus.Fields{"_breakpoint": "after execute file", "uri": uri, "_file": match.Handler.Bucket + "/" + match.Handler.File}).Info("trace")
 
 	if err != nil {
 		// TODO: Custom error
@@ -69,12 +87,15 @@ func AppEntryPointHandler(ctx echo.Context) error {
 			"_service": "api",
 			"handler":  match.Handler.String(),
 		}).WithError(err).Error("execute template")
-		return err
+
+		return config.InternalErrorHandler(ctx)
 	}
 
 	// ------------------------
 	// Flush session data
 	// ------------------------
+
+	logrus.WithFields(logrus.Fields{"_breakpoint": "update session", "uri": uri}).Info("trace")
 
 	if err := _ctx.Session().Save(); err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -83,6 +104,8 @@ func AppEntryPointHandler(ctx echo.Context) error {
 	}
 
 	// redirect if specified
+
+	logrus.WithFields(logrus.Fields{"_breakpoint": "redirect if exist", "uri": uri}).Info("trace")
 
 	if _ctx.IsRedirect() {
 
@@ -97,6 +120,8 @@ func AppEntryPointHandler(ctx echo.Context) error {
 	// ------------------------
 
 	// TODO: Custom header
+
+	logrus.WithFields(logrus.Fields{"_breakpoint": "response", "uri": uri}).Info("trace")
 
 	return ctx.HTML(http.StatusOK, res)
 }

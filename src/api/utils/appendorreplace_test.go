@@ -3,6 +3,7 @@ package utils
 import (
 	"reflect"
 	"testing"
+	"utils"
 )
 
 type simpleSubType struct {
@@ -17,6 +18,7 @@ type simpleType struct {
 	E map[string]simpleSubType
 	G *simpleSubType
 	F map[string]*simpleSubType
+	M utils.M
 }
 
 func TestAppendOrReplace(t *testing.T) {
@@ -33,6 +35,10 @@ func TestAppendOrReplace(t *testing.T) {
 			"a": &simpleSubType{"b"},
 			"c": &simpleSubType{"d"},
 		},
+		utils.M(map[string]interface{}{
+			"a":  "b",
+			"f1": utils.M(map[string]interface{}{"a": "b"}),
+		}),
 	}
 	d := simpleType{[]string{"b", "c"},
 		"b",
@@ -49,6 +55,11 @@ func TestAppendOrReplace(t *testing.T) {
 			"c": &simpleSubType{"y"},
 			"e": &simpleSubType{"f"},
 		},
+		utils.M(map[string]interface{}{
+			"c":  "d",
+			"f1": utils.M(map[string]interface{}{"c": "d"}),
+			"f2": utils.M(map[string]interface{}{"a": "b"}),
+		}),
 	}
 
 	// expected
@@ -68,6 +79,12 @@ func TestAppendOrReplace(t *testing.T) {
 			"c": &simpleSubType{"d"},
 			"e": &simpleSubType{"f"},
 		},
+		utils.M(map[string]interface{}{
+			"a":  "b",
+			"c":  "d",
+			"f1": utils.M(map[string]interface{}{"a": "b"}),
+			"f2": utils.M(map[string]interface{}{"a": "b"}),
+		}),
 	}
 
 	AppendOrReplace(&d, s)

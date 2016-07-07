@@ -4,6 +4,7 @@ import (
 	"addons/session"
 	"api/vrouter"
 	"fmt"
+	"strings"
 )
 
 // Session get current session
@@ -14,6 +15,10 @@ func (c *Context) Session() *session.Session {
 // CurrentRoute get current route if exist
 func (c *Context) CurrentRoute() *vrouter.RouteMatch {
 	return vrouter.GetCurrentRoute(c.Context)
+}
+
+func (c *Context) CurrentRouteIs(routeName string) bool {
+	return strings.ToLower(c.CurrentRoute().Handler.Name) == strings.ToLower(routeName)
 }
 
 func (c Context) CSRFToken() string {

@@ -169,11 +169,13 @@ func NewHandlerFromRoute(r Rout) Handler {
 			Bucket:         "",
 			File:           "",
 			SpecialHandler: r.Handler,
+			Name:           r.Name,
 		}
 	} else {
 		h = NewHandlerFromString(r.Handler)
 	}
 
+	h.Name = r.Name
 	h.Licenses = r.Licenses
 	h.Path = r.Path
 	h.Methods = r.Methods

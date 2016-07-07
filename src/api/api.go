@@ -3,6 +3,7 @@ package api
 import (
 	_ "addons/filestatic"
 	_ "addons/importexport"
+	_ "addons/payment"
 	_ "addons/search"
 	"addons/session"
 	_ "addons/standard"
@@ -41,8 +42,11 @@ func Run() error {
 
 	var e = echo.New()
 
+	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		StackSize: 400 << 10, // 400 KB
+	}))
+
 	if logrus.GetLevel() >= logrus.InfoLevel {
-		e.Use(middleware.Recover())
 
 		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 			Format: `{"_service": "api", "time":"${time_rfc3339}","remote_ip":"${remote_ip}",` +
@@ -180,7 +184,10 @@ func debugMiddleware(servicename string) echo.MiddlewareFunc {
 		return func(ctx echo.Context) error {
 			uri := ctx.Request().URI()
 
-			logrus.WithField("uri", uri).WithField("_service", servicename).Debug("debug")
+			logrus.WithFields(logrus.Fields{
+				"_service": servicename,
+				"uri":      uri,
+			}).Info("trace")
 
 			return h(ctx)
 		}

@@ -124,6 +124,14 @@ func (s Session) Get(key interface{}) interface{} {
 	return s.Session.Get(key)
 }
 
+// GetOnce get and remove field
+func (s Session) GetOnce(key interface{}) interface{} {
+	v := s.Session.Get(key)
+	s.Session.Delete(key)
+
+	return v
+}
+
 func (s *Session) Set(key interface{}, val interface{}) *Session {
 	s.Session.Set(key, val)
 	return s

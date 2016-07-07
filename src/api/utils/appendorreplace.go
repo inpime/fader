@@ -54,7 +54,8 @@ func appendOrReplace(vdst, vsrc reflect.Value) error {
 		}
 	case reflect.Map:
 		for _, key := range vsrc.MapKeys() {
-			vdst.SetMapIndex(key, vsrc.MapIndex(key))
+			vdst.SetMapIndex(key, vsrc.MapIndex(key)) // if error "panic: assignment to entry in nil map".
+			// because map not init, please make(map[...]...)
 		}
 	case reflect.Slice:
 		for i := 0; i < vsrc.Len(); i++ {

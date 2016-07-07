@@ -39,7 +39,8 @@ prebuild:
 		github.com/dyatlov/go-url2oembed/... \
 		github.com/jeffail/tunny \
 		github.com/lionelbarrow/braintree-go \
-		gopkg.in/go-playground/validator.v8
+		gopkg.in/go-playground/validator.v8 \
+		github.com/mailgun/mailgun-go
 
 	mkdir -p releases
 
