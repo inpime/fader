@@ -34,7 +34,7 @@ func AppEntryPointHandler(ctx echo.Context) error {
 
 	logrus.WithFields(logrus.Fields{"_breakpoint": "HasOneLicense", "uri": uri}).Info("trace")
 
-	if !_ctx.Session().HasOneLicense(match.Handler.Licenses) {
+	if len(match.Handler.Licenses) > 0 && !_ctx.Session().HasOneLicense(match.Handler.Licenses) {
 
 		return config.ForbiddenHandler(ctx)
 	}
