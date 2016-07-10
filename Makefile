@@ -1,10 +1,11 @@
 GO=go
 ENTIRYPOINTFILES ?= src/fader.go src/config.go src/fixtures.go src/fixturex.go
+BUILDFLAGS ?= CGO_ENABLED=0  go build -a --installsuffix cgo --ldflags="-s" -o
 GOPATH:=${GOPATH}:${PWD}
 
 RUNARGS ?= -workspace="./_workspace/" \
-	-address="192.168.1.36:3322" \
-	-es_address="https://es.idheap.com" \
+	-address="" \
+	-es_address="" \
 	-es_index="fader" \
 	-session_secret="secure-key" \
 	-mode="info"
@@ -18,7 +19,7 @@ run:
 test:
 	$(GO) test -v -bench=. -benchmem -run=. ./src/api/...
 testx:
-	$(GO) test -v -run=TestAppendOrReplace ./src/...
+	$(GO) test -v -run=TestHasMap_simple ./src/utils/...
 
 prebuild:
 	$(GO) get github.com/Sirupsen/logrus \
@@ -48,14 +49,14 @@ prebuild:
 	
 build-linux: prebuild
 	@echo Build Linux amd64
-	env GOBIN=${PWD}/build/linux_amd64 GOOS=linux GOARCH=amd64 $(GO) install $(ENTIRYPOINTFILES)
+	env GOBIN=${PWD}/build/linux_amd64 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO) install -a --installsuffix cgo --ldflags="-s" $(ENTIRYPOINTFILES)
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).linux_amd64.$(STAMP).zip ${PWD}/build/linux_amd64/fader
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).linux_amd64.latest.zip ${PWD}/build/linux_amd64/fader
 .PHONY: build-linux
 
 build-osx: prebuild
 	@echo Build OSX amd64
-	env GOBIN=${PWD}/build/osx_amd64 GOOS=darwin GOARCH=amd64 $(GO) install $(ENTIRYPOINTFILES)
+	env GOBIN=${PWD}/build/osx_amd64 GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 $(GO) install -a --installsuffix cgo --ldflags="-s" $(ENTIRYPOINTFILES)
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).osx_amd64.$(STAMP).zip ${PWD}/build/osx_amd64/fader
 	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).osx_amd64.latest.zip ${PWD}/build/osx_amd64/fader
 .PHONY: build-osx
@@ -67,7 +68,7 @@ build-linux-dev: build-linux
 # helper
 reload-dev: build-linux-dev
 	-docker-compose down
-	docker-compose build
+	docker-compose build --force-rm
 	docker-compose up -d
 
 	
