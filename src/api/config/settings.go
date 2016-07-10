@@ -7,9 +7,9 @@ import (
 var sectionName = "main"
 
 // MainSettings
-func MainSettings() Settings {
+func MainSettings() *Settings {
 
-	return Cfgx.Config(sectionName).(Settings)
+	return Cfgx.Config(sectionName).(*Settings)
 }
 
 // Wraper setting
@@ -18,7 +18,7 @@ type Settings struct {
 }
 
 func (s Settings) Merge(cfg interface{}) error {
-	return utils.AppendOrReplace(s.settings, *cfg.(Settings).settings)
+	return utils.AppendOrReplace(s.settings, cfg.(*Settings).settings)
 }
 
 type settings struct {

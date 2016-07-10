@@ -23,9 +23,9 @@ var (
 	lookupForm   = "form:"
 )
 
-func MainSettings() Settings {
+func MainSettings() *Settings {
 
-	return config.Cfgx.Config(addonName).(Settings)
+	return config.Cfgx.Config(addonName).(*Settings)
 }
 
 // AppRouts

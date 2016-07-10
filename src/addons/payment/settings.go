@@ -5,8 +5,8 @@ import (
 	"api/utils"
 )
 
-func MainSettings() Settings {
-	return config.Cfgx.Config(NAME).(Settings)
+func MainSettings() *Settings {
+	return config.Cfgx.Config(NAME).(*Settings)
 }
 
 type Settings struct {
@@ -15,7 +15,7 @@ type Settings struct {
 }
 
 func (s Settings) Merge(cfg interface{}) error {
-	return utils.AppendOrReplace(s.settings, *cfg.(Settings).settings)
+	return utils.AppendOrReplace(s.settings, cfg.(*Settings).settings)
 }
 
 type settings struct{}

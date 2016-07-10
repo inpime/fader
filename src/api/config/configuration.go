@@ -145,7 +145,7 @@ func mergeAllAppConfigs(c *configs, src, fileName string) {
 
 		if addonName == sectionName {
 			// TODO: refactoring main config
-			addonConfig = Settings{&settings{}}
+			addonConfig = &Settings{&settings{}}
 		} else {
 			addonConfig = addons.GetAddon(addonName).TemplateSettings()
 		}

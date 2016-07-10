@@ -54,7 +54,7 @@ func (Extension) Setup() {
 }
 
 func (s Extension) TemplateSettings() addons.Configuration {
-	return Settings{&settings{}}
+	return &Settings{&settings{}}
 }
 
 func (s *Extension) Middlewares() []echo.MiddlewareFunc {

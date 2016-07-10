@@ -36,7 +36,7 @@ func (e Extension) Setup() {
 }
 
 func (Extension) TemplateSettings() addons.Configuration {
-	return Settings{&settings{}}
+	return &Settings{&settings{}}
 }
 
 func (*Extension) Middlewares() []echo.MiddlewareFunc {

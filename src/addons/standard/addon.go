@@ -45,7 +45,7 @@ func (Extension) Setup() {
 }
 
 func (s Extension) TemplateSettings() addons.Configuration {
-	return Settings{&settings{
+	return &Settings{&settings{
 		Config: utils.Map(),
 	}}
 }

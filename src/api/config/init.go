@@ -8,7 +8,7 @@ func Init() {
 
 func NewConfig() *configs {
 	c := make(configs)
-	c.AddConfig(sectionName, Settings{&settings{}})
+	c.AddConfig(sectionName, &Settings{&settings{}})
 
 	return &c
 }

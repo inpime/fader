@@ -12,7 +12,7 @@ type Settings struct {
 }
 
 func (s Settings) Merge(cfg interface{}) error {
-	return utils.AppendOrReplace(s.settings, *cfg.(Settings).settings)
+	return utils.AppendOrReplace(s.settings, cfg.(*Settings).settings)
 }
 
 type settings struct {

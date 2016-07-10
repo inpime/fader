@@ -51,7 +51,7 @@ func (s Extension) Middlewares() []echo.MiddlewareFunc {
 }
 
 func (s Extension) TemplateSettings() addons.Configuration {
-	return Settings{&settings{
+	return &Settings{&settings{
 		Groups: make(map[string][]GroupSettings),
 	}}
 }
