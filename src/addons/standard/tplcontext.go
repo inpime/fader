@@ -17,7 +17,7 @@ func (Extension) initTplContext() {
 	}
 
 	pongo2.DefaultSet.Globals["Config"] = func() *pongo2.Value {
-		return pongo2.AsValue(config.Cfgx.Config(addonName).(Settings).Config)
+		return pongo2.AsValue(config.Cfgx.Config(addonName).(*Settings).Config)
 	}
 
 	pongo2.DefaultSet.Globals["SectionAppConfig"] = func(sectionName *pongo2.Value) *pongo2.Value {
