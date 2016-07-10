@@ -3,6 +3,8 @@ package payment
 import (
 	"addons/standard"
 	braintree "github.com/lionelbarrow/braintree-go"
+	"strconv"
+	"time"
 	"utils"
 )
 
@@ -83,7 +85,7 @@ type TxAddress struct {
 	PostalCode    string
 }
 
-func PayViaBraintreeGateway(opt OrderInfo) (string, error) {
+func newBraintree() *braintree.Braintree {
 	var env = braintree.Sandbox
 
 	paymentOption := standard.MainSettings().Config.M("braintree")
@@ -92,12 +94,18 @@ func PayViaBraintreeGateway(opt OrderInfo) (string, error) {
 		env = braintree.Production
 	}
 
-	bt := braintree.New(
+	return braintree.New(
 		env,
 		paymentOption.String("merchantId"),
 		paymentOption.String("publicKey"),
 		paymentOption.String("privateKey"),
 	)
+}
+
+func PayViaBraintreeGateway(opt OrderInfo) (string, error) {
+	bt := newBraintree()
+
+	// tx, err := bt.Transaction().Find()
 
 	tx, err := bt.Transaction().Create(&braintree.Transaction{
 		Type:    "sale",
@@ -140,4 +148,27 @@ func PayViaBraintreeGateway(opt OrderInfo) (string, error) {
 	}
 
 	return tx.Id, nil
+}
+
+func ClientTokenBraintree() (string, error) {
+	bt := newBraintree()
+	return bt.ClientToken().Generate()
+}
+
+func PayFromNonceViaBraintreeGateway(payment_method_nonce string) (string, error) {
+	bt := newBraintree()
+
+	orderId := strconv.FormatInt(time.Now().Unix(), 10)
+
+	tx, err := bt.Transaction().Create(&braintree.Transaction{
+		Type:               "sale",
+		Amount:             braintree.NewDecimal(1234, 2), // 100 cents = 1 USD
+		OrderId:            orderId,
+		PaymentMethodNonce: payment_method_nonce,
+		Options: &braintree.TransactionOptions{
+			SubmitForSettlement: true,
+		},
+	})
+
+	return tx.Id, err
 }

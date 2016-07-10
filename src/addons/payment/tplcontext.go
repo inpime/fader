@@ -30,4 +30,33 @@ func initTplContext() {
 
 		return pongo2.AsValue(txId)
 	}
+
+	pongo2.DefaultSet.Globals["BraintreeClientToken"] = func() *pongo2.Value {
+		token, err := ClientTokenBraintree()
+
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"err":      err,
+				"_service": NAME,
+			}).Infof("generate braintree client token")
+			return pongo2.AsValue("")
+		}
+
+		return pongo2.AsValue(token)
+	}
+
+	pongo2.DefaultSet.Globals["PayFromNonceViaBraintreeGateway"] = func(payment_method_nonce *pongo2.Value) *pongo2.Value {
+		token, err := PayFromNonceViaBraintreeGateway(payment_method_nonce.String())
+
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"err":      err,
+				"_service": NAME,
+			}).Infof("payment method nonce braintree")
+
+			return pongo2.AsValue("")
+		}
+
+		return pongo2.AsValue(token)
+	}
 }
