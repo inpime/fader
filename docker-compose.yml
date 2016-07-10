@@ -6,7 +6,7 @@ services:
         restart: always
         volumes:
             - ./state/app/workspace:/app/_workspace
-            - ./state/logs/app:/app/logs
+            # - ./state/logs/app:/app/logs
         # tty: true
         ports:
             - 8081:3322
