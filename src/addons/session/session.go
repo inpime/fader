@@ -7,7 +7,7 @@ import (
 	"github.com/gebv/echo-session"
 	"github.com/inpime/dbox"
 	"store"
-	"utils"
+	"utils/sdata"
 )
 
 var (
@@ -22,7 +22,7 @@ var (
 
 func init() {
 	gob.Register(map[string]interface{}{})
-	gob.Register(utils.Map())
+	gob.Register(sdata.NewStringMap())
 }
 
 func NewSession(s session.Session) *Session {

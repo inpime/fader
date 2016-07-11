@@ -16,7 +16,7 @@ import (
 	// "sort"
 	"store"
 	"time"
-	"utils"
+	"utils/sdata"
 )
 
 func initElasticSearch() error {
@@ -138,8 +138,8 @@ func _initStroes() {
 
 		// Mapping bucket
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
-		bucket.MMapDataFilesMapping().LoadFromM(store.BucketMapMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
+		bucket.MMapDataFilesMapping().LoadFrom(store.BucketMapMappingDefault)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -159,8 +159,8 @@ func _initStroes() {
 
 		// Mapping bucket
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
-		// bucket.MMapDataFilesMapping().LoadFromM(store.FileEmptyMapDataMapping)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
+		// bucket.MMapDataFilesMapping().LoadFrom(store.FileEmptyMapDataMapping)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -180,8 +180,8 @@ func _initStroes() {
 
 		// Mapping bucket
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
-		// bucket.MMapDataFilesMapping().LoadFromM(store.FileEmptyMapDataMapping)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
+		// bucket.MMapDataFilesMapping().LoadFrom(store.FileEmptyMapDataMapping)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -201,8 +201,8 @@ func _initStroes() {
 
 		// Mapping bucket
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
-		// bucket.MMapDataFilesMapping().LoadFromM(store.FileEmptyMapDataMapping)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
+		// bucket.MMapDataFilesMapping().LoadFrom(store.FileEmptyMapDataMapping)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -220,9 +220,9 @@ func _initStroes() {
 
 		// Mapping bucket
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
 		bucket.MMapDataFilesMapping().
-			Set("licenses", utils.Map().
+			Set("licenses", sdata.NewStringMap().
 				Set("type", "string").
 				Set("index", "not_analyzed"))
 
@@ -244,8 +244,8 @@ func _initStroes() {
 
 		// Mapping bucket
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
-		// bucket.MMapDataFilesMapping().LoadFromM(store.FileEmptyMapDataMapping)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
+		// bucket.MMapDataFilesMapping().LoadFrom(store.FileEmptyMapDataMapping)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -430,7 +430,7 @@ licenses = ["admin"]
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
-		utils.M(file.MapData()).Set("fullName", "Guest")
+		sdata.NewStringMapFrom(file.MapData()).Set("fullName", "Guest")
 		user := session.FileAsUser(file)
 		user.AddLicense(session.GuestLicense)
 
@@ -441,7 +441,7 @@ licenses = ["admin"]
 	if err == dbox.ErrNotFound {
 		fmt.Printf("%v: create %q\n", file.Bucket(), file.Name())
 
-		utils.M(file.MapData()).Set("fullName", "Demo")
+		sdata.NewStringMapFrom(file.MapData()).Set("fullName", "Demo")
 		user := session.FileAsUser(file)
 		user.AddLicense(session.UserLicense)
 		user.AddLicense(session.AdminLicense)

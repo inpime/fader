@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/inpime/dbox"
-	"utils"
+	"utils/sdata"
 )
 
 var (
@@ -18,19 +18,19 @@ var (
 	BucketRawDataStoreNameWithoutPostfixKey  = "RawDataStoreNameWithoutPostfix"
 	BucketMetaDataStoreNameWithoutPostfixKey = "MetaDataStoreNameWithoutPostfix"
 
-	BucketFileMappingDefault = utils.Map().
-					Set("FileID", utils.Map().
+	BucketFileMappingDefault = sdata.NewStringMap().
+					Set("FileID", sdata.NewStringMap().
 						Set("type", "string").
 						Set("index", "not_analyzed")).
-					Set("Bucket", utils.Map().
+					Set("Bucket", sdata.NewStringMap().
 						Set("type", "string").
 						Set("index", "not_analyzed")).
-					Set("Name", utils.Map().
+					Set("Name", sdata.NewStringMap().
 						Set("type", "string").
 						Set("index", "not_analyzed")).
-					Set("TextData", utils.Map().
+					Set("TextData", sdata.NewStringMap().
 						Set("type", "string")).
-					Set("MapData", utils.Map().
+					Set("MapData", sdata.NewStringMap().
 						Set("type", "object").
 						Set("enabled", false)) // disabled mapping by default
 
@@ -38,44 +38,44 @@ var (
 		// Set("CreatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"}).
 		// Set("UpdatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"})
 
-	FileMetaMappingDefault = utils.Map().
-				Set(dbox.MapDataStoreNameKey, utils.Map().
+	FileMetaMappingDefault = sdata.NewStringMap().
+				Set(dbox.MapDataStoreNameKey, sdata.NewStringMap().
 					Set("type", "string").
 					Set("index", "not_analyzed")).
-				Set(dbox.RawDataStoreNameKey, utils.Map().
+				Set(dbox.RawDataStoreNameKey, sdata.NewStringMap().
 					Set("type", "string").
 					Set("index", "not_analyzed")).
-				Set(dbox.MetaDataFileStoreNameKey, utils.Map().
+				Set(dbox.MetaDataFileStoreNameKey, sdata.NewStringMap().
 					Set("type", "string").
 					Set("index", "not_analyzed")).
-				Set(dbox.CreatedAtKey, utils.Map().
+				Set(dbox.CreatedAtKey, sdata.NewStringMap().
 					Set("type", "date").
 					Set("format", "strict_date_optional_time||epoch_millis")).
-				Set(dbox.UpdatedAtKey, utils.Map().
+				Set(dbox.UpdatedAtKey, sdata.NewStringMap().
 					Set("type", "date").
 					Set("format", "strict_date_optional_time||epoch_millis")).
-				Set(dbox.MapDataIDMetaKey, utils.Map().
+				Set(dbox.MapDataIDMetaKey, sdata.NewStringMap().
 					Set("type", "string").
 					Set("index", "not_analyzed")).
-				Set(dbox.RawDataIDMetaKey, utils.Map().
+				Set(dbox.RawDataIDMetaKey, sdata.NewStringMap().
 					Set("type", "string").
 					Set("index", "not_analyzed")).
-				Set(dbox.BucketKey, utils.Map().
+				Set(dbox.BucketKey, sdata.NewStringMap().
 					Set("type", "string").
 					Set("index", "not_analyzed")).
-				Set(dbox.NameKey, utils.Map().
+				Set(dbox.NameKey, sdata.NewStringMap().
 					Set("type", "string").
 					Set("index", "not_analyzed"))
 
-	FileEmptyMapDataMapping = utils.Map().
+	FileEmptyMapDataMapping = sdata.NewStringMap().
 				Set("type", "object").
 				Set("enabled", false)
 
-	BucketMapMappingDefault = utils.Map().
-				Set(MetaFilesBucketMappingKey, utils.Map().
+	BucketMapMappingDefault = sdata.NewStringMap().
+				Set(MetaFilesBucketMappingKey, sdata.NewStringMap().
 					Set("type", "object").
 					Set("enabled", false)).
-				Set(MapFilesBucketMappingKey, utils.Map().
+				Set(MapFilesBucketMappingKey, sdata.NewStringMap().
 					Set("type", "object").
 					Set("enabled", false))
 )
@@ -156,45 +156,45 @@ func (f Bucket) InitMapDataStore(_type dbox.StoreType, withoutPostfix bool) {
 // without postfix
 
 func (b Bucket) GetMapDataStoreNameWithoutPostfix() bool {
-	return utils.M(b.Meta()).Bool(BucketMapDataStoreNameWithoutPostfixKey)
+	return sdata.NewStringMapFrom(b.Meta()).Bool(BucketMapDataStoreNameWithoutPostfixKey)
 }
 
 func (b Bucket) GetRawDataStoreNameWithoutPostfix() bool {
-	return utils.M(b.Meta()).Bool(BucketRawDataStoreNameWithoutPostfixKey)
+	return sdata.NewStringMapFrom(b.Meta()).Bool(BucketRawDataStoreNameWithoutPostfixKey)
 }
 
 func (b Bucket) GetMetaDataStoreNameWithoutPostfix() bool {
-	return utils.M(b.Meta()).Bool(BucketMetaDataStoreNameWithoutPostfixKey)
+	return sdata.NewStringMapFrom(b.Meta()).Bool(BucketMetaDataStoreNameWithoutPostfixKey)
 }
 
 func (b Bucket) SetMapDataStoreNameWithoutPostfix(v bool) {
-	utils.M(b.Meta()).Set(BucketMapDataStoreNameWithoutPostfixKey, v)
+	sdata.NewStringMapFrom(b.Meta()).Set(BucketMapDataStoreNameWithoutPostfixKey, v)
 }
 
 func (b Bucket) SetRawDataStoreNameWithoutPostfix(v bool) {
-	utils.M(b.Meta()).Set(BucketRawDataStoreNameWithoutPostfixKey, v)
+	sdata.NewStringMapFrom(b.Meta()).Set(BucketRawDataStoreNameWithoutPostfixKey, v)
 }
 
 func (b Bucket) SetMetaDataStoreNameWithoutPostfix(v bool) {
-	utils.M(b.Meta()).Set(BucketMetaDataStoreNameWithoutPostfixKey, v)
+	sdata.NewStringMapFrom(b.Meta()).Set(BucketMetaDataStoreNameWithoutPostfixKey, v)
 }
 
 // store type
 
 func (b Bucket) SetMapDataStoreType(_type dbox.StoreType) {
-	utils.M(b.Meta()).Set(BucketMapDataStoreTypeKey, _type)
+	sdata.NewStringMapFrom(b.Meta()).Set(BucketMapDataStoreTypeKey, _type)
 }
 
 func (b Bucket) SetRawDataStoreType(_type dbox.StoreType) {
-	utils.M(b.Meta()).Set(BucketRawDataStoreTypeKey, _type)
+	sdata.NewStringMapFrom(b.Meta()).Set(BucketRawDataStoreTypeKey, _type)
 }
 
 func (b Bucket) SetMetaDataStoreType(_type dbox.StoreType) {
-	utils.M(b.Meta()).Set(BucketMetaDataStoreTypeKey, _type)
+	sdata.NewStringMapFrom(b.Meta()).Set(BucketMetaDataStoreTypeKey, _type)
 }
 
 func (b Bucket) GetMapDataStoreType() dbox.StoreType {
-	switch v := utils.M(b.Meta()).Get(BucketMapDataStoreTypeKey).(type) {
+	switch v := sdata.NewStringMapFrom(b.Meta()).GetOrNil(BucketMapDataStoreTypeKey).(type) {
 	case string:
 		return dbox.StoreType(v)
 	case dbox.StoreType:
@@ -207,7 +207,7 @@ func (b Bucket) GetMapDataStoreType() dbox.StoreType {
 }
 
 func (b Bucket) GetRawDataStoreType() dbox.StoreType {
-	switch v := utils.M(b.Meta()).Get(BucketRawDataStoreTypeKey).(type) {
+	switch v := sdata.NewStringMapFrom(b.Meta()).GetOrNil(BucketRawDataStoreTypeKey).(type) {
 	case string:
 		return dbox.StoreType(v)
 	case dbox.StoreType:
@@ -220,7 +220,7 @@ func (b Bucket) GetRawDataStoreType() dbox.StoreType {
 }
 
 func (b Bucket) GetMetaDataStoreType() dbox.StoreType {
-	switch v := utils.M(b.Meta()).Get(BucketMetaDataStoreTypeKey).(type) {
+	switch v := sdata.NewStringMapFrom(b.Meta()).GetOrNil(BucketMetaDataStoreTypeKey).(type) {
 	case string:
 		return dbox.StoreType(v)
 	case dbox.StoreType:
@@ -237,21 +237,21 @@ func (b Bucket) GetMetaDataStoreType() dbox.StoreType {
 // MetaDataFilesMapping returns the mapping metadata of file of the search index (for elastic search)
 func (f Bucket) MetaDataFilesMapping() map[string]interface{} {
 
-	return utils.M(f.MapData()).Map(MetaFilesBucketMappingKey)
+	return sdata.NewStringMapFrom(f.MapData()).Map(MetaFilesBucketMappingKey)
 }
 
 // MapDataFilesMapping returns the mapping mapdata of file of the search index (for elastic search)
 func (f Bucket) MapDataFilesMapping() map[string]interface{} {
 
-	return utils.M(f.MapData()).Map(MapFilesBucketMappingKey)
+	return sdata.NewStringMapFrom(f.MapData()).Map(MapFilesBucketMappingKey)
 }
 
-func (f *Bucket) MMetaDataFilesMapping() utils.M {
-	return utils.M(f.MapData()).M(MetaFilesBucketMappingKey)
+func (f *Bucket) MMetaDataFilesMapping() *sdata.StringMap {
+	return sdata.NewStringMapFrom(f.MapData()).M(MetaFilesBucketMappingKey)
 }
 
-func (f *Bucket) MMapDataFilesMapping() utils.M {
-	return utils.M(f.MapData()).M(MapFilesBucketMappingKey)
+func (f *Bucket) MMapDataFilesMapping() *sdata.StringMap {
+	return sdata.NewStringMapFrom(f.MapData()).M(MapFilesBucketMappingKey)
 }
 
 func (f *Bucket) UpdateMapping() error {

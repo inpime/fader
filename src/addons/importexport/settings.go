@@ -3,7 +3,7 @@ package importexport
 import (
 	"api/config"
 	apiutils "api/utils"
-	"utils"
+	"utils/sdata"
 )
 
 func MainSettings() *Settings {
@@ -48,5 +48,5 @@ type GroupSettings struct {
 }
 
 func (gs GroupSettings) IncludeFile(filename string) bool {
-	return utils.NewA(gs.Files).Include(filename)
+	return sdata.NewArrayFrom(gs.Files).Index(filename) > -1
 }

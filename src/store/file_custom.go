@@ -2,25 +2,25 @@ package store
 
 import (
 	"github.com/Sirupsen/logrus"
-	"utils"
+	"utils/sdata"
 )
 
-func (f File) MMeta() utils.M {
-	return utils.M(f.Meta())
+func (f File) MMeta() *sdata.StringMap {
+	return sdata.NewStringMapFrom(f.Meta())
 }
 
 func (f *File) SetContentType(v string) *File {
-	utils.M(f.Meta()).Set(ContentTypeKey, v)
+	sdata.NewStringMapFrom(f.Meta()).Set(ContentTypeKey, v)
 	return f
 }
 
 func (f File) ContentType() string {
 
-	return utils.Map(f.Meta()).String(ContentTypeKey)
+	return sdata.NewStringMapFrom(f.Meta()).String(ContentTypeKey)
 }
 
-func (f *File) MMapData() utils.M {
-	return utils.M(f.MapData())
+func (f *File) MMapData() *sdata.StringMap {
+	return sdata.NewStringMapFrom(f.MapData())
 }
 
 func (f *File) SetMapData(v map[string]interface{}) *File {

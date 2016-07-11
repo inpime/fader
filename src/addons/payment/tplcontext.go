@@ -3,7 +3,7 @@ package payment
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
-	"utils"
+	"utils/sdata"
 )
 
 func initTplContext() {
@@ -11,7 +11,7 @@ func initTplContext() {
 		orderOpt := OrderInfoFromM(
 			orderId.String(),
 			int64(amount.Float()*100),
-			opt.Interface().(utils.M),
+			opt.Interface().(*sdata.StringMap),
 		)
 
 		txId, err := PayViaBraintreeGateway(orderOpt)

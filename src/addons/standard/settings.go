@@ -3,7 +3,8 @@ package standard
 import (
 	"api/config"
 	"api/utils"
-	gutils "utils"
+	// gutils "utils"
+	"utils/sdata"
 )
 
 type Settings struct {
@@ -17,9 +18,9 @@ func (s Settings) Merge(cfg interface{}) error {
 }
 
 type settings struct {
-	TplCache       bool     `toml:"tplcache" json:"tplcache"`
-	MailerProvider string   `toml:"mailerprovider" json:"mailerprovider"`
-	Config         gutils.M `toml:"config" json:"config"`
+	TplCache       bool             `toml:"tplcache" json:"tplcache"`
+	MailerProvider string           `toml:"mailerprovider" json:"mailerprovider"`
+	Config         *sdata.StringMap `toml:"config" json:"config"`
 }
 
 func MainSettings() *Settings {

@@ -4,7 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"gopkg.in/go-playground/validator.v8"
-	"utils"
+	"utils/sdata"
 )
 
 var V = validator.New(&validator.Config{})
@@ -16,17 +16,17 @@ func init() {
 
 func NewValidatorData() *ValidatorData {
 	return &ValidatorData{
-		Data:          utils.M{},
-		Rules:         utils.M{},
-		ErrorMessages: utils.M{},
+		Data:          sdata.NewStringMap(),
+		Rules:         sdata.NewStringMap(),
+		ErrorMessages: sdata.NewStringMap(),
 	}
 }
 
 type ValidatorData struct {
-	Data  utils.M
-	Rules utils.M
+	Data  *sdata.StringMap
+	Rules *sdata.StringMap
 
-	ErrorMessages utils.M
+	ErrorMessages *sdata.StringMap
 }
 
 func (v *ValidatorData) SetData(data interface{}) *ValidatorData {
@@ -40,20 +40,21 @@ func (v *ValidatorData) AddRule(fieldName, ruleStr string) *ValidatorData {
 }
 
 func (v *ValidatorData) Valid() bool {
-	v.ErrorMessages = utils.M{} // clear old error messages
+	v.ErrorMessages = sdata.NewStringMap() // clear old error messages
 
-	for fieldName, rule := range v.Rules {
-		if err := V.Field(v.Data.Get(fieldName), rule.(string)); err != nil {
+	for _, fieldName := range v.Rules.Keys() {
+		rule := v.Rules.String(fieldName)
+		if err := V.Field(v.Data.GetOrNil(fieldName), rule); err != nil {
 
 			v.ErrorMessages.Set(fieldName,
 				NewFIeld(fieldName,
-					v.Data.Get(fieldName),
+					v.Data.GetOrNil(fieldName),
 					err,
 				))
 		}
 	}
 
-	if len(v.ErrorMessages) > 0 {
+	if v.ErrorMessages.Size() > 0 {
 		return false
 	}
 
@@ -61,7 +62,7 @@ func (v *ValidatorData) Valid() bool {
 }
 
 func (v ValidatorData) Get(fieldName string) FIeld {
-	field := v.ErrorMessages.Get(fieldName)
+	field := v.ErrorMessages.GetOrNil(fieldName)
 
 	if field, valid := field.(FIeld); valid {
 		return field
@@ -69,11 +70,11 @@ func (v ValidatorData) Get(fieldName string) FIeld {
 
 	return FIeld{
 		FieldName: fieldName,
-		Value:     v.Data.Get(fieldName),
+		Value:     v.Data.GetOrNil(fieldName),
 	}
 }
 
-func (v ValidatorData) Messages() utils.M {
+func (v ValidatorData) Messages() *sdata.StringMap {
 	return v.ErrorMessages
 }
 

@@ -2,7 +2,7 @@ package store
 
 import (
 	"gopkg.in/olivere/elastic.v3"
-	"utils"
+	"utils/sdata"
 )
 
 type SearchQueryIface interface {
@@ -76,11 +76,11 @@ func UpdateSearchMapping(bucket *Bucket) error {
 		Format string `json:"format,omitempty"`
 	}
 
-	docMapping := utils.Map(BucketFileMappingDefault).
-		Set("Meta", utils.Map().Set("properties", bucket.MetaDataFilesMapping()))
+	docMapping := sdata.NewStringMapFrom(BucketFileMappingDefault).
+		Set("Meta", sdata.NewStringMap().Set("properties", bucket.MetaDataFilesMapping()))
 
 	if len(bucket.MapDataFilesMapping()) > 0 {
-		docMapping.Set("MapData", utils.Map().Set("properties", bucket.MapDataFilesMapping()))
+		docMapping.Set("MapData", sdata.NewStringMap().Set("properties", bucket.MapDataFilesMapping()))
 	}
 
 	// Set("UpdatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"})

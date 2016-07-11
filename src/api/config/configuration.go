@@ -94,7 +94,9 @@ func Reload() {
 
 	hydrateAllAppConfigs(newconfig, src, fileName)
 
-	for _, fileName := range newconfig.Config(sectionName).(addons.MainConfiguration).Include() {
+	includeFiles := newconfig.Config(sectionName).(addons.MainConfiguration).Include()
+
+	for _, fileName := range includeFiles {
 		// include
 		logrus.WithField("_service", loggerKey).
 			Debug("load include settings from file %q", fileName)

@@ -5,7 +5,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"store"
 	"strings"
-	"utils"
+	"utils/sdata"
 )
 
 func makeSearch(filter store.SearchQueryIface) store.SearchResultIface {
@@ -69,7 +69,7 @@ func makeSearch(filter store.SearchQueryIface) store.SearchResultIface {
 // поиск всех файлов в указанном бакете по текстовому запросу (по умолчанию по RawData)
 // Sorted by CreatedAt desc
 func buildSearchQueryFilesByBycket(bucketName, qstr string, page, perpage int) map[string]interface{} {
-	query := utils.Map()
+	query := sdata.NewStringMap()
 
 	// filter arguments
 
@@ -85,14 +85,14 @@ func buildSearchQueryFilesByBycket(bucketName, qstr string, page, perpage int) m
 
 	// prepare arguments of query
 
-	queryFileter := utils.Map().
-		Set("term", utils.Map().Set("Bucket", bucketName))
+	queryFileter := sdata.NewStringMap().
+		Set("term", sdata.NewStringMap().Set("Bucket", bucketName))
 
-	querySort := utils.Map().
-		Set("Meta.CreatedAt", utils.Map().Set("order", "desc"))
+	querySort := sdata.NewStringMap().
+		Set("Meta.CreatedAt", sdata.NewStringMap().Set("order", "desc"))
 
-	_query := utils.Map().
-		Set("query_string", utils.Map().
+	_query := sdata.NewStringMap().
+		Set("query_string", sdata.NewStringMap().
 			Set("default_field", "TextData").
 			Set("query", qstr))
 
@@ -125,7 +125,7 @@ func buildSearchQueryFilesByBycket(bucketName, qstr string, page, perpage int) m
 		query.Set("query", _query)
 	}
 
-	return query
+	return query.ToMap()
 }
 
 // --------------

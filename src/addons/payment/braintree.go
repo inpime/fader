@@ -5,7 +5,7 @@ import (
 	braintree "github.com/lionelbarrow/braintree-go"
 	"strconv"
 	"time"
-	"utils"
+	"utils/sdata"
 )
 
 /*
@@ -28,7 +28,7 @@ import (
 		PostalCode
 */
 
-func OrderInfoFromM(orderId string, amount int64, opt utils.M) OrderInfo {
+func OrderInfoFromM(orderId string, amount int64, opt *sdata.StringMap) OrderInfo {
 	return OrderInfo{
 		OrderID: orderId,
 		Amount:  amount,

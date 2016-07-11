@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"store"
 	"strings"
-	"utils"
+	"utils/sdata"
 )
 
 func (Extension) initTplContext() {
@@ -164,11 +164,11 @@ func (Extension) initTplContext() {
 	// Load load file by name
 	pongo2.DefaultSet.Globals["M"] = func() *pongo2.Value {
 
-		return pongo2.AsValue(utils.Map())
+		return pongo2.AsValue(sdata.NewStringMap())
 	}
 
 	pongo2.DefaultSet.Globals["A"] = func() *pongo2.Value {
-		return pongo2.AsValue(utils.NewA([]string{}))
+		return pongo2.AsValue(sdata.NewArray())
 	}
 
 	pongo2.DefaultSet.Globals["AIface"] = func() *pongo2.Value {
@@ -182,7 +182,7 @@ func (Extension) initTplContext() {
 
 	// CreateBucket special function (used only to create a bucket)
 	pongo2.DefaultSet.Globals["CreateBucket"] = func(_opt *pongo2.Value) *pongo2.Value {
-		opt := utils.Map().LoadFrom(_opt.Interface())
+		opt := sdata.NewStringMapFrom(_opt.Interface())
 
 		bucketName := opt.String("Name")
 		bucket, err := store.BucketByName(bucketName)
@@ -207,7 +207,7 @@ func (Extension) initTplContext() {
 			return pongo2.AsValue(err)
 		}
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
 		bucket.MMapDataFilesMapping().LoadFrom(opt.String("MappingMapDataFiles"))
 
 		if err := bucket.UpdateMapping(); err != nil {

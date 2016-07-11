@@ -1,10 +1,10 @@
 package context
 
-import "utils"
+import "utils/sdata"
 
-// BindFormToMap helper function for fast bind forms
-func (c Context) BindFormToMap(fieldNames ...string) utils.M {
-	m := utils.Map()
+// BindFormToMap returns the form field values for the provided names.
+func (c Context) BindFormToMap(fieldNames ...string) *sdata.StringMap {
+	m := sdata.NewStringMap()
 
 	for _, name := range fieldNames {
 		m.Set(name, c.FormValue(name))

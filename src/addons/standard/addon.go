@@ -4,7 +4,7 @@ import (
 	"api/addons"
 	"fmt"
 	"github.com/labstack/echo"
-	"utils"
+	"utils/sdata"
 )
 
 var addonName = "basic"
@@ -46,7 +46,7 @@ func (Extension) Setup() {
 
 func (s Extension) TemplateSettings() addons.Configuration {
 	return &Settings{&settings{
-		Config: utils.Map(),
+		Config: sdata.NewStringMap(),
 	}}
 }
 

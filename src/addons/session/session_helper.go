@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/sessions"
 	"store"
-	"utils"
+	"utils/sdata"
 )
 
 func (s Session) IsGuest() bool {
@@ -41,10 +41,9 @@ type gorillaSessionIface interface {
 	Session() *sessions.Session
 }
 
-func (s Session) Props() utils.M {
-	// TODO: change Values type as map[string]interface{}
+func (s Session) Props() *sdata.Map {
 
-	return utils.Map(s.Session.(gorillaSessionIface).Session().Values)
+	return sdata.NewMapFrom(s.Session.(gorillaSessionIface).Session().Values)
 }
 
 // Signin the user authorization via key and password

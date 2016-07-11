@@ -11,7 +11,7 @@ import (
 	"github.com/inpime/dbox"
 	"store"
 	"time"
-	"utils"
+	"utils/sdata"
 )
 
 func initStroes() {
@@ -44,8 +44,8 @@ func initStroes() {
 	if err == dbox.ErrNotFound {
 		logrus.Infof("buckets: create bucket %q\n", bucket.Name())
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
-		bucket.MMapDataFilesMapping().LoadFromM(store.BucketMapMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
+		bucket.MMapDataFilesMapping().LoadFrom(store.BucketMapMappingDefault)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -86,7 +86,7 @@ func initStroes() {
 	if err == dbox.ErrNotFound {
 		logrus.Infof("buckets: create bucket %q\n", bucket.Name())
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -104,7 +104,7 @@ func initStroes() {
 	if err == dbox.ErrNotFound {
 		logrus.Infof("buckets: create bucket %q\n", bucket.Name())
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
@@ -120,14 +120,14 @@ func initStroes() {
 	if err == dbox.ErrNotFound {
 		logrus.Infof("buckets: create bucket %q\n", bucket.Name())
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
 		bucket.MMapDataFilesMapping().
-			Set("licenses", utils.Map().
+			Set("licenses", sdata.NewStringMap().
 				Set("type", "string").
 				Set("index", "not_analyzed")).
-			Set("fullname", utils.Map().
+			Set("fullname", sdata.NewStringMap().
 				Set("type", "string")).
-			Set("pwd", utils.Map().
+			Set("pwd", sdata.NewStringMap().
 				Set("type", "string").
 				Set("index", "not_analyzed"))
 
@@ -147,7 +147,7 @@ func initStroes() {
 	if err == dbox.ErrNotFound {
 		logrus.Infof("buckets: create bucket %q\n", bucket.Name())
 
-		bucket.MMetaDataFilesMapping().LoadFromM(store.FileMetaMappingDefault)
+		bucket.MMetaDataFilesMapping().LoadFrom(store.FileMetaMappingDefault)
 
 		bucket.UpdateMapping()
 		bucket.Sync()
