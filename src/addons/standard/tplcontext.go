@@ -171,10 +171,6 @@ func (Extension) initTplContext() {
 		return pongo2.AsValue(sdata.NewArray())
 	}
 
-	pongo2.DefaultSet.Globals["AIface"] = func() *pongo2.Value {
-		return pongo2.AsValue([]interface{}{})
-	}
-
 	pongo2.DefaultSet.Globals["Validator"] = func() *pongo2.Value {
 
 		return pongo2.AsValue(NewValidatorData())
