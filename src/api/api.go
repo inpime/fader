@@ -187,7 +187,7 @@ func debugMiddleware(servicename string) echo.MiddlewareFunc {
 			logrus.WithFields(logrus.Fields{
 				"_service": servicename,
 				"uri":      uri,
-			}).Info("trace")
+			}).Debug("trace")
 
 			return h(ctx)
 		}
