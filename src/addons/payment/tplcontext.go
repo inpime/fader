@@ -31,6 +31,10 @@ func initTplContext() {
 		return pongo2.AsValue(txId)
 	}
 
+	pongo2.DefaultSet.Globals["Payment"] = func() *pongo2.Value {
+		return pongo2.AsValue(&Payment{})
+	}
+
 	pongo2.DefaultSet.Globals["BraintreeClientToken"] = func() *pongo2.Value {
 		token, err := ClientTokenBraintree()
 
@@ -45,18 +49,27 @@ func initTplContext() {
 		return pongo2.AsValue(token)
 	}
 
-	pongo2.DefaultSet.Globals["PayFromNonceViaBraintreeGateway"] = func(payment_method_nonce *pongo2.Value) *pongo2.Value {
-		token, err := PayFromNonceViaBraintreeGateway(payment_method_nonce.String())
+	pongo2.DefaultSet.Globals["PayFromNonceViaBraintreeGateway"] = func(payment_method_nonce, orderId, amount, opt *pongo2.Value) *pongo2.Value {
+		orderOpt := OrderInfoFromM(
+			orderId.String(),
+			int64(amount.Float()*100),
+			opt.Interface().(*sdata.StringMap),
+		)
+
+		txId, err := PayFromNonceViaBraintreeGateway(payment_method_nonce.String(), orderOpt)
 
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
+				"order":    orderId.String(),
+				"amount":   amount.Integer(),
 				"err":      err,
+				"txid":     txId,
 				"_service": NAME,
-			}).Infof("payment method nonce braintree")
+			}).Infof("pay via nonce")
 
 			return pongo2.AsValue("")
 		}
 
-		return pongo2.AsValue(token)
+		return pongo2.AsValue(txId)
 	}
 }

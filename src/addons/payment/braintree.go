@@ -3,8 +3,6 @@ package payment
 import (
 	"addons/standard"
 	braintree "github.com/lionelbarrow/braintree-go"
-	"strconv"
-	"time"
 	"utils/sdata"
 )
 
@@ -155,18 +153,43 @@ func ClientTokenBraintree() (string, error) {
 	return bt.ClientToken().Generate()
 }
 
-func PayFromNonceViaBraintreeGateway(payment_method_nonce string) (string, error) {
+func PayFromNonceViaBraintreeGateway(payment_method_nonce string, opt OrderInfo) (string, error) {
 	bt := newBraintree()
 
-	orderId := strconv.FormatInt(time.Now().Unix(), 10)
-
 	tx, err := bt.Transaction().Create(&braintree.Transaction{
-		Type:               "sale",
-		Amount:             braintree.NewDecimal(1234, 2), // 100 cents = 1 USD
-		OrderId:            orderId,
 		PaymentMethodNonce: payment_method_nonce,
+		Type:               "sale",
+		Amount:             braintree.NewDecimal(opt.Amount, 2), // 100 cents = 1 USD
+		OrderId:            opt.OrderID,
+		CreditCard: &braintree.CreditCard{
+			CardholderName: opt.CardholderName,
+			Number:         opt.CardNumber,
+			ExpirationDate: opt.ExpDate,
+			CVV:            opt.CVV,
+		},
+		Customer: &braintree.Customer{
+			FirstName: opt.Customer.FirstName,
+			LastName:  opt.Customer.LastName,
+			Email:     opt.Customer.Email,
+			Company:   opt.Customer.Company,
+		},
+		BillingAddress: &braintree.Address{
+			StreetAddress: opt.BillingAddress.StreetAddress,
+			Locality:      opt.BillingAddress.Locality,
+			Region:        opt.BillingAddress.Region,
+			PostalCode:    opt.BillingAddress.PostalCode,
+		},
+		// ShippingAddress: &braintree.Address{
+		// 	StreetAddress: opt.ShippingAddress.StreetAddress,
+		// 	Locality:      opt.ShippingAddress.Locality,
+		// 	Region:        opt.ShippingAddress.Region,
+		// 	PostalCode:    opt.ShippingAddress.PostalCode,
+		// },
 		Options: &braintree.TransactionOptions{
 			SubmitForSettlement: true,
+			// 	// StoreInVault:                     true,
+			AddBillingAddressToPaymentMethod: true,
+			StoreShippingAddressInVault:      true,
 		},
 	})
 
