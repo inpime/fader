@@ -27,13 +27,18 @@ func (m *Map) Set(key, value interface{}) *Map {
 	return m
 }
 
-func (m Map) Get(key interface{}) (value interface{}, exists bool) {
+func (m Map) Get(key interface{}) (value interface{}) {
+
+	return m.GetOrNil(key)
+}
+
+func (m Map) GetIf(key interface{}) (value interface{}, exists bool) {
 	value, exists = m[key]
 	return
 }
 
 func (m Map) GetOrNil(key interface{}) interface{} {
-	if value, exists := m.Get(key); exists {
+	if value, exists := m.GetIf(key); exists {
 		return value
 	}
 

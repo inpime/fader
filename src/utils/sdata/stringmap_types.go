@@ -25,7 +25,7 @@ func (m StringMap) Bool(key string) bool {
 }
 
 func (m *StringMap) Map(key string) map[string]interface{} {
-	v, exists := m.Get(key)
+	v, exists := m.GetIf(key)
 
 	if exists {
 		if v, ok := v.(map[string]interface{}); ok {

@@ -25,7 +25,7 @@ func (m Map) Bool(key interface{}) bool {
 }
 
 func (m *Map) Map(key interface{}) map[interface{}]interface{} {
-	v, exists := m.Get(key)
+	v, exists := m.GetIf(key)
 
 	if exists {
 		if v, ok := v.(map[interface{}]interface{}); ok {

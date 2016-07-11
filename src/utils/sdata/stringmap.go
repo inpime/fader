@@ -25,13 +25,19 @@ func (m *StringMap) Set(key string, value interface{}) *StringMap {
 	return m
 }
 
-func (m StringMap) Get(key string) (value interface{}, exists bool) {
+// Get alias GetOrNil
+func (m StringMap) Get(key string) (value interface{}) {
+
+	return m.GetOrNil(key)
+}
+
+func (m StringMap) GetIf(key string) (value interface{}, exists bool) {
 	value, exists = m[key]
 	return
 }
 
 func (m StringMap) GetOrNil(key string) interface{} {
-	if value, exists := m.Get(key); exists {
+	if value, exists := m.GetIf(key); exists {
 		return value
 	}
 
