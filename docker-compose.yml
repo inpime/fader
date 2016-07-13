@@ -12,12 +12,13 @@ services:
             - 8081:3322
         environment:
             FADER_WORKSPACE: "/app/_workspace/"
-            FADER_API_ADDR:: ":3322"
-            # FADER_ES_ADDR:: http://elasticsearch:9200
-            FADER_ES_ADDR_DOCKER: "elasticsearch"
-            FADER_ES_INDEX:: "fader_v1"
-            FADER_SESSION_SECRET: "secure-key"
-            FADER_MODE: error
+            FADER_HTTPLISTENER:: ":3322"
+            # FADER_ESADDRESS:: http://elasticsearch:9200
+            FADER_ESADDRESSDOCKER: "elasticsearch"
+            FADER_ESINDEX:: "fader_v1"
+            FADER_SESSIONSECRET: "secure-key"
+            FADER_LOGGERMODE: info
+            FADER_APPSETUP: https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/archives/FADER(console).dev.latest.zip
         links:
             - elasticsearch
     elasticsearch:
