@@ -1,11 +1,14 @@
 
 
 BUILD_DATE = `date --rfc-3339=seconds -u | sed 's/ /T/'`
-BUILD_HASH = $(git rev-parse HEAD)
+BUILD_HASH = `git rev-parse HEAD`
 ifeq ($(BUILD_HASH),)
-	BUILD_NUMBER := $(TRAVIS_COMMIT)
+	BUILD_HASH := ${TRAVIS_COMMIT}
 endif
 VERSION = v0.1.1
+
+echo ${TRAVIS_COMMIT}
+echo `git rev-parse FETCH_HEAD`
 
 GO=go
 GOPATH:=${GOPATH}:/Users/gbv/work
