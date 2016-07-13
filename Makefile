@@ -7,9 +7,6 @@ ifeq ($(BUILD_HASH),)
 endif
 VERSION = v0.1.1
 
-echo ${TRAVIS_COMMIT}
-echo `git rev-parse FETCH_HEAD`
-
 GO=go
 GOPATH:=${GOPATH}:/Users/gbv/work
 BUILDFLAGS ?= -a --installsuffix cgo -ldflags \
