@@ -1,11 +1,13 @@
 
+# https://github.com/travis-ci/worker/blob/master/Makefile#L8
+BUILD_DATE = `date -u +%Y-%m-%dT%H:%M:%S%z`
+BUILD_HASH = `git rev-parse HEAD 2>/dev/null || echo "???"`
 
-BUILD_DATE = `date --rfc-3339=seconds -u | sed 's/ /T/'`
-BUILD_HASH = `git rev-parse HEAD`
 ifeq ($(BUILD_HASH),)
 	BUILD_HASH := ${TRAVIS_COMMIT}
 endif
 VERSION = v0.1.1
+# BUILD_NUMBER = ${TRAVIS_BUILD_NUMBER}
 
 GO=go
 GOPATH:=${GOPATH}:/Users/gbv/work
