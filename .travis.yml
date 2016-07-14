@@ -7,6 +7,7 @@ before_install:
   - echo "before install"
 
 script:
+  - make test
   - make build-linux
 
 
@@ -23,4 +24,6 @@ deploy:
   detect_encoding: true
   cache_control: max-age=0
   on:
+    tags: false
     repo: inpime/fader
+    branch: master
