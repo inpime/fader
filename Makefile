@@ -20,8 +20,11 @@ BUILDFLAGS ?= -a --installsuffix cgo -ldflags \
 build: build-linux
 .PHONY: build
 
-test: prebuild
-	$(GO) test -v -bench=. -benchmem -run=TestAppendOrReplace ./...
+test-prebuild:
+	$(GO) get github.com/stretchr/testify/assert
+
+test: test-prebuild
+	$(GO) test -v -bench=. -benchmem -run=. ./...
 .PHONY: test
 
 build-linux: prebuild
