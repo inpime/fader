@@ -2,6 +2,8 @@ package utils
 
 import (
 	"errors"
+	// "github.com/inpime/fader/utils/sdata"
+	// "log"
 	"reflect"
 )
 
@@ -45,6 +47,7 @@ func resolveValues(dst, src interface{}) (vdst reflect.Value, vsrc reflect.Value
 }
 
 func appendOrReplace(vdst, vsrc reflect.Value) error {
+
 	switch vdst.Kind() {
 	case reflect.Struct:
 		for i := 0; i < vdst.NumField(); i++ {
@@ -53,14 +56,22 @@ func appendOrReplace(vdst, vsrc reflect.Value) error {
 			}
 		}
 	case reflect.Map:
-		for _, key := range vsrc.MapKeys() {
-			vdst.SetMapIndex(key, vsrc.MapIndex(key)) // if error "panic: assignment to entry in nil map".
-			// because map not init, please make(map[...]...)
+		if !isEmptyValue(vdst) && !isEmptyValue(vsrc) {
+			for _, key := range vsrc.MapKeys() {
+				vdst.SetMapIndex(key, vsrc.MapIndex(key)) // if error "panic: assignment to entry in nil map".
+				// because map not init, please make(map[...]...)
+			}
 		}
 	case reflect.Slice:
 		for i := 0; i < vsrc.Len(); i++ {
 			vdst.Set(reflect.Append(vdst, vsrc.Index(i)))
 		}
+	case reflect.Ptr:
+		if isEmptyValue(vsrc) {
+			return nil
+		}
+
+		return appendOrReplace(vdst.Elem(), vsrc.Elem())
 	default:
 		if vdst.CanSet() && !isEmptyValue(vsrc) {
 			vdst.Set(vsrc)

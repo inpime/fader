@@ -1,7 +1,7 @@
 package utils
 
 import (
-	// "github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/fader/utils/sdata"
 	"reflect"
 	"testing"
 )
@@ -18,11 +18,12 @@ type simpleType struct {
 	E map[string]simpleSubType
 	G *simpleSubType
 	F map[string]*simpleSubType
-	// M *sdata.StringMap
+	M *sdata.StringMap
 }
 
 func TestAppendOrReplace(t *testing.T) {
-	s := simpleType{[]string{"a", "b"},
+	s := simpleType{
+		[]string{"a", "b"},
 		"a",
 		[]simpleSubType{simpleSubType{"a"}, simpleSubType{"b"}},
 		map[string]string{"a": "b", "c": "d"},
@@ -35,12 +36,13 @@ func TestAppendOrReplace(t *testing.T) {
 			"a": &simpleSubType{"b"},
 			"c": &simpleSubType{"d"},
 		},
-		// sdata.NewStringMapFrom(map[string]interface{}{
-		// 	"a":  "b",
-		// 	"f1": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
-		// }),
+		sdata.NewStringMapFrom(map[string]interface{}{
+			"a":  "b",
+			"f1": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
+		}),
 	}
-	d := simpleType{[]string{"b", "c"},
+	d := simpleType{
+		[]string{"b", "c"},
 		"b",
 		[]simpleSubType{simpleSubType{"c"}, simpleSubType{"d"}},
 		map[string]string{"a": "z", "c": "y", "e": "f"},
@@ -55,11 +57,11 @@ func TestAppendOrReplace(t *testing.T) {
 			"c": &simpleSubType{"y"},
 			"e": &simpleSubType{"f"},
 		},
-		// sdata.NewStringMapFrom(map[string]interface{}{
-		// 	"c":  "d",
-		// 	"f1": sdata.NewStringMapFrom(map[string]interface{}{"c": "d"}),
-		// 	"f2": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
-		// }),
+		sdata.NewStringMapFrom(map[string]interface{}{
+			"c":  "d",
+			"f1": sdata.NewStringMapFrom(map[string]interface{}{"c": "d"}),
+			"f2": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
+		}),
 	}
 
 	// expected
@@ -79,17 +81,15 @@ func TestAppendOrReplace(t *testing.T) {
 			"c": &simpleSubType{"d"},
 			"e": &simpleSubType{"f"},
 		},
-		// sdata.NewStringMapFrom(map[string]interface{}{
-		// 	"a":  "b",
-		// 	"c":  "d",
-		// 	"f1": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
-		// 	"f2": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
-		// }),
+		sdata.NewStringMapFrom(map[string]interface{}{
+			"a":  "b",
+			"c":  "d",
+			"f1": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
+			"f2": sdata.NewStringMapFrom(map[string]interface{}{"a": "b"}),
+		}),
 	}
 
 	AppendOrReplace(&d, s)
-
-	t.Logf("%#v", d)
 
 	if !reflect.DeepEqual(d, e) {
 		t.FailNow()
