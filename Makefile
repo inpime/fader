@@ -20,7 +20,7 @@ BUILDFLAGS ?= -a --installsuffix cgo -ldflags \
 build: build-linux
 .PHONY: build
 
-test:
+test: prebuild
 	$(GO) test -v -bench=. -benchmem -run=TestAppendOrReplace ./...
 .PHONY: test
 
