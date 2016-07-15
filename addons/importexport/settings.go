@@ -1,6 +1,7 @@
 package importexport
 
 import (
+	// "github.com/Sirupsen/logrus"
 	"github.com/inpime/fader/api/config"
 	"github.com/inpime/fader/utils"
 	"github.com/inpime/fader/utils/sdata"
@@ -20,21 +21,26 @@ func (s Settings) Merge(cfg interface{}) error {
 }
 
 type settings struct {
-	Groups map[string][]GroupSettings `toml:"groups" json:"groups"`
+	Groups []GroupSettings `toml:"groups" json:"groups"`
 }
 
 func (s Settings) GroupNames() (arr []string) {
-	for name, _ := range s.Groups {
-		arr = append(arr, name)
+	groups := sdata.NewStringMap()
+
+	for _, group := range s.Groups {
+		if _, exist := groups.GetIf(group.GroupName); !exist {
+			groups.Set(group.GroupName, nil)
+		}
 	}
 
-	return arr
+	return groups.Keys()
 }
 
 func (s Settings) SettingsForBucket(groupName, bucketName string) *GroupSettings {
-	for _, setting := range s.Groups[groupName] {
-		if setting.BucketName == bucketName {
-			return &setting
+	for _, group := range s.Groups {
+		if group.GroupName == groupName &&
+			group.BucketName == bucketName {
+			return &group
 		}
 	}
 
@@ -42,6 +48,7 @@ func (s Settings) SettingsForBucket(groupName, bucketName string) *GroupSettings
 }
 
 type GroupSettings struct {
+	GroupName  string   `toml:"group" json:"group"`
 	BucketName string   `toml:"bucket" json:"bucket"`
 	Files      []string `toml:"files" json:"files"`
 	All        bool     `toml:"all" json:"all"`
