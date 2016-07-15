@@ -23,7 +23,8 @@ build: build-linux
 test-prebuild:
 	$(GO) get github.com/stretchr/testify/assert
 
-test: test-prebuild
+test: prebuild
+	$(GO) get github.com/stretchr/testify/assert
 	$(GO) test -v -bench=. -benchmem -run=. ./...
 .PHONY: test
 
@@ -49,7 +50,7 @@ build-osx: prebuild
 prebuild:
 	@echo Pre install
 	mkdir -p releases
-	-$(GO) get github.com/inpime/fader
+	$(GO) get github.com/inpime/fader
 .PHONY: prebuild
 
 # for a comfortable development
