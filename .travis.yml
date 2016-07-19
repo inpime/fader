@@ -4,7 +4,7 @@ go:
   - tip
 
 before_install: 
-  - echo "before install"
+  - go env
 
 script:
   - make test
