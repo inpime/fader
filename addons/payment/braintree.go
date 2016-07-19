@@ -193,5 +193,9 @@ func PayFromNonceViaBraintreeGateway(payment_method_nonce string, opt OrderInfo)
 		},
 	})
 
+	if err != nil {
+		return "", err
+	}
+
 	return tx.Id, err
 }

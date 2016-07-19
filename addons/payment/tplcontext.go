@@ -67,7 +67,7 @@ func initTplContext() {
 				"_api":   NAME,
 			}).Infof("pay via nonce")
 
-			return pongo2.AsValue("")
+			return pongo2.AsValue(err)
 		}
 
 		return pongo2.AsValue(txId)
