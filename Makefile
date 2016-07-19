@@ -8,7 +8,9 @@ ifeq ($(BUILD_HASH),)
 endif
 VERSION = v0.1.1
 # BUILD_NUMBER = ${TRAVIS_BUILD_NUMBER}
-platforms = linux
+listOS = linux
+listARCH = amd64
+
 GOPATH := ${GOPATH}
 
 BUILDFLAGS ?= -a --installsuffix cgo -ldflags \
@@ -33,7 +35,7 @@ build-via-docker:
 
 build: vendor
 	@echo Build
-	@$(foreach GOOS,$(platforms), $(foreach GOARCH,amd64, \
+	@$(foreach GOOS,$(listOS), $(foreach GOARCH,$(listARCH), \
 		env GOPATH=${GOPATH}:/usr \
 				CGO_ENABLED=0 \
 				go build -o build/${GOOS}_${GOARCH}/fader -v $(BUILDFLAGS) \
@@ -42,7 +44,7 @@ build: vendor
 
 build-withrace: vendor
 	@echo Build
-	@$(foreach GOOS,$(platforms), $(foreach GOARCH,amd64, \
+	@$(foreach GOOS,$(listOS), $(foreach GOARCH,$(listARCH), \
 		env GOPATH=${GOPATH}:/usr \
 				CGO_ENABLED=1 \
 				go build -o build/${GOOS}_${GOARCH}/fader -v -race $(BUILDFLAGS) \
@@ -51,8 +53,9 @@ build-withrace: vendor
 
 release: build
 	@mkdir -p releases
-	@$(foreach GOOS,$(platforms), $(foreach GOARCH,amd64, \
-		zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).${GOOS}_${GOARCH}.$(BUILD_DATE).zip ${PWD}/build/${GOOS}_${GOARCH}/fader \
+	@$(foreach GOOS,$(listOS), $(foreach GOARCH,$(listARCH), \
+		zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).${GOOS}_${GOARCH}.$(BUILD_DATE).zip ${PWD}/build/${GOOS}_${GOARCH}/fader && \
+		zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).${GOOS}_${GOARCH}.latest.zip ${PWD}/build/${GOOS}_${GOARCH}/fader \
 	;))
 .PHONY: release
 
