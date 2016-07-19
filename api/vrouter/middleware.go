@@ -5,9 +5,11 @@ import (
 	"github.com/inpime/fader/api/config"
 	"github.com/labstack/echo"
 	"net/url"
+	"sync"
 )
 
 var appRouter = NewRouter()
+var AppRouterMutex sync.Mutex
 
 func AppRouter() *Router {
 
@@ -22,6 +24,9 @@ func RouterMiddleware() echo.MiddlewareFunc {
 			_url, _ := url.Parse(ctx.Request().URI())
 
 			logrus.WithField("_service", addonName).Debugf("count routs %d", len(AppRouter().routes))
+
+			AppRouterMutex.Lock()
+			defer AppRouterMutex.Unlock()
 
 			if AppRouter().Match(&Request{_url, ctx.Request().Method()}, &match) {
 				for key, value := range match.Vars {
@@ -134,6 +139,9 @@ func ReloadAppRouts() {
 	router := NewRouter()
 
 	refreshRouter(router)
+
+	AppRouterMutex.Lock()
+	defer AppRouterMutex.Unlock()
 
 	appRouter = router
 }

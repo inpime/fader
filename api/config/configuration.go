@@ -55,6 +55,12 @@ func (c configs) Config(name string) addons.Configuration {
 	return c[name]
 }
 
+func (c *configs) Reset(_c *configs) {
+	cfgxMutex.RLock()
+	defer cfgxMutex.RUnlock()
+	*c = *_c
+}
+
 // Reload update app settings
 func Reload() {
 
@@ -117,7 +123,7 @@ func Reload() {
 		mergeAllAppConfigs(newconfig, src, fileName)
 	}
 
-	Cfgx = newconfig
+	Cfgx.Reset(newconfig)
 }
 
 func hydrateAllAppConfigs(c *configs, src, fileName string) {
