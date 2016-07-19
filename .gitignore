@@ -1,4 +1,4 @@
-_workspace*
+_*
 .vscode
 pkg
 build
@@ -9,4 +9,3 @@ state/app/workspace*
 state/app_es/data
 state/app/Dockerfile
 state/app/fader
-_*.docker-compose.yml
