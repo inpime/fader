@@ -86,8 +86,6 @@ func SessionStoreMiddleware(name string, config Config) echo.MiddlewareFunc {
 			Panic("init store session")
 	}
 
-	logrus.Error("init store session")
-
 	return session.Sessions(name, &Store{_store})
 }
 
