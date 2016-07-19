@@ -6,7 +6,7 @@ BUILD_HASH = `git rev-parse HEAD 2>/dev/null || echo "???"`
 ifeq ($(BUILD_HASH),)
 	BUILD_HASH := ${TRAVIS_COMMIT}
 endif
-VERSION = v0.1.1
+VERSION = v0.1.2
 # BUILD_NUMBER = ${TRAVIS_BUILD_NUMBER}
 listOS = linux
 listARCH = amd64
