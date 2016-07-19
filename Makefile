@@ -8,57 +8,86 @@ ifeq ($(BUILD_HASH),)
 endif
 VERSION = v0.1.1
 # BUILD_NUMBER = ${TRAVIS_BUILD_NUMBER}
+platforms = linux
+GOPATH := ${GOPATH}
 
-GO=go
-GOPATH:=${GOPATH}:/Users/gbv/work
 BUILDFLAGS ?= -a --installsuffix cgo -ldflags \
     "-s -X 'github.com/inpime/fader/config.BuildDate=$(BUILD_DATE)'\
     -X github.com/inpime/fader/config.BuildHash=$(BUILD_HASH)\
     -X github.com/inpime/fader/config.Version=$(VERSION)" \
     fader.go
 
-build: build-linux
-.PHONY: build
-
-test-prebuild:
-	$(GO) get github.com/stretchr/testify/assert
-
-test: prebuild
-	$(GO) get github.com/stretchr/testify/assert
-	$(GO) test -v -bench=. -benchmem -run=. ./...
+test: vendor vendor-test
+	#docker run --rm -v "${PWD}":/usr/src/github.com/inpime/fader \
+	#	-w /usr/src/github.com/inpime/fader \
+	#	golang:1.6 go test -v -bench=. -benchmem -run=. ./...
+	go test -v -race -bench=. -benchmem -run=. ./...
 .PHONY: test
 
-build-linux: prebuild
-	@echo Build Linux amd64
-	env GOBIN=${PWD}/build/linux_amd64 \
-        GOOS=linux GOARCH=amd64 CGO_ENABLED=0 \
-        $(GO) install $(BUILDFLAGS)
-	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).linux_amd64.$(BUILD_DATE).zip ${PWD}/build/linux_amd64/fader
-	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).linux_amd64.latest.zip ${PWD}/build/linux_amd64/fader
-.PHONY: build-linux
+build-via-docker:
+	@echo Docker build Linux amd64
+	docker run --rm -v "${PWD}":/usr/src/github.com/inpime/fader \
+		-w /usr/src/github.com/inpime/fader \
+		golang:1.6 make build
+.PHONY: build-via-docker
 
-build-osx: prebuild
-	@echo Build OSX amd64
-	env GOBIN=${PWD}/build/osx_amd64 \
-        GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 \
-        $(GO) install $(BUILDFLAGS)
-	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).osx_amd64.$(BUILD_DATE).zip ${PWD}/build/osx_amd64/fader
-	zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).osx_amd64.latest.zip ${PWD}/build/osx_amd64/fader
-.PHONY: build-osx
+build: vendor
+	@echo Build
+	@$(foreach GOOS,$(platforms), $(foreach GOARCH,amd64, \
+		env GOPATH=${GOPATH}:/usr \
+				CGO_ENABLED=0 \
+				go build -o build/${GOOS}_${GOARCH}/fader -v $(BUILDFLAGS) \
+	;))
+.PHONY: build
 
+build-withrace: vendor
+	@echo Build
+	@$(foreach GOOS,$(platforms), $(foreach GOARCH,amd64, \
+		env GOPATH=${GOPATH}:/usr \
+				CGO_ENABLED=1 \
+				go build -o build/${GOOS}_${GOARCH}/fader -v -race $(BUILDFLAGS) \
+	;))
+.PHONY: build-withrace
 
-prebuild:
-	@echo Pre install
-	mkdir -p releases
-	$(GO) get github.com/inpime/fader
-.PHONY: prebuild
+release: build
+	@mkdir -p releases
+	@$(foreach GOOS,$(platforms), $(foreach GOARCH,amd64, \
+		zip -j ${PWD}/releases/fader.go$(TRAVIS_GO_VERSION).${GOOS}_${GOARCH}.$(BUILD_DATE).zip ${PWD}/build/${GOOS}_${GOARCH}/fader \
+	;))
+.PHONY: release
+
+vendor-test:
+	go get -v github.com/stretchr/testify/assert
+.PHONY: vendor-test
+
+vendor:
+	@echo Installation vendor
+	go get -v github.com/BurntSushi/toml \
+		github.com/Sirupsen/logrus \
+		github.com/boltdb/bolt \
+		github.com/flosch/pongo2 \
+		github.com/flosch/pongo2-addons \
+		github.com/echo-contrib/sessions \
+		github.com/gorilla/sessions \
+		github.com/inpime/dbox \
+		github.com/labstack/echo \
+		github.com/labstack/echo/engine/standard \
+		github.com/labstack/echo/middleware \
+		github.com/lionelbarrow/braintree-go \
+		github.com/mailgun/mailgun-go \
+		github.com/yosssi/boltstore/reaper \
+		github.com/yosssi/boltstore/store \
+		gopkg.in/go-playground/validator.v8 \
+		gopkg.in/olivere/elastic.v3
+.PHONY: vendor
 
 # for a comfortable development
-build-linux-dev: build-linux
+reload-dev: build-via-docker
+# reload-dev:
+	# env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o build/linux_amd64/fader -v -race $(BUILDFLAGS)
+	
 	cp ${PWD}/build/linux_amd64/fader ${PWD}/state/app/fader
-.PHONY: build-linux-dev
-
-reload-dev: build-linux-dev
 	-docker-compose down
 	docker-compose build --force-rm
-	docker-compose up
+	docker-compose up -d
+.PHONY: reload-dev
