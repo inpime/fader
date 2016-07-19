@@ -3,7 +3,7 @@ package session
 import (
 	"encoding/gob"
 	"github.com/Sirupsen/logrus"
-	"github.com/gebv/echo-session"
+	session "github.com/echo-contrib/sessions"
 	"github.com/inpime/dbox"
 	"github.com/inpime/fader/api/config"
 	"github.com/inpime/fader/store"
@@ -27,15 +27,28 @@ func init() {
 
 func NewSession(s session.Session) *Session {
 
-	return &Session{
+	_session := &Session{
 		Session: s,
 		file:    nil,
 	}
+
+	if s.Get(SessionExistingFlag) == nil {
+
+		if err := _session.Save(); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"_api": addonName,
+			}).
+				WithError(err).
+				Error("save new session")
+		}
+	}
+
+	return _session
 }
 
 type Session struct {
-	session.Session
-	file *store.File
+	Session session.Session
+	file    *store.File
 }
 
 func (s *Session) Logout() *Session {
@@ -65,7 +78,7 @@ func (s Session) UserID() string {
 	return userId
 }
 
-func (s Session) IsNew() bool {
+func (s *Session) IsNew() bool {
 	return s.Get(SessionExistingFlag) == nil
 }
 
@@ -119,7 +132,7 @@ func (s *Session) User() *User {
 // Default session interface
 // ------------------
 
-func (s Session) Get(key interface{}) interface{} {
+func (s *Session) Get(key interface{}) interface{} {
 
 	return s.Session.Get(key)
 }

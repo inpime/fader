@@ -3,7 +3,8 @@ package session
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
-	"github.com/gebv/echo-session"
+	// "github.com/gebv/echo-session"
+	session "github.com/echo-contrib/sessions"
 	"github.com/gorilla/sessions"
 	faderstore "github.com/inpime/fader/store"
 	"github.com/labstack/echo"
@@ -85,6 +86,8 @@ func SessionStoreMiddleware(name string, config Config) echo.MiddlewareFunc {
 			Panic("init store session")
 	}
 
+	logrus.Error("init store session")
+
 	return session.Sessions(name, &Store{_store})
 }
 
@@ -94,55 +97,23 @@ func InitializerUserSessionMiddleware() echo.MiddlewareFunc {
 
 			uri := ctx.Request().URI()
 
-			if ctx.Get(session.DefaultKey) == nil {
+			internalSession := session.Default(ctx)
+
+			if internalSession == nil {
 				// TODO: clear session or panic?
 
 				logrus.WithFields(logrus.Fields{
 					"_api": addonName,
 					"url":  uri,
 				}).Fatal("current session is null")
-				return nil
-			}
-
-			internalSession, ok := ctx.Get(session.DefaultKey).(session.Session)
-
-			if !ok {
-				// can't happen
-
-				logrus.WithFields(logrus.Fields{
-					"_api": addonName,
-					"url":  uri,
-				}).Fatalf("current session is not Session, got %T", internalSession)
-				return nil
-			}
-
-			if nil == internalSession {
-				// can't happen
-
 				return ctx.NoContent(http.StatusInternalServerError)
 			}
-
 			//
 			// Session current request
 			//
 
-			_session := NewSession(internalSession)
-
+			_session := NewSession(internalSession.(session.Session))
 			ctx.Set(SessionNameContextKey, _session)
-
-			if _session.IsNew() {
-				logrus.WithFields(logrus.Fields{
-					"_api": addonName,
-					"url":  uri,
-				}).Debug("save new session")
-
-				if err := _session.Save(); err != nil {
-					logrus.WithFields(logrus.Fields{
-						"_api": addonName,
-						"url":  uri,
-					}).WithError(err).Error("save new session")
-				}
-			}
 
 			return h(ctx)
 		}
