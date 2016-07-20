@@ -11,7 +11,8 @@ VERSION = v0.1.2
 listOS = linux
 listARCH = amd64
 
-GOPATH := ${GOPATH}
+# path ../src/github.com/inpime/fader/...
+GOPATH := ${GOPATH}:${PWD}/../../../..
 
 BUILDFLAGS ?= -a --installsuffix cgo -ldflags \
     "-s -X 'github.com/inpime/fader/config.BuildDate=$(BUILD_DATE)'\
