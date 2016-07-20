@@ -81,6 +81,13 @@ func (m StringMap) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}(m))
 }
 
+func (m StringMap) JSON() string {
+	if b, err := json.Marshal(map[string]interface{}(m)); err == nil {
+		return string(b)
+	}
+	return "{}"
+}
+
 func (m StringMap) ToMap() map[string]interface{} {
 	return map[string]interface{}(m)
 }

@@ -2,6 +2,7 @@ package sdata
 
 import (
 	"encoding/json"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -42,6 +43,13 @@ func (m *StringMap) LoadFromStringMap(v *StringMap) *StringMap {
 func (m *StringMap) LoadFromMapIfaceIface(v map[interface{}]interface{}) *StringMap {
 	for key, value := range v {
 		m.Set(toString(key), value)
+	}
+	return m
+}
+
+func (m *StringMap) Clear() *StringMap {
+	for _, key := range m.Keys() {
+		m.Remove(key)
 	}
 	return m
 }
