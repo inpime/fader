@@ -24,6 +24,7 @@ type Rout struct {
 	Path      string   `toml:"path" json:"path"`
 	Name      string   `toml:"name" json:"name"`
 	Handler   string   `toml:"handler" json:"handler"`
+	Args      string   `toml:"args" json:"args"`
 	Methods   []string `toml:"methods" json:"methods"`
 	Licenses  []string `toml:"licenses" json:"licenses"`
 	IsSpecial bool     `toml:"special" json:"special"`

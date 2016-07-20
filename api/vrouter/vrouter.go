@@ -39,6 +39,7 @@ type Handler struct {
 	File   string
 
 	SpecialHandler string
+	Args           string
 
 	Licenses []string
 	Methods  []string

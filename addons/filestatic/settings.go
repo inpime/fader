@@ -19,5 +19,6 @@ func (s Settings) Merge(cfg interface{}) error {
 }
 
 type settings struct {
+	// BucketSource the default value
 	BucketSource string `toml:"bucket" json:"bucket"`
 }

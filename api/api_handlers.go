@@ -46,6 +46,7 @@ func AppEntryPointHandler(ctx echo.Context) error {
 	logrus.WithFields(logrus.Fields{"_breakpoint": "GetSpecialHandler", "uri": uri}).Debug("trace")
 
 	if specialHandler, err := GetSpecialHandler(match.Handler.SpecialHandler); err == nil {
+		ctx.Set(config.SpecialHandlerArgsKey, match.Handler.Args)
 		return specialHandler(ctx)
 	}
 

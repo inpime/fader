@@ -1,5 +1,9 @@
 package config
 
+const (
+	SpecialHandlerArgsKey = "_special_handler_args"
+)
+
 var (
 
 	// ---------------------

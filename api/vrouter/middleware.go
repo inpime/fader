@@ -188,6 +188,7 @@ func NewHandlerFromRoute(r Rout) Handler {
 	h.Path = r.Path
 	h.Methods = r.Methods
 	h.CSRF = r.CSRF
+	h.Args = r.Args
 	// h.CSRFTokenLookup = r.CSRFTokenLookup
 
 	return h

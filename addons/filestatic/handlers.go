@@ -1,11 +1,31 @@
 package filestatic
 
 import (
+	"github.com/inpime/fader/api/config"
 	"github.com/inpime/fader/store"
 	"github.com/labstack/echo"
 	"net/http"
 	"time"
 )
+
+func getBucketNameFromHandler(ctx echo.Context) string {
+	if bucketName, ok := ctx.Get(config.SpecialHandlerArgsKey).(string); ok {
+
+		return bucketName
+	}
+
+	return ""
+}
+
+func storeBucketName(ctx echo.Context) string {
+	bucketName := getBucketNameFromHandler(ctx)
+
+	if len(bucketName) == 0 {
+		bucketName = MainSettings().BucketSource
+	}
+
+	return bucketName
+}
 
 // FileContentByNameHandler returns the file content by name (raw data file) without access checks
 //
@@ -18,7 +38,7 @@ func FileContentByNameHandler(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := MainSettings().BucketSource
+	bucketName := storeBucketName(ctx)
 
 	file, err := store.LoadOrNewFile(bucketName, fileName)
 
@@ -42,7 +62,7 @@ func FileContentByIDHandler(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	bucketName := MainSettings().BucketSource
+	bucketName := storeBucketName(ctx)
 
 	file, err := store.LoadOrNewFileID(bucketName, fileId)
 
