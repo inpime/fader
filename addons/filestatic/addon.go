@@ -8,8 +8,13 @@ import (
 
 const (
 	NAME    = "filestatic"
-	VERSION = "0.1.0"
+	VERSION = "0.1.1"
 )
+
+/*
+ * CHANGELOGS:
+ * 0.1.1 different the buckets that stores files
+ */
 
 var (
 	// route or special handler name
