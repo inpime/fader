@@ -1,15 +1,17 @@
 package context
 
 import (
-	"github.com/inpime/fader/api/vrouter"
-	"github.com/labstack/echo"
 	"net/http"
+
+	"github.com/inpime/fader/utils/sdata"
+	"github.com/labstack/echo"
 )
 
 // NewContext wrap echo context
 func NewContext(ctx echo.Context) *Context {
 	wrapCtx := &Context{
 		Context: ctx,
+		JSON:    sdata.NewStringMap(),
 		// Props:   utils.Map(map[string]interface{}{}),
 	}
 
@@ -23,9 +25,9 @@ func NewContext(ctx echo.Context) *Context {
 type Context struct {
 	echo.Context
 
-	Route *vrouter.RouteMatch
+	// Route *vrouter.RouteMatch
 
-	// Props utils.M
+	JSON *sdata.StringMap
 }
 
 func (c Context) IsPut() bool {

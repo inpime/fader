@@ -2,13 +2,14 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
 	"github.com/inpime/fader/addons/standard"
 	"github.com/inpime/fader/api/config"
 	"github.com/inpime/fader/api/context"
 	"github.com/labstack/echo"
-	"net/http"
 )
 
 // AppEntryPointHandler the entry point for the application
@@ -119,12 +120,18 @@ func AppEntryPointHandler(ctx echo.Context) error {
 	// 	* Text
 	// 	* Byte
 	// ------------------------
+	switch _ctx.ResponseType() {
+	case "json":
+		return ctx.JSON(_ctx.ResponseStatus(), _ctx.JSON)
+	default:
+
+	}
 
 	// TODO: Custom header
 
 	logrus.WithFields(logrus.Fields{"_breakpoint": "response", "uri": uri}).Debug("trace")
 
-	return ctx.HTML(http.StatusOK, res)
+	return ctx.HTML(_ctx.ResponseStatus(), res)
 }
 
 // -----------------------------------
