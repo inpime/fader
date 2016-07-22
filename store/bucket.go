@@ -235,15 +235,15 @@ func (b Bucket) GetMetaDataStoreType() dbox.StoreType {
 //
 
 // MetaDataFilesMapping returns the mapping metadata of file of the search index (for elastic search)
-func (f Bucket) MetaDataFilesMapping() map[string]interface{} {
+func (f *Bucket) MetaDataFilesMapping() map[string]interface{} {
 
-	return sdata.NewStringMapFrom(f.MapData()).Map(MetaFilesBucketMappingKey)
+	return f.MMetaDataFilesMapping().ToMap()
 }
 
 // MapDataFilesMapping returns the mapping mapdata of file of the search index (for elastic search)
-func (f Bucket) MapDataFilesMapping() map[string]interface{} {
+func (f *Bucket) MapDataFilesMapping() map[string]interface{} {
 
-	return sdata.NewStringMapFrom(f.MapData()).Map(MapFilesBucketMappingKey)
+	return f.MMapDataFilesMapping().ToMap()
 }
 
 func (f *Bucket) MMetaDataFilesMapping() *sdata.StringMap {

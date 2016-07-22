@@ -77,17 +77,19 @@ func UpdateSearchMapping(bucket *Bucket) error {
 	}
 
 	docMapping := sdata.NewStringMapFrom(BucketFileMappingDefault).
-		Set("Meta", sdata.NewStringMap().Set("properties", bucket.MetaDataFilesMapping()))
+		Set("Meta", map[string]interface{}{"properties": bucket.MetaDataFilesMapping()})
 
 	if len(bucket.MapDataFilesMapping()) > 0 {
-		docMapping.Set("MapData", sdata.NewStringMap().Set("properties", bucket.MapDataFilesMapping()))
-	}
 
-	// Set("UpdatedAt", fieldMapping{"date", "", "strict_date_optional_time||epoch_millis"})
+		docMapping.Set("MapData", map[string]interface{}{"properties": bucket.MapDataFilesMapping()})
+	}
 
 	mapping := map[string]interface{}{
-		"properties": docMapping,
+		"properties": docMapping.ToMap(),
 	}
+
+	// b, errr := json.Marshal(mapping)
+	// logrus.Infof("Mapping %q, %v, \n%s\n", bucket.Name(), errr, string(b))
 
 	_, err := ESClient.
 		PutMapping().
