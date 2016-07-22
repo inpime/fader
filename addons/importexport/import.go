@@ -1,10 +1,11 @@
 package importexport
 
 import (
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/inpime/dbox"
 	"github.com/inpime/fader/store"
-	"time"
 )
 
 // makeImportImportExport выполнить импорт из архива
@@ -26,7 +27,10 @@ func makeImportImportExport(data []byte) error {
 			bucket.SetID(_bucket.ID)
 			bucket.SetName(_bucket.Name)
 			bucket.SetBucket(_bucket.Bucket)
-			bucket.Import(_bucket.Data)
+
+			if err := bucket.Import(_bucket.Data); err != nil {
+				logrus.Errorf("Import data bucket %q, %#v", bucket.Name(), err)
+			}
 
 			bucket.InitRawDataStore(bucket.GetRawDataStoreType(),
 				bucket.GetRawDataStoreNameWithoutPostfix())
@@ -35,8 +39,15 @@ func makeImportImportExport(data []byte) error {
 			bucket.InitMapDataStore(bucket.GetMapDataStoreType(),
 				bucket.GetMapDataStoreNameWithoutPostfix())
 
-			bucket.UpdateMapping()
-			bucket.Sync()
+			if err := bucket.UpdateMapping(); err != nil {
+				logrus.WithField("ref", addonName).
+					Errorf("Update mapping bucket %q, %#v", bucket.Name(), err)
+			}
+
+			if err := bucket.Sync(); err != nil {
+				logrus.WithField("ref", addonName).
+					Errorf("Save bucket %q, %#v", bucket.Name(), err)
+			}
 		}
 	}
 
@@ -54,8 +65,14 @@ func makeImportImportExport(data []byte) error {
 		logrus.WithField("_api", addonName).
 			Infof("import: Upsert a file %q", _file.Bucket+"@"+_file.Name)
 
-		file.Import(_file.Data)
-		file.Sync()
+		if err := file.Import(_file.Data); err != nil {
+			logrus.WithField("ref", addonName).
+				Errorf("Import data file %q:%q, %v", _file.Name, _file.Bucket, err)
+		}
+		if err := file.Sync(); err != nil {
+			logrus.WithField("ref", addonName).
+				Errorf("Save file %q:%q, %v", _file.Name, _file.Bucket, err)
+		}
 	}
 
 	return nil
