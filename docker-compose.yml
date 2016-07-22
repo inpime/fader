@@ -18,7 +18,7 @@ services:
             FADER_ESINDEX:: "fader_v1"
             FADER_SESSIONSECRET: "secure-key"
             FADER_LOGGERMODE: info
-            FADER_APPSETUP: https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/archives/FADER(console).dev.latest.zip
+            FADER_APPSETUP: https://s3.eu-central-1.amazonaws.com/releases.fader.inpime.com/archives/FADER(console).v0.1.2.20160722_090106.zip
         links:
             - elasticsearch
     elasticsearch:
