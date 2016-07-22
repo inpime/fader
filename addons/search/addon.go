@@ -1,15 +1,18 @@
 package search
 
 import (
+	"strings"
+
 	"github.com/flosch/pongo2"
 	"github.com/inpime/fader/api/addons"
 	"github.com/inpime/fader/store"
 	"github.com/labstack/echo"
-	"strings"
 )
 
+const NAME = "search"
+
 var (
-	addonName = "search"
+	addonName = NAME
 	version   = "0.1.0"
 )
 
@@ -69,6 +72,30 @@ func (*Extension) InjectTplAddons() error {
 		filter.SetQueryRaw(queryRaw)
 
 		return pongo2.AsValue(makeSearch(filter))
+	}
+
+	pongo2.DefaultSet.Globals["Search"] = func(bucketName,
+		queryString,
+		fields,
+		page,
+		perpage,
+		filter,
+		sortFields *pongo2.Value) *pongo2.Value {
+
+		_filter := store.NewSearchFilter(strings.ToLower(bucketName.String()))
+		_filter.SetQueryString(queryString.String())
+		_filter.SetPage(page.Integer())
+		_filter.SetPerPage(perpage.Integer())
+
+		queryRaw := BuildAdvancedQuery(queryString.String(),
+			fields.String(), // field1 (field2 ...)
+			page.Integer(),
+			perpage.Integer(),
+			filter.String(),     // prefix field_name field_value ([operation_name field_name field_value], ...)
+			sortFields.String()) // field asc|desc ([field asc|desc], ...)
+		_filter.SetQueryRaw(queryRaw)
+
+		return pongo2.AsValue(MakeSearch(_filter))
 	}
 
 	return nil

@@ -10,7 +10,7 @@ func GetAllBuckets() []*store.File {
 	filter := store.NewSearchFilter(config.BucketsBucketName)
 	filter.SetQueryString("")
 	filter.SetPage(0)
-	filter.SetPerPage(100)
+	filter.SetPerPage(100) // TODO: magic number
 
 	queryRaw := BuildSearchQueryFilesByBucket(
 		filter.Bucket(),
@@ -28,7 +28,7 @@ func GetAllFiles(bucket string) []*store.File {
 	filter := store.NewSearchFilter(bucket)
 	filter.SetQueryString("")
 	filter.SetPage(0)
-	filter.SetPerPage(1000)
+	filter.SetPerPage(1000) // TODO: magic number
 
 	queryRaw := BuildSearchQueryFilesByBucket(
 		filter.Bucket(),
