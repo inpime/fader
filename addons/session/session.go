@@ -2,6 +2,7 @@ package session
 
 import (
 	"encoding/gob"
+
 	"github.com/Sirupsen/logrus"
 	session "github.com/echo-contrib/sessions"
 	"github.com/inpime/dbox"
@@ -183,7 +184,9 @@ func (s Session) FirstFlash(vars ...string) interface{} {
 }
 
 func (s *Session) Save() error {
-	s.Set(SessionExistingFlag, true)
+	if s.Get(SessionExistingFlag) == nil {
+		s.Set(SessionExistingFlag, true)
+	}
 
 	return s.Session.Save()
 }
