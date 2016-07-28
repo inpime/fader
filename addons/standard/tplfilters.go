@@ -2,9 +2,10 @@ package standard
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
-	"strings"
 )
 
 func (Extension) initTplFilters() {
@@ -15,6 +16,7 @@ func (Extension) initTplFilters() {
 
 	pongo2.RegisterFilter("is_error", filterIsError)
 	pongo2.RegisterFilter("clear", filterClear)
+	pongo2.RegisterFilter("muted", filterClear) // alias clear
 	pongo2.RegisterFilter("logf", filterLogf)
 	pongo2.RegisterFilter("atojs", tagAnyObjectToJS)
 	pongo2.RegisterFilter("split", filterSplit)
