@@ -1,14 +1,15 @@
 package standard
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
 	"github.com/inpime/dbox"
 	"github.com/inpime/fader/api/config"
 	"github.com/inpime/fader/store"
 	"github.com/inpime/fader/utils/sdata"
-	"net/url"
-	"strings"
 )
 
 func (Extension) initTplContext() {
@@ -129,6 +130,12 @@ func (Extension) initTplContext() {
 	}
 
 	pongo2.DefaultSet.Globals["Validator"] = func() *pongo2.Value {
+
+		return pongo2.AsValue(NewValidatorData())
+	}
+
+	// alias Validator
+	pongo2.DefaultSet.Globals["V"] = func() *pongo2.Value {
 
 		return pongo2.AsValue(NewValidatorData())
 	}
