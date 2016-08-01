@@ -1,6 +1,8 @@
 package payment
 
 import (
+	"strings"
+
 	"github.com/inpime/fader/addons/standard"
 	"github.com/inpime/fader/utils/sdata"
 	braintree "github.com/lionelbarrow/braintree-go"
@@ -26,6 +28,28 @@ import (
 		PostalCode
 */
 
+type FullName string
+
+func (n FullName) FirstName() string {
+	if n.size() == 1 {
+		return strings.Fields(string(n))[0]
+	}
+
+	return ""
+}
+
+func (n FullName) LastName() string {
+	if n.size() > 1 {
+		return strings.Fields(string(n))[1]
+	}
+
+	return ""
+}
+
+func (n FullName) size() int {
+	return len(strings.Fields(string(n)))
+}
+
 func OrderInfoFromM(orderId string, amount int64, opt *sdata.StringMap) OrderInfo {
 	return OrderInfo{
 		OrderID: orderId,
@@ -37,8 +61,8 @@ func OrderInfoFromM(orderId string, amount int64, opt *sdata.StringMap) OrderInf
 		CVV:            opt.String("CVV"),
 
 		Customer: OrderCustomer{
-			FirstName: opt.String("FirstName"),
-			LastName:  opt.String("LastName"),
+			FirstName: FullName(opt.String("FullName")).FirstName(),
+			LastName:  FullName(opt.String("FullName")).LastName(),
 			Email:     opt.String("Email"),
 			Company:   opt.String("Company"),
 			Phone:     opt.String("Phone"),
