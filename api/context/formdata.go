@@ -1,6 +1,7 @@
 package context
 
-import "github.com/inpime/fader/utils/sdata"
+// import "github.com/inpime/fader/utils/sdata"
+import "github.com/inpime/sdata"
 
 // BindFormToMap returns the form field values for the provided names.
 func (c Context) BindFormToMap(fieldNames ...string) *sdata.StringMap {

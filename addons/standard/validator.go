@@ -3,7 +3,8 @@ package standard
 import (
 	"encoding/gob"
 	"fmt"
-	"github.com/inpime/fader/utils/sdata"
+
+	"github.com/inpime/sdata"
 	"gopkg.in/go-playground/validator.v8"
 )
 
@@ -44,11 +45,11 @@ func (v *ValidatorData) Valid() bool {
 
 	for _, fieldName := range v.Rules.Keys() {
 		rule := v.Rules.String(fieldName)
-		if err := V.Field(v.Data.GetOrNil(fieldName), rule); err != nil {
+		if err := V.Field(v.Data.Get(fieldName), rule); err != nil {
 
 			v.ErrorMessages.Set(fieldName,
 				NewFIeld(fieldName,
-					v.Data.GetOrNil(fieldName),
+					v.Data.Get(fieldName),
 					err,
 				))
 		}
@@ -62,7 +63,7 @@ func (v *ValidatorData) Valid() bool {
 }
 
 func (v ValidatorData) Get(fieldName string) FIeld {
-	field := v.ErrorMessages.GetOrNil(fieldName)
+	field := v.ErrorMessages.Get(fieldName)
 
 	if field, valid := field.(FIeld); valid {
 		return field
@@ -70,7 +71,7 @@ func (v ValidatorData) Get(fieldName string) FIeld {
 
 	return FIeld{
 		FieldName: fieldName,
-		Value:     v.Data.GetOrNil(fieldName),
+		Value:     v.Data.Get(fieldName),
 	}
 }
 

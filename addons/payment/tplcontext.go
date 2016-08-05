@@ -3,7 +3,7 @@ package payment
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 )
 
 func initTplContext() {

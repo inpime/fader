@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 )
 
 func BuildAdvancedQuery(queryString, queryFieldsString string, page, perpage int, filter, sortFields string) map[string]interface{} {

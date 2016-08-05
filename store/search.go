@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 	"gopkg.in/olivere/elastic.v3"
 )
 

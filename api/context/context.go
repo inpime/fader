@@ -3,7 +3,7 @@ package context
 import (
 	"net/http"
 
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 	"github.com/labstack/echo"
 )
 
@@ -44,4 +44,10 @@ func (c Context) IsDelete() bool {
 
 func (c Context) IsGet() bool {
 	return c.Request().Method() == http.MethodGet
+}
+
+// Set saves data in the context.
+func (c Context) Set(key string, v interface{}) Context {
+	c.Context.Set(key, v)
+	return c
 }

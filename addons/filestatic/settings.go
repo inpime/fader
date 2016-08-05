@@ -2,7 +2,7 @@ package filestatic
 
 import (
 	"github.com/inpime/fader/api/config"
-	"github.com/inpime/fader/utils"
+	"github.com/inpime/sdata"
 )
 
 func MainSettings() *Settings {
@@ -15,7 +15,8 @@ type Settings struct {
 }
 
 func (s Settings) Merge(cfg interface{}) error {
-	return utils.AppendOrReplace(s.settings, cfg.(*Settings).settings)
+
+	return sdata.Mergex(s.settings, cfg.(*Settings).settings)
 }
 
 type settings struct {

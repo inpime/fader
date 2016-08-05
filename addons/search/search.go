@@ -1,11 +1,12 @@
 package search
 
 import (
+	"strings"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/inpime/fader/api/config"
 	"github.com/inpime/fader/store"
-	"github.com/inpime/fader/utils/sdata"
-	"strings"
+	"github.com/inpime/sdata"
 )
 
 func makeSearch(filter store.SearchQueryIface) store.SearchResultIface {

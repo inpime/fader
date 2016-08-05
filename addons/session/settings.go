@@ -1,8 +1,6 @@
 package session
 
-import (
-	"github.com/inpime/fader/utils"
-)
+import "github.com/inpime/sdata"
 
 type Settings struct {
 	// same value as `addonName`
@@ -10,7 +8,7 @@ type Settings struct {
 }
 
 func (s Settings) Merge(cfg interface{}) error {
-	return utils.AppendOrReplace(s.settings, cfg.(*Settings).settings)
+	return sdata.Mergex(s.settings, cfg.(*Settings).settings)
 }
 
 type settings struct {

@@ -1,9 +1,10 @@
 package vrouter
 
 import (
+	"net/url"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/flosch/pongo2"
-	"net/url"
 )
 
 func tplContext() {
@@ -27,6 +28,7 @@ func tplContext() {
 			logrus.WithFields(logrus.Fields{
 				"_service": addonName,
 			}).Warningf("args expected in multiples of two, want %d", len(args)-1)
+
 			return pongo2.AsValue(emptyUrl)
 		}
 

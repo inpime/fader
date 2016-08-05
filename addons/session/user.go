@@ -1,10 +1,11 @@
 package session
 
 import (
+	"strings"
+
 	"github.com/inpime/dbox"
 	"github.com/inpime/fader/store"
-	"github.com/inpime/fader/utils/sdata"
-	"strings"
+	"github.com/inpime/sdata"
 )
 
 var (

@@ -2,7 +2,7 @@ package store
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 )
 
 func (f File) MMeta() *sdata.StringMap {

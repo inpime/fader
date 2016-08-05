@@ -2,7 +2,7 @@ package payment
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 )
 
 type Payment struct {

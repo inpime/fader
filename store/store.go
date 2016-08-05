@@ -121,12 +121,15 @@ func LoadOrNewFile(bucketName string, fileName string) (*File, error) {
 	}
 
 	file, err := dbox.NewFileName(fileName, dbox.MustStore(bucket.MetaDataStoreName()))
-	file.SetMapDataStore(dbox.MustStore(bucket.MapDataStoreName()))
-	file.SetRawDataStore(dbox.MustStore(bucket.RawDataStoreName()))
 
-	if err == dbox.ErrNotFound {
+	if err == dbox.ErrNotFound && file != nil {
 		file.SetName(fileName)
 		file.SetBucket(bucketName)
+	}
+
+	if file != nil {
+		file.SetMapDataStore(dbox.MustStore(bucket.MapDataStoreName()))
+		file.SetRawDataStore(dbox.MustStore(bucket.RawDataStoreName()))
 	}
 
 	return &File{File: file}, err

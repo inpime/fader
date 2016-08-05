@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/inpime/fader/addons/standard"
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 	braintree "github.com/lionelbarrow/braintree-go"
 )
 

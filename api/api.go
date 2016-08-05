@@ -6,11 +6,15 @@ import (
 	_ "github.com/inpime/fader/addons/payment"
 	_ "github.com/inpime/fader/addons/search"
 	"github.com/inpime/fader/addons/session"
+	_ "github.com/inpime/fader/addons/shop"
 	_ "github.com/inpime/fader/addons/standard"
 	"github.com/inpime/fader/api/addons"
 	"github.com/inpime/fader/api/vrouter"
 
 	"fmt"
+	"path/filepath"
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
 	"github.com/inpime/fader/api/config"
@@ -19,8 +23,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
-	"path/filepath"
-	"time"
 )
 
 // InitAppSettings

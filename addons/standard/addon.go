@@ -2,8 +2,9 @@ package standard
 
 import (
 	"fmt"
+
 	"github.com/inpime/fader/api/addons"
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 	"github.com/labstack/echo"
 )
 

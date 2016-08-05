@@ -9,7 +9,7 @@ import (
 	"github.com/inpime/dbox"
 	"github.com/inpime/fader/api/config"
 	"github.com/inpime/fader/store"
-	"github.com/inpime/fader/utils/sdata"
+	"github.com/inpime/sdata"
 )
 
 func (Extension) initTplContext() {

@@ -1,9 +1,12 @@
 package vrouter
 
-import (
-	// "api/addons"
-	"github.com/inpime/fader/utils"
+import
+// "api/addons"
+
+(
 	"time"
+
+	"github.com/inpime/sdata"
 )
 
 type Settings struct {
@@ -12,7 +15,7 @@ type Settings struct {
 }
 
 func (s Settings) Merge(cfg interface{}) error {
-	return utils.AppendOrReplace(s.settings, cfg.(*Settings).settings)
+	return sdata.Mergex(s.settings, cfg.(*Settings).settings)
 }
 
 type settings struct {
