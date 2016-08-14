@@ -82,7 +82,8 @@ vendor:
 		github.com/yosssi/boltstore/reaper \
 		github.com/yosssi/boltstore/store \
 		gopkg.in/go-playground/validator.v8 \
-		gopkg.in/olivere/elastic.v3
+		gopkg.in/olivere/elastic.v3 \
+		github.com/inpime/sdata
 .PHONY: vendor
 
 # for a comfortable development
