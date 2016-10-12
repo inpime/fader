@@ -19,7 +19,7 @@ func (Extension) initTplFilters() {
 	pongo2.RegisterFilter("muted", filterClear) // alias clear
 	pongo2.RegisterFilter("logf", filterLogf)
 	pongo2.RegisterFilter("atojs", tagAnyObjectToJS)
-	pongo2.RegisterFilter("split", filterSplit)
+// 	pongo2.RegisterFilter("split", filterSplit)
 	pongo2.RegisterFilter("btos", filterBytesToString)
 	pongo2.RegisterFilter("stob", filterStringToBytes)
 	pongo2.RegisterFilter("append", filterAppend)
