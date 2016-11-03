@@ -1,5 +1,9 @@
 # Fader
 
+Comming soon v2. This was going to be cool!
+
+---
+
 [![Build Status](https://travis-ci.org/inpime/fader.svg?branch=master)](https://travis-ci.org/inpime/fader)
 
 Fader is a abstract tool for creation of web applications. Gives maximum flexibility arranging information on the site.
