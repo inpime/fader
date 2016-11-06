@@ -1,6 +1,7 @@
 package api
 
 import (
+	"addons"
 	"api/router"
 	"api/templates"
 	"interfaces"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/flosch/pongo2"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -50,7 +52,7 @@ func Setup(e *echo.Echo, _settings *Settings) error {
 		return err
 	}
 
-	// Components -------------------------------------------------------------
+	// Sys components -------------------------------------------------------------
 
 	bucketManager = boltdb.NewBucketManager(db)
 	fileManager = boltdb.NewFileManager(db)
@@ -65,7 +67,7 @@ func Setup(e *echo.Echo, _settings *Settings) error {
 		interfaces.FileWithoutRawData,
 	)
 
-	// Application compoenents ------------------------------------------------
+	// App compoenents ------------------------------------------------
 
 	logger.Println("init... manager routes")
 	vrouter = router.NewRouter()
@@ -76,13 +78,35 @@ func Setup(e *echo.Echo, _settings *Settings) error {
 		logger.Fatalln("[FAIL] installation of first run:", err)
 	}
 
-	// TODO: setup app config
+	// Setup app config
+	logger.Println("init... app config")
 	config = newConfig()
-	/*
-		1. Routers
-	*/
+	logger.Println("\t  run auto update settings every 10 seconds")
+	appConfigUpdateFn()
+	go RefreshEvery(time.Second*10, appConfigUpdateFn)
 
-	// Application routes -----------------------------------------------------
+	// Setup app addons
+	logger.Println("init... app addons")
+	if err := SetupAddons(); err != nil {
+		logger.Println("[ERR] stup addons", err)
+	}
+	for _, addon := range addons.Addons {
+		logger.Println("\t addon:", addon.Name())
+		if err := addon.ExtContextPongo2(pongo2.DefaultSet.Globals); err != nil {
+			logger.Printf("\t addon %q, ext. contoext err: %s", addon.Name(), err)
+		}
+
+		if err := addon.ExtTagsFiltersPongo2(
+			pongo2.RegisterFilter,
+			pongo2.ReplaceFilter,
+			pongo2.RegisterTag,
+			pongo2.ReplaceTag,
+		); err != nil {
+			logger.Printf("\t addon %q, ext. filters/tags err: %s", addon.Name(), err)
+		}
+	}
+
+	// Routes -----------------------------------------------------
 
 	logger.Println("init... application middlewares")
 	e.Use(middleware.Logger())

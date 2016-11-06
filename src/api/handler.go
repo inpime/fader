@@ -6,6 +6,8 @@ import (
 	"interfaces"
 	"net/http"
 
+	"addons"
+
 	"github.com/flosch/pongo2"
 	"github.com/labstack/echo"
 	"github.com/yuin/gopher-lua"
@@ -60,6 +62,11 @@ func FaderHandler(ctx echo.Context) error {
 
 	var L = lua.NewState()
 	defer L.Close()
+
+	// Lua addons ---------------------------------------------------
+	for _, addon := range addons.Addons {
+		L.PreloadModule(addon.Name(), addon.LuaLoader)
+	}
 
 	_ctx := ContextLuaExecutor(L, ctx)
 	_luaScript := string(file.LuaScript)

@@ -67,11 +67,6 @@ var (
 		config.Addons = _config.Addons
 		config.Unlock()
 
-		return nil
-	}
-
-	appRoutesUpdateFn = func() error {
-
 		vrouter.RefreshRoutes(config.Config().Routing.Routs)
 
 		return nil

@@ -26,11 +26,9 @@ func TestConfiguratorUpdate_simple(t *testing.T) {
 	// assert.NoError(t, err)
 
 	configOnce := sync.Once{}
-	routesOnce := sync.Once{}
 
 	firstInitWaiting := sync.WaitGroup{}
 	firstInitWaiting.Add(1) // config
-	firstInitWaiting.Add(1) // routing
 	wg := sync.WaitGroup{}
 
 	for i := 0; i < 10; i++ {
@@ -40,19 +38,6 @@ func TestConfiguratorUpdate_simple(t *testing.T) {
 				err = appConfigUpdateFn()
 				assert.NoError(t, err)
 				configOnce.Do(func() {
-					firstInitWaiting.Done()
-				})
-			}
-
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
-			for i := 0; i < 1000; i++ {
-				err = appRoutesUpdateFn()
-				assert.NoError(t, err)
-				routesOnce.Do(func() {
 					firstInitWaiting.Done()
 				})
 			}
@@ -101,8 +86,6 @@ func TestConfiguratorUpdate_simple(t *testing.T) {
 
 	// update config setup
 	err = appConfigUpdateFn()
-	assert.NoError(t, err)
-	err = appRoutesUpdateFn()
 	assert.NoError(t, err)
 
 	assert.Len(t, config.Config().Routing.Routs, 3)
@@ -376,7 +359,7 @@ faderAppToml = "yes2"
 	c:Set("name", "fader")
 `)
 	router22File.ContentType = "text/html"
-	router22File.RawData = []byte(`Hello {{ ctx.Get("name") }} {{ ctx.Get("param") }} {{ ctx.QueryParam("c") }} !`)
+	router22File.RawData = []byte(`Hello {{ ContextFunction() }} {{ ctx.Get("name") }} {{ ctx.Get("param") }} {{ ctx.QueryParam("c") }} !`)
 
 	if err := fileManager.CreateFile(router22File); err != nil {
 		logger.Panicln("[FAIL] create router22File", err)
