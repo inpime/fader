@@ -1,6 +1,9 @@
 package api
 
-import "interfaces"
+import (
+	"interfaces"
+	"time"
+)
 
 // IsFirstStart the app first launched
 func IsFirstStart() bool {
@@ -12,4 +15,18 @@ func IsFirstStart() bool {
 		})
 
 	return count == 0
+}
+
+func RefreshEvery(d time.Duration, f func() error) {
+
+	for {
+		select {
+		case <-time.After(d):
+			if err := f(); err != nil {
+				logger.Println("[RefreshEvery] abort, err:", err)
+				return
+			}
+		}
+	}
+
 }

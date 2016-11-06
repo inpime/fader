@@ -94,6 +94,12 @@ func LogLevelFrom(name string) Level {
 
 // config
 
+func newConfig() *Config {
+	return &Config{
+		Addons: make(map[string]interface{}),
+	}
+}
+
 type Config struct {
 	sync.RWMutex
 

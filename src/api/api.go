@@ -20,6 +20,7 @@ var (
 	vrouter *router.Router
 
 	settings *Settings
+	config   *Config
 
 	fileLoaderForRouting interfaces.FileLoader
 
@@ -74,6 +75,12 @@ func Setup(e *echo.Echo, _settings *Settings) error {
 	if err := InitFirstRunIfNeed(); err != nil {
 		logger.Fatalln("[FAIL] installation of first run:", err)
 	}
+
+	// TODO: setup app config
+	config = newConfig()
+	/*
+		1. Routers
+	*/
 
 	// Application routes -----------------------------------------------------
 

@@ -6,9 +6,12 @@ import (
 	"interfaces"
 	"net/url"
 	"strings"
+	"sync"
 )
 
 type Route struct {
+	sync.Mutex
+
 	// Parent where the route was registered (a Router).
 	parent parentRoute
 
@@ -324,6 +327,8 @@ func (r *Route) addRegexpMatcher(tpl string, matchHost, matchPrefix, matchQuery 
 // ------------------
 
 type Router struct {
+	sync.Mutex
+
 	NotFoundHandler interfaces.RequestHandler
 
 	parent parentRoute
@@ -343,12 +348,18 @@ type Router struct {
 
 // Get returns a route registered with the given name.
 func (r *Router) Get(name string) interfaces.Route {
+	r.Lock()
+	defer r.Unlock()
+
 	return r.getNamedRoutes()[name]
 }
 
 // GetRoute returns a route registered with the given name. This method
 // was renamed to Get() and remains here for backwards compatibility.
 func (r *Router) GetRoute(name string) *Route {
+	r.Lock()
+	defer r.Unlock()
+
 	return r.getNamedRoutes()[name]
 }
 
@@ -357,11 +368,24 @@ func NewRouter() *Router {
 	return &Router{namedRoutes: make(map[string]*Route)}
 }
 
-// func (r *Router) Clear() {
+func (r *Router) clear() {
+	r.routes = []*Route{}
+	r.namedRoutes = make(map[string]*Route)
+}
 
-// 	r.routes = []*Route{}
-// 	r.namedRoutes = make(map[string]*Route)
-// }
+func (r *Router) RefreshRoutes(routs []interfaces.RequestHandler) {
+	r.Lock()
+	defer r.Unlock()
+
+	r.clear()
+
+	for _, h := range routs {
+		r.Handle(h.Path, h).
+			Methods(h.AllowedMethods...).
+			Name(h.Name)
+	}
+
+}
 
 func (r *Router) NewRoute() *Route {
 
@@ -377,7 +401,6 @@ func (r *Router) Handle(path string, h interfaces.RequestHandler) interfaces.Rou
 }
 
 func (r Router) Match(req interfaces.RequestParams, match *interfaces.RouteMatch) bool {
-
 	for _, route := range r.routes {
 		if route.Match(req, match) {
 			return true
@@ -436,6 +459,9 @@ func (r *Router) buildVars(m map[string]string) map[string]string {
 
 // getNamedRoutes returns the map where named routes are registered.
 func (r *Route) getNamedRoutes() map[string]*Route {
+	r.Lock()
+	defer r.Unlock()
+
 	if r.parent == nil {
 		// During tests router is not always set.
 		r.parent = NewRouter()
