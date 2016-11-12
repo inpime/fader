@@ -168,12 +168,31 @@ methods = ["get"]
 	file.FileID = uuid.NewV4()
 	file.BucketID = faderConsoleBucketID
 	file.FileName = "index.html"
-	file.LuaScript = []byte(``)
+	file.LuaScript = []byte(`
+c = ctx()
+c:Set("YourName", c:QueryParam("name"))
+`)
 	file.ContentType = "text/html"
 	file.RawData = []byte(`
-<h1>Welcome!</h1>
-<smal>Fader2. Fader console v1.</smal>
+{% if ctx.Get("YourName") == "" %}
+<p>You have no name? Can i name you <a href="?name=Super Star">Super Star</a>?</p>
+<p>Don't like the name?</p>
+<form>
+	<fieldset>
+		<legend>What is your name?</legend>
+		<input type="text" name="name" placeholder="What is your name?"/>
+		<button>Set</button>
+	</fieldset>
+</form>
+{% else %}
+<h1>Welcome {{ ctx.Get("YourName") }}!</h1>
+{% endif %}
+<p><small>Fader2. Fader console v1.</small></p>
+{# current route #}
+<p><small><a href="">clear</a></small></p>
     `)
+	// TODO: CSRF код для формы
+	// TODO: текущий роут
 
 	err = fileManager.CreateFile(file)
 	assert.NoError(t, err, "create file %q", file.FileName)
