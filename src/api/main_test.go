@@ -15,6 +15,8 @@ var e *echo.Echo
 
 func TestMain(m *testing.M) {
 	e = echo.New()
+	
+	TESTING = true
 
 	os.Exit(m.Run())
 }

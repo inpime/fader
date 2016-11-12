@@ -24,6 +24,7 @@ const (
 	FADER_HTTPHOST = "FADER_HTTPHOST"
 	FADER_DBPATH   = "FADER_DBPATH"
 	FADER_LOGLEVEL = "FADER_LOGLEVEL"
+	FADER_INITFILE = "FADER_INITFILE"
 )
 
 func main() {
@@ -94,5 +95,6 @@ func settingsFromENV() *api.Settings {
 		ApiPort:      os.Getenv(FADER_HTTPPORT),
 		DatabasePath: os.Getenv(FADER_DBPATH),
 		LogLevel:     api.LogLevelFrom(os.Getenv(FADER_LOGLEVEL)),
+		InitFile:     os.Getenv(FADER_INITFILE),
 	}
 }

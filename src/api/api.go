@@ -30,6 +30,8 @@ var (
 	bucketManager interfaces.BucketManager
 
 	db *bolt.DB
+
+	TESTING bool
 )
 
 // Setup
@@ -74,8 +76,12 @@ func Setup(e *echo.Echo, _settings *Settings) error {
 
 	// Setup init settings
 	logger.Println("init... app check")
-	if err := InitFirstRunIfNeed(); err != nil {
-		logger.Fatalln("[FAIL] installation of first run:", err)
+	if !TESTING {
+		if err := InitFirstRunIfNeed(); err != nil {
+			logger.Fatalln("[FAIL] installation of first run:", err)
+		}
+	} else {
+		logger.Println("\t skiped check first run")
 	}
 
 	// Setup app config

@@ -26,6 +26,8 @@ func SHA1String(v interface{}) string {
 	return hex.EncodeToString(SHA1(v))
 }
 
+// TODO: переименовать в hashFromUUID
+
 func hashFromFile(bucketID uuid.UUID, fileName string) []byte {
 	return SHA1(bucketID.String() + fileName)
 }

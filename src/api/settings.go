@@ -27,6 +27,8 @@ type Settings struct {
 	BodyLimit    string
 	LogLevel     Level
 
+	InitFile string // path to the file
+
 	TimeoutFileProvider time.Duration
 }
 
