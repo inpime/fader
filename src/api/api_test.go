@@ -1,15 +1,16 @@
 package api
 
 import (
+	"interfaces"
 	"net/http"
 	"os"
 	"testing"
-	"interfaces"
+
+	"io/ioutil"
 
 	"github.com/labstack/echo"
-	"github.com/stretchr/testify/assert"
 	"github.com/satori/go.uuid"
-	"io/ioutil"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestApiGlobal_simple(t *testing.T) {
@@ -47,6 +48,7 @@ func TestSettingsINitFile_simple(t *testing.T) {
 
 		os.RemoveAll(settings.DatabasePath)
 	}()
+	os.RemoveAll("../../_app.db")
 	assert.NoError(t, err)
 
 	////////////////////////////////////////////////////////////////////////////
@@ -62,14 +64,11 @@ func TestSettingsINitFile_simple(t *testing.T) {
 	err = bucketManager.CreateBucket(bucketFile)
 	assert.NoError(t, err, "create bucket %q", bucketFile.BucketName)
 
-	
-
 	bucketFile = interfaces.NewBucket()
 	bucketFile.BucketID = faderConsoleBucketID
 	bucketFile.BucketName = "fader.consolev1"
 	err = bucketManager.CreateBucket(bucketFile)
 	assert.NoError(t, err, "create bucket %q", bucketFile.BucketName)
-
 
 	// main.toml
 
@@ -162,15 +161,41 @@ methods = ["get"]
 	err = fileManager.CreateFile(file)
 	assert.NoError(t, err, "create file %q", file.FileName)
 
-
 	// fc = fader console
 	file = interfaces.NewFile()
 	file.FileID = uuid.NewV4()
 	file.BucketID = faderConsoleBucketID
 	file.FileName = "index.html"
 	file.LuaScript = []byte(`
+local basic = require("basic")
+
 c = ctx()
 c:Set("YourName", c:QueryParam("name"))
+
+print("=====")
+print(basic.name, basic.author)
+print(basic.name, basic.author)
+print(basic.name, basic.author)
+print("текущий роут", c:Route():Has("faderConfoleIndex"))
+print("текущий роут", c:Route():Has(""))
+print("текущий роут", c:Route():Has("qwe"))
+
+print("текущий роут, имя", c:Route():Name())
+print("текущий роут, путь", c:Route():Path())
+print("текущий роут, бакет", c:Route():Bucket())
+print("текущий роут, файл", c:Route():File())
+print("текущий роут, аргументы", c:Route():Args())
+
+print("текущий роут", c:Route("faderConfoleIndex"):URL())
+print("текущий роут", c:Route():URL())
+founrRoute = c:Route("qwe")
+print(founrRoute)
+if founrRoute then
+	print("найден!!!")
+end
+
+
+print("=====")
 `)
 	file.ContentType = "text/html"
 	file.RawData = []byte(`
@@ -189,7 +214,7 @@ c:Set("YourName", c:QueryParam("name"))
 {% endif %}
 <p><small>Fader2. Fader console v1.</small></p>
 {# current route #}
-<p><small><a href="">clear</a></small></p>
+<p><small><a href="?">clear</a></small></p>
     `)
 	// TODO: CSRF код для формы
 	// TODO: текущий роут

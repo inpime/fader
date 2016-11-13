@@ -1,6 +1,8 @@
 package api
 
 import (
+	"api/router"
+	"interfaces"
 	"log"
 
 	"github.com/labstack/echo"
@@ -8,13 +10,15 @@ import (
 )
 
 var contextMethods = map[string]lua.LGFunction{
-	"URI":        contextGetURI,
+	// "URI":        contextGetURI,
 	"QueryParam": contextGetQueryParam,
 	"NoContext":  contextNoContext,
 	"JSON":       contextRenderJSON,
 	"IsGET":      contextMethodIsGET,
 	"IsPOST":     contextMethodIsPOST,
 	"Set":        contextMethodSet,
+	// alias IsCurrentRoute
+	"Route": contextRoute,
 	// "Get":        contextMethodGet,
 }
 
@@ -24,9 +28,33 @@ func contextGetPath(L *lua.LState) int {
 	return 1
 }
 
-func contextGetURI(L *lua.LState) int {
-	p := checkContext(L)
-	L.Push(lua.LString(p.echoCtx.Request().URI()))
+// func contextGetURI(L *lua.LState) int {
+// 	p := checkContext(L)
+// 	L.Push(lua.LString(p.echoCtx.Request().URI()))
+// 	return 1
+// }
+
+func contextRoute(L *lua.LState) int {
+	c := checkContext(L)
+	route := router.MatchVRouteFromContext(c.echoCtx)
+
+	if route == nil {
+		// TODO: informing that an empty route, should not happen
+
+		return 0
+	}
+
+	if L.GetTop() >= 2 {
+		foundRoute := vrouter.Get(L.CheckString(2))
+
+		route = &interfaces.RouteMatch{
+			Route: foundRoute,
+		}
+	}
+
+	// Push route
+	newLuaRoute(route)(L)
+
 	return 1
 }
 
