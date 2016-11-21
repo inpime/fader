@@ -21,6 +21,8 @@ type RouteMatcher interface {
 type Route interface {
 	// RouteMatcher
 
+	Options() RequestHandler
+
 	GetName() string
 	Name(string) Route
 	Path(string) Route

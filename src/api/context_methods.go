@@ -45,10 +45,16 @@ func contextRoute(L *lua.LState) int {
 	}
 
 	if L.GetTop() >= 2 {
+		route = &interfaces.RouteMatch{
+			Route: nil,
+			Vars:  make(map[string]string),
+		}
+
 		foundRoute := vrouter.Get(L.CheckString(2))
 
-		route = &interfaces.RouteMatch{
-			Route: foundRoute,
+		if foundRoute != nil {
+			route.Route = foundRoute
+			route.Handler = foundRoute.Options()
 		}
 	}
 

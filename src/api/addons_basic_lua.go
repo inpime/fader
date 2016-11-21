@@ -77,7 +77,9 @@ func routeHasRoute(L *lua.LState) int {
 	r := checkRoute(L)
 
 	if L.GetTop() != 2 {
-		return 0
+		// if exists current route then return true
+		L.Push(lua.LBool(r.route != nil))
+		return 1
 	}
 
 	routeName := L.CheckString(2)
@@ -117,6 +119,7 @@ func rotueGetHandlerArgs(L *lua.LState) int {
 
 func routeGetURLFromParams(L *lua.LState) int {
 	r := checkRoute(L)
+
 	if r.route == nil {
 		// TODO: error
 		log.Println("empty router")

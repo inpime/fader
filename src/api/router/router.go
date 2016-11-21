@@ -42,6 +42,10 @@ type Route struct {
 	buildVarsFunc BuildVarsFunc
 }
 
+func (r *Route) Options() interfaces.RequestHandler {
+	return r.handler
+}
+
 // Name -----------------------------------------------------------------------
 
 // Name sets the name for the route, used to build URLs.
@@ -351,7 +355,13 @@ func (r *Router) Get(name string) interfaces.Route {
 	r.Lock()
 	defer r.Unlock()
 
-	return r.getNamedRoutes()[name]
+	f, exists := r.getNamedRoutes()[name]
+
+	if !exists {
+		return nil
+	}
+
+	return f
 }
 
 // GetRoute returns a route registered with the given name. This method
@@ -360,7 +370,13 @@ func (r *Router) GetRoute(name string) *Route {
 	r.Lock()
 	defer r.Unlock()
 
-	return r.getNamedRoutes()[name]
+	f, exists := r.getNamedRoutes()[name]
+
+	if !exists {
+		return nil
+	}
+
+	return f
 }
 
 // NewRouter returns a new router instance.
