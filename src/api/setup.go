@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	configBucketName   = "settings"
-	mainConfigFileName = "main.toml"
+	configBucketName   = ConfigBucketName
+	mainConfigFileName = MainConfigFileName
 
 	appConfigUpdateFn = func() error {
 		if config == nil {

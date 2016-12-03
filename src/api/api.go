@@ -32,6 +32,9 @@ var (
 	db *bolt.DB
 
 	TESTING bool
+
+	ConfigBucketName   = "settings"
+	MainConfigFileName = "main.toml"
 )
 
 // Setup

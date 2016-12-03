@@ -4,18 +4,18 @@ import (
 	"interfaces"
 	"log"
 
+	uuid "github.com/satori/go.uuid"
 	lua "github.com/yuin/gopher-lua"
 )
 
 var exports = map[string]lua.LGFunction{
-	"exfn": exfn,
+	"ListBuckets":         basicFn_ListBuckets,
+	"ListFilesByBucketID": basicFn_listFilesFromBucketID,
 }
 
-func exfn(L *lua.LState) int {
-	return 0
-}
-
+////////////////////////////////////////////////////////////////////////////////
 // luaRoute
+////////////////////////////////////////////////////////////////////////////////
 
 var luaRouteTypeName = "route"
 
@@ -134,5 +134,33 @@ func routeGetURLFromParams(L *lua.LState) int {
 		return 0
 	}
 	L.Push(lua.LString(url.String()))
+	return 1
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Bucket and file utils
+////////////////////////////////////////////////////////////////////////////////
+
+func basicFn_ListBuckets(L *lua.LState) int {
+	ud := L.NewUserData()
+	ud.Value = listOfBuckets()
+	L.Push(ud)
+	return 1
+}
+
+func basicFn_listFilesFromBucketID(L *lua.LState) int {
+	var bid uuid.UUID
+	if L.GetTop() == 2 {
+		switch v := L.CheckUserData(2).Value.(type) {
+		case uuid.UUID:
+			bid = v
+		case string:
+			bid = uuid.FromStringOrNil(v)
+		}
+	}
+
+	ud := L.NewUserData()
+	ud.Value = filesByBucketID(bid)
+	L.Push(ud)
 	return 1
 }

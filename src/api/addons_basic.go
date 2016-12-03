@@ -4,6 +4,7 @@ import (
 	"addons"
 
 	"github.com/flosch/pongo2"
+	uuid "github.com/satori/go.uuid"
 	"github.com/yuin/gopher-lua"
 )
 
@@ -69,6 +70,22 @@ func (a *AddonBasic) ExtContextPongo2(_ctx pongo2.Context) error {
 	// ctx["ContextFunction"] = func() *pongo2.Value {
 	// 	return pongo2.AsValue("context function")
 	// }
+
+	ctx["ListBuckets"] = func(bucketID *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(listOfBuckets())
+	}
+
+	ctx["ListFilesByBucketID"] = func(bucketID *pongo2.Value) *pongo2.Value {
+		var bid uuid.UUID
+		switch v := bucketID.Interface().(type) {
+		case uuid.UUID:
+			bid = v
+		case string:
+			bid = uuid.FromStringOrNil(v)
+		}
+		return pongo2.AsValue(filesByBucketID(bid))
+	}
+
 	_ctx.Update(ctx)
 	return nil
 }
