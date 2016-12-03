@@ -11,3 +11,4 @@ state/app/Dockerfile
 state/app/fader
 vendor
 *.lock
+.env
