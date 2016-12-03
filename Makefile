@@ -1,6 +1,4 @@
 
-_GOPATH=${GOPATH}:${PWD}
-
 vendor:
 	go get -v github.com/labstack/echo/... \
 		github.com/stretchr/testify/assert \
@@ -10,14 +8,20 @@ vendor:
 		github.com/BurntSushi/toml
 .PHONY: vendor 
 test: vendor
-	GOPATH=${_GOPATH} go test -v \
+	rm -rf _app.db
+	GOPATH=${PWD} go test -v \
 		-bench=. -benchmem \
-		-run=. ./src/...
+		-run=TestSettingsINitFile_simple ./src/...
 .PHONY: test
 
-run-dev:
+gen:
+	-rm -rf ${FADER_DBPATH}
+	-rm -rf ${FADER_INITFILE}
+	GOPATH=${PWD} go run src/cmd/gen/main.go
+
+run:
 	GOOS="darwin" \
 	GOARCH="amd64" \
-	GOPATH=${_GOPATH}  \
+	GOPATH=${PWD}  \
 	go run src/cmd/httpserver/main.go
 .PHONY: run-dev 
