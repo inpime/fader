@@ -10,6 +10,7 @@ func NewFile() *File {
 	return &File{
 		MetaData:       make(map[string]interface{}),
 		StructuralData: make(map[string]interface{}),
+		CreatedAt:      time.Now(),
 	}
 }
 
@@ -38,6 +39,7 @@ func NewBucket() *Bucket {
 	return &Bucket{
 		MetaData:       make(map[string]interface{}),
 		StructuralData: make(map[string]interface{}),
+		CreatedAt:      time.Now(),
 	}
 }
 

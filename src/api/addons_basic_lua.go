@@ -70,7 +70,9 @@ var routeMethods = map[string]lua.LGFunction{
 	"Has":    routeHasRoute,
 
 	// generate URL of the current routes in the parameters
-	"URL": routeGetURLFromParams,
+	// TODO: renate to URLPath
+	"URL":     routeGetURLFromParams,
+	"URLPath": routeGetURLFromParams,
 }
 
 func routeHasRoute(L *lua.LState) int {
@@ -126,7 +128,16 @@ func routeGetURLFromParams(L *lua.LState) int {
 		return 0
 	}
 
-	url, err := r.route.URLPath()
+	var args []string
+
+	if L.GetTop() > 1 {
+		args = make([]string, L.GetTop()-1)
+		for i := 2; i <= L.GetTop(); i++ {
+			args[i-2] = L.CheckString(i)
+		}
+	}
+
+	url, err := r.route.URLPath(args...)
 	// TODO: URL as custom object
 	if err != nil {
 		// TODO: error
@@ -163,4 +174,60 @@ func basicFn_listFilesFromBucketID(L *lua.LState) int {
 	ud.Value = filesByBucketID(bid)
 	L.Push(ud)
 	return 1
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// File type
+////////////////////////////////////////////////////////////////////////////////
+
+var luaFileTypeName = "file"
+
+func FileAsLuaFile(L *lua.LState, file *interfaces.File) *lua.LUserData {
+	ud := L.NewUserData()
+	if file == nil {
+		_f := interfaces.NewFile()
+		_f.FileID = uuid.NewV4()
+		ud.Value = &luaFile{_f}
+	} else {
+		ud.Value = &luaFile{file}
+	}
+	L.SetMetatable(ud, L.GetTypeMetatable(luaFileTypeName))
+	return ud
+}
+
+func newLuaFile(file *interfaces.File) func(L *lua.LState) int {
+	return func(L *lua.LState) int {
+		L.Push(FileAsLuaFile(L, file))
+		return 1
+	}
+
+}
+
+type luaFile struct {
+	*interfaces.File
+}
+
+func checkFile(L *lua.LState) *luaFile {
+	ud := L.CheckUserData(1)
+	if v, ok := ud.Value.(*luaFile); ok {
+		return v
+	}
+	L.ArgError(1, "route expected")
+	return nil
+}
+
+// luaRoute methods
+
+var fileMethods = map[string]lua.LGFunction{
+	"SetFileName":    func(*lua.LState) int { return 0 },
+	"SetBucketID":    func(*lua.LState) int { return 0 },
+	"SetLuaScript":   func(*lua.LState) int { return 0 },
+	"MetaData":       func(*lua.LState) int { return 0 },
+	"StructuralData": func(*lua.LState) int { return 0 },
+	"SetRawData":     func(*lua.LState) int { return 0 },
+	"SetContentType": func(*lua.LState) int { return 0 },
+	"SetOwners":      func(*lua.LState) int { return 0 },
+	"SetPrivate":     func(*lua.LState) int { return 0 },
+	"SetPublic":      func(*lua.LState) int { return 0 },
+	"SetReadOnly":    func(*lua.LState) int { return 0 },
 }

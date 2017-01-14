@@ -202,6 +202,14 @@ bucket = "fader.consolev1"
 file = "index.html"
 licenses = ["guest"]
 methods = ["get"]
+
+[[routing.routs]]
+name = "fileView"
+path = "/files/{file_id}"
+bucket = "fader.consolev1"
+file = "view_file.html"
+licenses = ["guest"]
+methods = ["get"]
     `)
 
 	err = fileManager.CreateFile(file)
@@ -210,11 +218,116 @@ methods = ["get"]
 		panic(err)
 	}
 
+	////////////////////////////////////////////////////////////////////////////
+	// index.html
+	////////////////////////////////////////////////////////////////////////////
+
 	// fc = fader console
 	file = interfaces.NewFile()
 	file.FileID = uuid.NewV4()
 	file.BucketID = faderConsoleBucketID
 	file.FileName = "index.html"
+	file.LuaScript = []byte(`
+local basic = require("basic")
+
+c = ctx()
+c:Set("YourName", c:QueryParam("name"))
+
+print("=====")
+print(basic.name, basic.author)
+print(basic.name, basic.author)
+print(basic.name, basic.author)
+print("has faderConfoleIndex", c:Route():Has("faderConfoleIndex"))
+print("has empty", c:Route():Has(""))
+print("has qwe", c:Route():Has("qwe"))
+print("has qwe", c:Route("qwe"):Has())
+
+print("current, имя", c:Route():Name())
+print("current, путь", c:Route():Path())
+print("current, бакет", c:Route():Bucket())
+print("current, файл", c:Route():File())
+print("current, аргументы", c:Route():Args())
+
+print("faderConfoleIndex", c:Route("faderConfoleIndex"):URL())
+print("homepage", c:Route("homepage"):URL())
+print("current", c:Route():URL())
+print("file view", c:Route("fileView"):URL("file_id", "ID", "qwd", "qwdqwdqwdqwd"))
+
+print("")
+print("=====")
+print("")
+
+founrRoute = c:Route("qwe")
+print(founrRoute:Has())
+if founrRoute:Has() then
+	print("qwe найден!!!")
+end
+
+founrRoute = c:Route("homepage")
+print("homepage", founrRoute:URL())
+print(founrRoute:Has())
+if founrRoute:Has() then
+	print("homepage найден!!!")
+end
+
+
+c:Set("baskets", basic:ListBuckets())
+
+
+print("=====")
+`)
+	file.ContentType = "text/html"
+	file.RawData = []byte(`
+{% if ctx.Get("YourName") == "" %}
+<p>You have no name? Can i name you <a href="?name=Super Star">Super Star</a>?</p>
+<p>Don't like the name?</p>
+<form>
+	<fieldset>
+		<legend>What is your name?</legend>
+		<input type="text" name="name" placeholder="What is your name?"/>
+		<button>Set</button>
+	</fieldset>
+</form>
+{% else %}
+<h1>Welcome {{ ctx.Get("YourName") }}!</h1>
+{% endif %}
+<p><small>Fader2. Fader console v1.</small></p>
+{# current route #}
+<p><small><a href="?">clear</a></small></p>
+
+<ul>
+{% for i in ctx.Get("baskets") %}
+<li>
+	Name: {{ i.BucketName }}
+	<ul>
+		{% for ii in ListFilesByBucketID(i.BucketID) %}
+		<li>
+			<a href="{{ Route("fileView").URLPath("file_id", ii.FileName) }}">Name: {{ ii.FileName }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+</li>
+{% endfor %}
+<ul>
+    `)
+	// TODO: CSRF код для формы
+	// TODO: текущий роут
+
+	err = fileManager.CreateFile(file)
+	log.Printf("create file %q", file.FileName)
+	if err != nil {
+		panic(err)
+	}
+
+	////////////////////////////////////////////////////////////////////////////
+	// view_file.html
+	////////////////////////////////////////////////////////////////////////////
+
+	// fc = fader console
+	file = interfaces.NewFile()
+	file.FileID = uuid.NewV4()
+	file.BucketID = faderConsoleBucketID
+	file.FileName = "view_file.html"
 	file.LuaScript = []byte(`
 local basic = require("basic")
 
@@ -289,7 +402,7 @@ print("=====")
 	<ul>
 		{% for ii in ListFilesByBucketID(i.BucketID) %}
 		<li>
-			Name: {{ ii.FileName }}
+			<a href="/files/view">Name: {{ ii.FileName }}</a>
 		</li>
 		{% endfor %}
 	</ul>

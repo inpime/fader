@@ -86,6 +86,14 @@ func (a *AddonBasic) ExtContextPongo2(_ctx pongo2.Context) error {
 		return pongo2.AsValue(filesByBucketID(bid))
 	}
 
+	ctx["Route"] = func(name *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(
+			&RoutePongo2{
+				vrouter.Get(name.String()),
+			},
+		)
+	}
+
 	_ctx.Update(ctx)
 	return nil
 }
