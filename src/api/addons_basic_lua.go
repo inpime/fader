@@ -11,6 +11,80 @@ import (
 var exports = map[string]lua.LGFunction{
 	"ListBuckets":         basicFn_ListBuckets,
 	"ListFilesByBucketID": basicFn_listFilesFromBucketID,
+
+	// file manager
+	"FindFileByName": func(L *lua.LState) int { return 0 },
+	"FindFile":       func(L *lua.LState) int { return 0 },
+	"CreateFile":     func(L *lua.LState) int { return 0 },
+	"CreateFileFrom": func(L *lua.LState) int { return 0 },
+	"UpdateFileFrom": func(L *lua.LState) int { return 0 },
+	"DeleteFile":     func(L *lua.LState) int { return 0 },
+
+	// bucket manager
+	"FindBucketByName": func(L *lua.LState) int { return 0 },
+	"FindBucket":       func(L *lua.LState) int { return 0 },
+	"CreateBucket":     func(L *lua.LState) int { return 0 },
+	"CreateBucketFrom": func(L *lua.LState) int { return 0 },
+	"UpdateBucketFrom": func(L *lua.LState) int { return 0 },
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Lua interfaces.DataUsed
+////////////////////////////////////////////////////////////////////////////////
+
+var luaDataUsed = "DataUsed"
+
+func newDataUsed(v interfaces.DataUsed) func(L *lua.LState) int {
+	return func(L *lua.LState) int {
+		ud := L.NewUserData()
+		ud.Value = v
+		L.SetMetatable(ud, L.GetTypeMetatable(luaDataUsed))
+		L.Push(ud)
+		return 1
+	}
+}
+
+func checkDataUsed(L *lua.LState) interfaces.DataUsed {
+	ud := L.CheckUserData(1)
+	if v, ok := ud.Value.(interfaces.DataUsed); ok {
+		return v
+	}
+	L.ArgError(1, "interfaces.DataUsed expected")
+	return interfaces.DataUsed(0)
+}
+
+// types
+
+var dataUsedMethods = map[string]lua.LGFunction{
+	"Has": func(L *lua.LState) int {
+		// TODO:
+	},
+	"Add": func(L *lua.LState) int {
+		var self *lua.LUserData
+		var v interfaces.DataUsed
+
+		for i := 1; i <= L.GetTop(); i++ {
+			ud := L.CheckUserData(i)
+			if ud == nil {
+				L.ArgError(i, "interfaces.DataUsed expected, got nil")
+				continue
+			}
+			if i == 1 {
+				self = ud
+			}
+			_v, ok := ud.Value.(interfaces.DataUsed)
+			if !ok {
+				L.ArgError(i, "interfaces.DataUsed expected")
+				continue
+			}
+			v = v | _v
+		}
+
+		self.Value = v
+		L.Push(self)
+
+		return 1
+	},
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +108,6 @@ func newLuaRoute(route *interfaces.RouteMatch) func(L *lua.LState) int {
 		L.Push(ud)
 		return 1
 	}
-
 }
 
 type luaRoute struct {
@@ -159,23 +232,6 @@ func basicFn_ListBuckets(L *lua.LState) int {
 	return 1
 }
 
-func basicFn_listFilesFromBucketID(L *lua.LState) int {
-	var bid uuid.UUID
-	if L.GetTop() == 2 {
-		switch v := L.CheckUserData(2).Value.(type) {
-		case uuid.UUID:
-			bid = v
-		case string:
-			bid = uuid.FromStringOrNil(v)
-		}
-	}
-
-	ud := L.NewUserData()
-	ud.Value = filesByBucketID(bid)
-	L.Push(ud)
-	return 1
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // File type
 ////////////////////////////////////////////////////////////////////////////////
@@ -230,4 +286,57 @@ var fileMethods = map[string]lua.LGFunction{
 	"SetPrivate":     func(*lua.LState) int { return 0 },
 	"SetPublic":      func(*lua.LState) int { return 0 },
 	"SetReadOnly":    func(*lua.LState) int { return 0 },
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// File manager
+////////////////////////////////////////////////////////////////////////////////
+
+// список файлов в бакете
+func basicFn_listFilesFromBucketID(L *lua.LState) int {
+	var bid uuid.UUID
+	if L.GetTop() == 2 {
+		switch v := L.CheckUserData(2).Value.(type) {
+		case uuid.UUID:
+			bid = v
+		case string:
+			bid = uuid.FromStringOrNil(v)
+		}
+	}
+
+	ud := L.NewUserData()
+	ud.Value = filesByBucketID(bid)
+	L.Push(ud)
+	return 1
+}
+
+// найти файл по имени бакета и имени файла
+func basicFn_FindFileByName(L *lua.LState) int {
+	/*
+		bucketName, fileName string,
+		used DataUsed,
+	*/
+	// var bucketName, fileName string
+	// var used interfaces.DataUsed
+
+	// bucketName = L.CheckString(2)
+	// fileName = L.CheckString(3)
+
+	return 0
+}
+
+func basicFn_FindFile(L *lua.LState) int {
+	return 0
+}
+
+func basicFn_CreateFileFrom(L *lua.LState) int {
+	return 0
+}
+
+func basicFn_UpdateFileFrom(L *lua.LState) int {
+	return 0
+}
+
+func basicFn_DeleteFile(L *lua.LState) int {
+	return 0
 }

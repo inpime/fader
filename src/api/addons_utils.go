@@ -30,7 +30,7 @@ func listOfBuckets() (res []*interfaces.Bucket) {
 }
 
 //////////////////////////////////////////////////////////
-// Context URL
+// Route pongo2
 //////////////////////////////////////////////////////////
 
 type RoutePongo2 struct {
@@ -41,4 +41,12 @@ func (r RoutePongo2) URLPath(pairs ...string) *url.URL {
 	v, _ := r.route.URLPath(pairs...)
 
 	return v
+}
+
+func (r RoutePongo2) GetName() string {
+	return r.route.GetName()
+}
+
+func (r RoutePongo2) Options() interfaces.RequestHandler {
+	return r.route.Options()
 }

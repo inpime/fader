@@ -252,6 +252,11 @@ print("faderConfoleIndex", c:Route("faderConfoleIndex"):URL())
 print("homepage", c:Route("homepage"):URL())
 print("current", c:Route():URL())
 print("file view", c:Route("fileView"):URL("file_id", "ID", "qwd", "qwdqwdqwdqwd"))
+vvv = basic.PrimaryIDsData
+vvv:Add(basic.PrimaryNamesData)
+vvv.Add(basic.AccessStatusData)
+basic.check(vvv)
+basic.check(vvv.Add(basic.AccessStatusData))
 
 print("")
 print("=====")

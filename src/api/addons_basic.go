@@ -2,6 +2,8 @@ package api
 
 import (
 	"addons"
+	"interfaces"
+	"log"
 
 	"github.com/flosch/pongo2"
 	uuid "github.com/satori/go.uuid"
@@ -62,6 +64,88 @@ func (a *AddonBasic) LuaLoader(L *lua.LState) int {
 	// Route
 	mt := L.NewTypeMetatable(luaRouteTypeName)
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), routeMethods))
+
+	// DataUsed
+	// type
+	mt = L.NewTypeMetatable(luaDataUsed)
+	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), dataUsedMethods))
+	// consts
+	newDataUsed := func(
+		L *lua.LState,
+		v interfaces.DataUsed,
+	) *lua.LUserData {
+		ud := L.NewUserData()
+		ud.Value = v
+		L.SetMetatable(ud, L.GetTypeMetatable(luaDataUsed))
+		return ud
+	}
+	L.SetField(
+		mod,
+		"PrimaryIDsData",
+		newDataUsed(L, interfaces.PrimaryIDsData),
+	)
+	L.SetField(
+		mod,
+		"PrimaryNamesData",
+		newDataUsed(L, interfaces.PrimaryNamesData),
+	)
+	L.SetField(
+		mod,
+		"ContentTypeData",
+		newDataUsed(L, interfaces.ContentTypeData),
+	)
+	L.SetField(
+		mod,
+		"OwnersData",
+		newDataUsed(L, interfaces.OwnersData),
+	)
+	L.SetField(
+		mod,
+		"AccessStatusData",
+		newDataUsed(L, interfaces.AccessStatusData),
+	)
+	L.SetField(
+		mod,
+		"LuaScript",
+		newDataUsed(L, interfaces.LuaScript),
+	)
+	L.SetField(
+		mod,
+		"MetaData",
+		newDataUsed(L, interfaces.MetaData),
+	)
+	L.SetField(
+		mod,
+		"StructuralData",
+		newDataUsed(L, interfaces.StructuralData),
+	)
+	L.SetField(
+		mod,
+		"RawData",
+		newDataUsed(L, interfaces.RawData),
+	)
+	L.SetField(
+		mod,
+		"BucketStoreNames",
+		newDataUsed(L, interfaces.BucketStoreNames),
+	)
+
+	L.SetField(mod, "check", L.NewFunction(func(L *lua.LState) int {
+		v := checkDataUsed(L)
+		log.Println("PrimaryIDsData", v&interfaces.PrimaryIDsData != 0)
+		log.Println("PrimaryNamesData", v&interfaces.PrimaryNamesData != 0)
+		log.Println("ContentTypeData", v&interfaces.ContentTypeData != 0)
+		log.Println("OwnersData", v&interfaces.OwnersData != 0)
+		log.Println("AccessStatusData", v&interfaces.AccessStatusData != 0)
+		log.Println("LuaScript", v&interfaces.LuaScript != 0)
+		log.Println("MetaData", v&interfaces.MetaData != 0)
+		log.Println("StructuralData", v&interfaces.StructuralData != 0)
+		log.Println("RawData", v&interfaces.RawData != 0)
+		log.Println("BucketStoreNames", v&interfaces.BucketStoreNames != 0)
+
+		return 0
+	}))
+
 	return 1
 }
 
@@ -71,10 +155,49 @@ func (a *AddonBasic) ExtContextPongo2(_ctx pongo2.Context) error {
 	// 	return pongo2.AsValue("context function")
 	// }
 
+	////////////////////////////////////////////////////////////////////////////
+	// file & bucket manager
+	////////////////////////////////////////////////////////////////////////////
+
+	ctx["TPrimaryIDsData"] = interfaces.PrimaryIDsData
+	ctx["TPrimaryNamesData"] = interfaces.PrimaryNamesData
+	ctx["TContentTypeData"] = interfaces.ContentTypeData
+	ctx["TOwnersData"] = interfaces.OwnersData
+	ctx["TAccessStatusData"] = interfaces.AccessStatusData
+	ctx["TLuaScript"] = interfaces.LuaScript
+	ctx["TMetaData"] = interfaces.MetaData
+	ctx["TStructuralData"] = interfaces.StructuralData
+	ctx["TRawData"] = interfaces.RawData
+	ctx["TBucketStoreNames"] = interfaces.BucketStoreNames
+
+	ctx["TFullFile"] = interfaces.FullFile
+	ctx["TFullFileWithoutRawData"] = interfaces.FileWithoutRawData
+	ctx["TFullBucket"] = interfaces.FullBucket
+
+	ctx["FindFileBuName"] = func(
+		bname,
+		fname,
+		dtype *pongo2.Value,
+	) *pongo2.Value {
+		return pongo2.AsValue(nil)
+	}
+	ctx["FindFile"] = func(fid, dtype *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(nil)
+	}
+	ctx["FindBucketByName"] = func(
+		bname,
+		dtype *pongo2.Value,
+	) *pongo2.Value {
+		return pongo2.AsValue(nil)
+	}
+	ctx["FindBucket"] = func(bid, dtype *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(nil)
+	}
+	// манипуляторы в lua
+	// collections
 	ctx["ListBuckets"] = func(bucketID *pongo2.Value) *pongo2.Value {
 		return pongo2.AsValue(listOfBuckets())
 	}
-
 	ctx["ListFilesByBucketID"] = func(bucketID *pongo2.Value) *pongo2.Value {
 		var bid uuid.UUID
 		switch v := bucketID.Interface().(type) {
@@ -85,8 +208,25 @@ func (a *AddonBasic) ExtContextPongo2(_ctx pongo2.Context) error {
 		}
 		return pongo2.AsValue(filesByBucketID(bid))
 	}
+	// utils
+	ctx["FileIsImage"] = func(f *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(false)
+	}
+	ctx["FileIsText"] = func(f *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(false)
+	}
+	ctx["FileIsRaw"] = func(f *pongo2.Value) *pongo2.Value {
+		return pongo2.AsValue(false)
+	}
+
+	// Router
 
 	ctx["Route"] = func(name *pongo2.Value) *pongo2.Value {
+		foundRoute := vrouter.Get(name.String())
+		if foundRoute == nil {
+			return pongo2.AsValue(nil)
+		}
+
 		return pongo2.AsValue(
 			&RoutePongo2{
 				vrouter.Get(name.String()),
