@@ -58,6 +58,7 @@ func checkDataUsed(L *lua.LState) interfaces.DataUsed {
 var dataUsedMethods = map[string]lua.LGFunction{
 	"Has": func(L *lua.LState) int {
 		// TODO:
+		return 0
 	},
 	"Add": func(L *lua.LState) int {
 		var self *lua.LUserData
