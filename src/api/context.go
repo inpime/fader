@@ -31,6 +31,10 @@ type Context struct {
 	ResponseStatus int // in lua script set response status
 }
 
+func (c Context) EchoCtx() echo.Context {
+	return c.echoCtx
+}
+
 // internal functions
 
 func checkContext(L *lua.LState) *Context {

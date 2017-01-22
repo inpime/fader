@@ -17,6 +17,7 @@ var contextMethods = map[string]lua.LGFunction{
 	"IsGET":      contextMethodIsGET,
 	"IsPOST":     contextMethodIsPOST,
 	"Set":        contextMethodSet,
+	"Get":        contextMethodGet,
 	// alias IsCurrentRoute
 	"Route": contextRoute,
 	// "Get":        contextMethodGet,
@@ -147,26 +148,32 @@ func contextMethodIsPOST(L *lua.LState) int {
 
 func contextMethodSet(L *lua.LState) int {
 	p := checkContext(L)
-	key := L.CheckString(2)
-	_value := L.CheckAny(3)
-	var value interface{}
-	switch _value.Type() {
-	case lua.LTNumber:
-		value = float64(_value.(lua.LNumber))
-	case lua.LTBool:
-		value = bool(_value.(lua.LBool))
-	case lua.LTString:
-		value = string(_value.(lua.LString))
-	case lua.LTUserData:
-		value = _value.(*lua.LUserData).Value
-	default:
-		log.Printf(
-			"[ERR] not expected type value, got %q, for field %q",
-			_value.Type(),
-			key,
-		)
+	k := L.CheckString(2)
+	lv := L.CheckAny(3)
+
+	v := ToValueFromLValue(lv)
+	if v == nil {
+		log.Printf("ctx.Set: not supported type, got %T, key %s", lv, k)
+		return 0
 	}
-	p.echoCtx.Set(key, value)
+	p.echoCtx.Set(k, v)
 
 	return 0
+}
+
+// contextMethodGet
+// Supported types: int, float, string, bool, nil
+func contextMethodGet(L *lua.LState) int {
+	p := checkContext(L)
+	k := L.CheckString(2)
+	v := p.echoCtx.Get(k)
+
+	lv := ToLValueOrNil(v, L)
+	if lv == nil {
+		log.Printf("ctx.Get: not supported type, got %T, key %s", v, k)
+		return 0
+	}
+
+	L.Push(lv)
+	return 1
 }
