@@ -7,21 +7,22 @@ ignore:
 - api
 - api/router
 - api/templates
-
 import:
 - package: github.com/BurntSushi/toml
 - package: github.com/boltdb/bolt
 - package: github.com/flosch/pongo2
 - package: github.com/flosch/pongo2-addons
 - package: github.com/labstack/echo
+  version: v2.2.0
   subpackages:
   - engine/standard
   - middleware
-  version: v2.2.0
 - package: github.com/satori/go.uuid
 - package: github.com/tylerb/graceful
 - package: github.com/yuin/gopher-lua
 - package: gopkg.in/vmihailenco/msgpack.v2
+- package: github.com/howeyc/fsnotify
+  version: v0.9.0
 testImport:
 - package: github.com/stretchr/testify
   subpackages:

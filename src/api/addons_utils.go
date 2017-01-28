@@ -4,6 +4,8 @@ import (
 	"interfaces"
 	"net/url"
 
+	"log"
+
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -37,8 +39,22 @@ type RoutePongo2 struct {
 	route interfaces.Route
 }
 
-func (r RoutePongo2) URLPath(pairs ...string) *url.URL {
-	v, _ := r.route.URLPath(pairs...)
+func (r RoutePongo2) URLPath(pairs ...interface{}) *url.URL {
+	var args = make([]string, len(pairs))
+
+	for i, v := range pairs {
+		switch v := v.(type) {
+		case string:
+			args[i] = v
+		case uuid.UUID:
+			args[i] = v.String()
+		default:
+			log.Printf("Pongo2 Route.URLPath: not expected type %T", v)
+			return nil
+		}
+	}
+
+	v, _ := r.route.URLPath(args...)
 
 	return v
 }

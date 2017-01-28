@@ -4,6 +4,8 @@ import (
 	"interfaces"
 	"log"
 
+	"fmt"
+
 	uuid "github.com/satori/go.uuid"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -14,15 +16,31 @@ var exports = map[string]lua.LGFunction{
 
 	// file manager
 	"FindFileByName": func(L *lua.LState) int { return 0 },
-	"FindFile":       func(L *lua.LState) int { return 0 },
+	"FindFile":       basicFn_FindFile,
 	"CreateFile":     func(L *lua.LState) int { return 0 },
 	"CreateFileFrom": func(L *lua.LState) int { return 0 },
-	"UpdateFileFrom": func(L *lua.LState) int { return 0 },
-	"DeleteFile":     func(L *lua.LState) int { return 0 },
+	"UpdateFileFrom": func(L *lua.LState) int {
+		file := checkFile(L)
+		mode := L.CheckUserData(2).Value.(interfaces.DataUsed)
+
+		err := fileManager.UpdateFileFrom(file.File, mode)
+
+		log.Printf("update file %s, name %s, mode %v", file.FileID, file.FileName, mode)
+
+		if err != nil {
+			L.RaiseError("update file %s, err %s", file.FileID, err)
+			L.Push(lua.LBool(false))
+			return 1
+		}
+
+		L.Push(lua.LBool(true))
+		return 1
+	},
+	"DeleteFile": func(L *lua.LState) int { return 0 },
 
 	// bucket manager
 	"FindBucketByName": func(L *lua.LState) int { return 0 },
-	"FindBucket":       func(L *lua.LState) int { return 0 },
+	"FindBucket":       basicFn_FindBucket,
 	"CreateBucket":     func(L *lua.LState) int { return 0 },
 	"CreateBucketFrom": func(L *lua.LState) int { return 0 },
 	"UpdateBucketFrom": func(L *lua.LState) int { return 0 },
@@ -218,6 +236,7 @@ func routeGetURLFromParams(L *lua.LState) int {
 		log.Println("build url", err)
 		return 0
 	}
+	log.Println("build url:", url.String())
 	L.Push(lua.LString(url.String()))
 	return 1
 }
@@ -231,6 +250,177 @@ func basicFn_ListBuckets(L *lua.LState) int {
 	ud.Value = listOfBuckets()
 	L.Push(ud)
 	return 1
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Bucket file
+////////////////////////////////////////////////////////////////////////////////
+
+var luaBucketTypeName = "bucket"
+
+func BucketAsLuaBucket(L *lua.LState, bucket *interfaces.Bucket) *lua.LUserData {
+	ud := L.NewUserData()
+	if bucket == nil {
+		_f := interfaces.NewBucket()
+		_f.BucketID = uuid.NewV4()
+		ud.Value = &luaBucket{_f}
+	} else {
+		ud.Value = &luaBucket{bucket}
+	}
+	L.SetMetatable(ud, L.GetTypeMetatable(luaBucketTypeName))
+	return ud
+}
+
+func newLuaBucket(bucket *interfaces.Bucket) func(L *lua.LState) int {
+	return func(L *lua.LState) int {
+		L.Push(BucketAsLuaBucket(L, bucket))
+		return 1
+	}
+
+}
+
+type luaBucket struct {
+	*interfaces.Bucket
+}
+
+func checkBucket(L *lua.LState) *luaBucket {
+	ud := L.CheckUserData(1)
+	if v, ok := ud.Value.(*luaBucket); ok {
+		return v
+	}
+	L.ArgError(1, "route expected")
+	return nil
+}
+
+var bucketMethods = map[string]lua.LGFunction{
+	// Setters
+	"SetBucketName": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+		obj.BucketName = L.CheckString(2)
+		return 0
+	},
+	"SetLuaScript": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+		obj.LuaScript = []byte(L.CheckString(2))
+
+		return 0
+	},
+	"SetRawData": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+		obj.RawData = []byte(L.CheckString(2))
+		return 0
+	},
+	"SetRawDataAsBytes": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+		obj.RawData = L.CheckUserData(2).Value.([]byte)
+		return 0
+	},
+	"SetStructuralData": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		// obj := checkBucket(L)
+		L.ArgError(2, "SetStructuralData: not implemented")
+		// obj.Bucket.StructuralData = L.CheckUserData(2).Value.([]byte)
+		return 0
+	},
+	"SetOwners": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		// obj := checkBucket(L)
+
+		L.ArgError(2, "SetOwners: not implemented")
+		return 0
+	},
+
+	// Getter
+
+	"BucketID": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+		L.Push(lua.LString(obj.BucketID.String()))
+
+		return 1
+	},
+	"BucketName": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+
+		L.Push(lua.LString(obj.BucketName))
+		return 1
+	},
+	"LuaScript": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+		L.Push(lua.LString(string(obj.LuaScript)))
+
+		return 1
+	},
+	"MetaData": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		// obj := checkBucket(L)
+
+		return 0
+	},
+	"StructuralData": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		// obj := checkBucket(L)
+
+		return 0
+	},
+	"RawData": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		obj := checkBucket(L)
+		L.Push(lua.LString(string(obj.RawData)))
+
+		return 1
+	},
+	"Owners": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		// obj := checkBucket(L)
+
+		return 0
+	},
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,17 +466,242 @@ func checkFile(L *lua.LState) *luaFile {
 // luaRoute methods
 
 var fileMethods = map[string]lua.LGFunction{
-	"SetFileName":    func(*lua.LState) int { return 0 },
-	"SetBucketID":    func(*lua.LState) int { return 0 },
-	"SetLuaScript":   func(*lua.LState) int { return 0 },
-	"MetaData":       func(*lua.LState) int { return 0 },
-	"StructuralData": func(*lua.LState) int { return 0 },
-	"SetRawData":     func(*lua.LState) int { return 0 },
-	"SetContentType": func(*lua.LState) int { return 0 },
-	"SetOwners":      func(*lua.LState) int { return 0 },
-	"SetPrivate":     func(*lua.LState) int { return 0 },
-	"SetPublic":      func(*lua.LState) int { return 0 },
-	"SetReadOnly":    func(*lua.LState) int { return 0 },
+	// Setters
+	"SetFileName": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		log.Println("Set file name", L.CheckString(2))
+		file := checkFile(L)
+		file.FileName = L.CheckString(2)
+		return 0
+	},
+	"SetBucketID": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+
+		lv := L.Get(2)
+
+		switch v := L.CheckUserData(2).Value.(type) {
+		case uuid.UUID:
+			file.BucketID = v
+		case string:
+			file.BucketID = uuid.FromStringOrNil(v)
+		default:
+			L.ArgError(2, fmt.Sprintf("SetBucketID: not expected type %#v", lv))
+			return 0
+		}
+
+		return 0
+	},
+	"SetLuaScript": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.LuaScript = []byte(L.CheckString(2))
+
+		return 0
+	},
+	"SetRawData": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.RawData = []byte(L.CheckString(2))
+		return 0
+	},
+	"SetRawDataAsBytes": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.RawData = L.CheckUserData(2).Value.([]byte)
+		return 0
+	},
+	"SetStructuralData": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		// file := checkFile(L)
+		L.ArgError(2, "SetStructuralData: not implemented")
+		// file.StructuralData = L.CheckUserData(2).Value.([]byte)
+		return 0
+	},
+	"SetContentType": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.ContentType = L.CheckString(2)
+		return 0
+	},
+	"SetOwners": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		// file := checkFile(L)
+
+		L.ArgError(2, "SetOwners: not implemented")
+		return 0
+	},
+	"AsPrivate": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.IsPrivate = true
+		return 0
+	},
+	"AsPublic": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.IsPrivate = false
+		return 0
+	},
+	"AsReadOnly": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.IsReadOnly = true
+		return 0
+	},
+
+	"AsNotReadOnly": func(L *lua.LState) int {
+		if L.GetTop() != 2 {
+			return 0
+		}
+
+		file := checkFile(L)
+		file.IsReadOnly = false
+		return 0
+	},
+
+	// Getter
+
+	"FileID": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+
+		L.Push(lua.LString(file.FileID.String()))
+		return 1
+	},
+	"FileName": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+
+		L.Push(lua.LString(file.FileName))
+		return 1
+	},
+	"BucketID": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		L.Push(lua.LString(file.BucketID.String()))
+
+		return 1
+	},
+	"LuaScript": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		L.Push(lua.LString(string(file.LuaScript)))
+
+		return 1
+	},
+	"MetaData": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		// file := checkFile(L)
+
+		return 0
+	},
+	"StructuralData": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		// file := checkFile(L)
+
+		return 0
+	},
+	"RawData": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		L.Push(lua.LString(string(file.RawData)))
+
+		return 1
+	},
+	"ContentType": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		L.Push(lua.LString(file.ContentType))
+
+		return 1
+	},
+	"Owners": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		// file := checkFile(L)
+
+		return 0
+	},
+	"IsPrivate": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		L.Push(lua.LBool(file.IsPrivate))
+
+		return 1
+	},
+	"IsReadOnly": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		L.Push(lua.LBool(file.IsPrivate))
+
+		return 1
+	},
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -327,7 +742,53 @@ func basicFn_FindFileByName(L *lua.LState) int {
 }
 
 func basicFn_FindFile(L *lua.LState) int {
-	return 0
+	var id uuid.UUID
+	if L.GetTop() == 1 {
+		lv := L.Get(1)
+		switch lv.Type() {
+		case lua.LTString:
+			id = uuid.FromStringOrNil(lv.(lua.LString).String())
+		case lua.LTUserData:
+			switch v := lv.(*lua.LUserData).Value.(type) {
+			case uuid.UUID:
+				id = v
+			case string:
+				id = uuid.FromStringOrNil(v)
+			default:
+				L.ArgError(
+					1,
+					fmt.Sprintf("FindFile: not supported file ID type %T", v),
+				)
+				return 0
+			}
+		default:
+			L.ArgError(
+				1,
+				fmt.Sprintf(
+					"FindFile: not supported file ID type %v",
+					lv.Type(),
+				),
+			)
+			return 0
+		}
+	}
+
+	if uuid.Equal(uuid.Nil, id) {
+		L.ArgError(
+			1,
+			"FindFile: is nil ID",
+		)
+		return 0
+	}
+
+	file, err := fileManager.FindFile(id, interfaces.FullFile)
+
+	if err != nil {
+		L.RaiseError("FindFile: find file by ID %s, err %s", id, err)
+		return 0
+	}
+
+	return newLuaFile(file)(L)
 }
 
 func basicFn_CreateFileFrom(L *lua.LState) int {
@@ -340,4 +801,57 @@ func basicFn_UpdateFileFrom(L *lua.LState) int {
 
 func basicFn_DeleteFile(L *lua.LState) int {
 	return 0
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Bucket manager
+////////////////////////////////////////////////////////////////////////////////
+
+func basicFn_FindBucket(L *lua.LState) int {
+	var id uuid.UUID
+	if L.GetTop() == 1 {
+		lv := L.Get(1)
+		switch lv.Type() {
+		case lua.LTString:
+			id = uuid.FromStringOrNil(lv.(lua.LString).String())
+		case lua.LTUserData:
+			switch v := lv.(*lua.LUserData).Value.(type) {
+			case uuid.UUID:
+				id = v
+			case string:
+				id = uuid.FromStringOrNil(v)
+			default:
+				L.ArgError(
+					1,
+					fmt.Sprintf("FindBucket: not supported file ID type %T", v),
+				)
+				return 0
+			}
+		default:
+			L.ArgError(
+				1,
+				fmt.Sprintf(
+					"FindBucket: not supported file ID type %v",
+					lv.Type(),
+				),
+			)
+			return 0
+		}
+	}
+
+	if uuid.Equal(uuid.Nil, id) {
+		L.ArgError(
+			1,
+			"FindBucket: is nil ID",
+		)
+		return 0
+	}
+
+	bucket, err := bucketManager.FindBucket(id, interfaces.FullBucket)
+	if err != nil {
+		L.RaiseError("FindBucket: find bucket by ID %s, err %s", id, err)
+		return 0
+	}
+
+	return newLuaBucket(bucket)(L)
 }

@@ -5,6 +5,8 @@ import (
 	"interfaces"
 	"log"
 
+	"net/http"
+
 	"github.com/labstack/echo"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -13,11 +15,13 @@ var contextMethods = map[string]lua.LGFunction{
 	// "URI":        contextGetURI,
 	"QueryParam": contextGetQueryParam,
 	"NoContext":  contextNoContext,
+	"Redirect":   contextRedirect,
 	"JSON":       contextRenderJSON,
 	"IsGET":      contextMethodIsGET,
 	"IsPOST":     contextMethodIsPOST,
 	"Set":        contextMethodSet,
 	"Get":        contextMethodGet,
+	"FormValue":  contextMethodFormValue,
 	// alias IsCurrentRoute
 	"Route": contextRoute,
 	// "Get":        contextMethodGet,
@@ -80,6 +84,15 @@ func contextNoContext(L *lua.LState) int {
 	p := checkContext(L)
 
 	p.Err = p.echoCtx.NoContent(L.CheckInt(2))
+	p.Rendered = true
+
+	return 0
+}
+
+func contextRedirect(L *lua.LState) int {
+	p := checkContext(L)
+
+	p.Err = p.echoCtx.Redirect(http.StatusFound, L.CheckString(2))
 	p.Rendered = true
 
 	return 0
@@ -175,5 +188,13 @@ func contextMethodGet(L *lua.LState) int {
 	}
 
 	L.Push(lv)
+	return 1
+}
+
+func contextMethodFormValue(L *lua.LState) int {
+	c := checkContext(L)
+
+	L.Push(lua.LString(c.echoCtx.FormValue(L.CheckString(2))))
+
 	return 1
 }

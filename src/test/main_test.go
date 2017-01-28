@@ -20,6 +20,7 @@ func TestContext(t *testing.T) {
 ctx():Set("res", ctx():Get("a") == "b")
 ctx():Set("a", "c")
 `)
+
 	assert.NoError(t, err)
 	assert.Equal(t, "c", ctx.Get("a"))
 	assert.True(t, ctx.Get("res").(bool))

@@ -82,7 +82,6 @@ func main() {
 			logger.Println("[INF] shutdown http server")
 		}
 
-		// TODO: destroy services
 	}()
 
 	<-close

@@ -123,7 +123,8 @@ func Setup(e *echo.Echo, _settings *Settings) error {
 	e.Use(router.VRouterMiddleware(vrouter))
 
 	logger.Println("init... application routes")
-	e.Get("*", FaderHandler)
+	e.GET("*", FaderHandler)
+	e.POST("*", FaderHandler)
 
 	logger.Println("init... done")
 

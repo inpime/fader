@@ -65,6 +65,14 @@ func (a *AddonBasic) LuaLoader(L *lua.LState) int {
 	mt := L.NewTypeMetatable(luaRouteTypeName)
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), routeMethods))
 
+	// File
+	mt = L.NewTypeMetatable(luaFileTypeName)
+	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), fileMethods))
+
+	// Bucket
+	mt = L.NewTypeMetatable(luaBucketTypeName)
+	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), bucketMethods))
+
 	// DataUsed
 	// type
 	mt = L.NewTypeMetatable(luaDataUsed)
@@ -128,6 +136,11 @@ func (a *AddonBasic) LuaLoader(L *lua.LState) int {
 		mod,
 		"BucketStoreNames",
 		newDataUsed(L, interfaces.BucketStoreNames),
+	)
+	L.SetField(
+		mod,
+		"FullFile",
+		newDataUsed(L, interfaces.FullFile),
 	)
 
 	L.SetField(mod, "check", L.NewFunction(func(L *lua.LState) int {
@@ -195,7 +208,7 @@ func (a *AddonBasic) ExtContextPongo2(_ctx pongo2.Context) error {
 	}
 	// манипуляторы в lua
 	// collections
-	ctx["ListBuckets"] = func(bucketID *pongo2.Value) *pongo2.Value {
+	ctx["ListBuckets"] = func() *pongo2.Value {
 		return pongo2.AsValue(listOfBuckets())
 	}
 	ctx["ListFilesByBucketID"] = func(bucketID *pongo2.Value) *pongo2.Value {
@@ -244,5 +257,23 @@ func (a *AddonBasic) ExtTagsFiltersPongo2(
 	addt func(name string, fn pongo2.TagParser),
 	rapt func(name string, fn pongo2.TagParser),
 ) error {
+
+	pongo2.RegisterFilter(
+		"btos",
+		func(
+			in *pongo2.Value,
+			param *pongo2.Value,
+		) (
+			*pongo2.Value,
+			*pongo2.Error,
+		) {
+			v, ok := in.Interface().([]byte)
+			if !ok {
+				return pongo2.AsValue(""), nil
+			}
+			return pongo2.AsValue(string(v)), nil
+		},
+	)
+
 	return nil
 }
