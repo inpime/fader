@@ -67,6 +67,15 @@ func (a *AddonBasic) LuaLoader(L *lua.LState) int {
 
 	// File
 	mt = L.NewTypeMetatable(luaFileTypeName)
+	L.SetGlobal("File", mt)
+	L.SetField(
+		mt,
+		"new",
+		L.NewFunction(func(L *lua.LState) int {
+			L.Push(FileAsLuaFile(L, nil))
+			return 1
+		}),
+	)
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), fileMethods))
 
 	// Bucket

@@ -259,7 +259,8 @@ methods = ["post"]
 			"application/soap+xml": "ace/mode/xml",
 			"application/json": "ace/mode/json",
 			"text/json": "ace/mode/json",
-			"text/csv": "ace/mode/json"
+			"text/csv": "ace/mode/json",
+			"text/lua": "ace/mode/lua"
 		}</script>
 		{% block head %}{% endblock %}
 	</head>
@@ -434,6 +435,7 @@ ctx():Set("File", file)
 			<li>
 				<span>
 					{{ file.FileName }}
+					{# helper, скопировать имя файла для разных целей #}
 					<div class="uk-button-group">
 						<button class="uk-button uk-button-mini" data-clipboard-text="{{ file.FileName }}">
 							<i class="uk-icon-clipboard"></i>
@@ -469,6 +471,7 @@ ctx():Set("File", file)
 
 						</div>
 					</div>
+					{# helper end #}
 				</span>
 			</li>
 		</ul>
@@ -505,7 +508,10 @@ ctx():Set("File", file)
 				<li>
 					{# Raw data #}
 					<div class="uk-width-1-1">
-						<form class="uk-form uk-form-stacked">
+						<form 
+							action="{{ Route("cv1_EditFile_UpdateByCmd").URLPath("file_id", file.FileID.String(), "cmd", "update_content_from_console") }}" 
+							method="POST"
+							class="uk-form uk-form-stacked">
 							<div class="uk-form-row">
 								<label class="uk-form-label">Content type</label>
 								<div class="uk-form-controls">
@@ -529,7 +535,7 @@ ctx():Set("File", file)
 									<input 
 										id="file-{{ file.FileID.String() }}-raw-data" 
 										type="hidden" 
-										name="TextData" 
+										name="RawDataString" 
 										value="{{ file.RawData|btos }}" />
 									<div 
 										id="file-{{file.FileID.String()}}-raw-data-editor" 
@@ -693,21 +699,68 @@ rawDataEditor.$blockScrolling = Infinity;
 local std = require("basic")
 
 fileID = ctx():Get("file_id")
-newName = ctx():FormValue("FileName")
-
+cmd = ctx():Get("cmd")
 file = std.FindFile(fileID)
 
 if file == nil then
 	ctx():NoContext(404)
-else
+end
+
+-- обновление имени у файла
+if cmd == "update_name" then
+	newName = ctx():FormValue("FileName")
+	-- TODO: validation
+
 	file:SetFileName(newName)
-	std.UpdateFileFrom(file, std.PrimaryNamesData)
+	ok = std.UpdateFileFrom(file, std.PrimaryNamesData)
+
+	if not ok then
+		-- TODO: error handler
+	end
 	
 	goTo = ctx():Route("cv1_EditFile"):URLPath("file_id", file:FileID())
-	print("redirect to", goTo)
-	
 	ctx():Redirect(goTo)
 end 
+
+-- обновление контента и типа контента с формы редактирования файла
+if cmd == "update_content_from_console" then
+	contentType = ctx():FormValue("ContentType")
+	rawDataStr = ctx():FormValue("RawDataString")
+	-- TODO: validation
+
+	file:SetContentType(contentType)
+	file:SetRawData(rawDataStr)
+
+	mode = std.ContentTypeData
+	mode:Add(std.RawData)
+
+	ok = std.UpdateFileFrom(file, mode)
+
+	if not ok then
+		-- TODO: error handler
+	end
+	
+	goTo = ctx():Route("cv1_EditFile"):URLPath("file_id", file:FileID())
+	ctx():Redirect(goTo)
+end 
+
+-- обновление lua с формы редактирования файла
+if cmd == "update_lua_from_console" then
+	luaScript = ctx():FormValue("LuaScript")
+	-- TODO: validation
+
+	file:SetLuaScript(luaScript)
+
+	ok = std.UpdateFileFrom(file, std.LuaScript)
+
+	if not ok then
+		-- TODO: error handler
+	end
+	
+	goTo = ctx():Route("cv1_EditFile"):URLPath("file_id", file:FileID())
+	ctx():Redirect(goTo)
+end 
+
 `, // lua
 		"text/lua",
 		``,

@@ -3,9 +3,13 @@ package api
 import (
 	"api/router"
 	"interfaces"
+	"io"
 	"log"
+	"time"
 
 	"net/http"
+
+	"bytes"
 
 	"github.com/labstack/echo"
 	lua "github.com/yuin/gopher-lua"
@@ -25,6 +29,9 @@ var contextMethods = map[string]lua.LGFunction{
 	// alias IsCurrentRoute
 	"Route": contextRoute,
 	// "Get":        contextMethodGet,
+
+	"AppExport": contextAppExport,
+	"AppImport": contextAppImport,
 }
 
 func contextGetPath(L *lua.LState) int {
@@ -196,5 +203,78 @@ func contextMethodFormValue(L *lua.LState) int {
 
 	L.Push(lua.LString(c.echoCtx.FormValue(L.CheckString(2))))
 
+	return 1
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// import export
+////////////////////////////////////////////////////////////////////////////////
+
+func contextAppExport(L *lua.LState) int {
+	c := checkContext(L)
+
+	importer := interfaces.NewImportManager(
+		bucketManager,
+		fileManager,
+	)
+
+	data, _ := importer.Export(
+		"vDEV-"+time.Now().String(),
+		"Fader",
+		time.Now().String(),
+	)
+	fileName := "Fader.vDEV-" + time.Now().String() + ".txt"
+
+	buf := bytes.NewReader(data)
+
+	c.Err = c.echoCtx.Attachment(buf, fileName)
+	c.Rendered = true
+
+	return 0
+}
+
+func contextAppImport(L *lua.LState) int {
+	c := checkContext(L)
+
+	importer := interfaces.NewImportManager(
+		bucketManager,
+		fileManager,
+	)
+
+	f, err := c.echoCtx.FormFile("file")
+
+	if err != nil {
+		log.Println("AppImport: ", err)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	of, err := f.Open()
+
+	if err != nil {
+		log.Println("AppImport: open file,", err)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+	defer of.Close()
+
+	buf := &bytes.Buffer{}
+	_, err = io.Copy(buf, of)
+	if err != nil {
+		log.Println("AppImport: io copy,", err)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	info, err := importer.Import(buf.Bytes())
+	if err != nil {
+		log.Println("AppImport: import,", err)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	log.Println("AppImport: success, ", info)
+
+	L.Push(lua.LBool(true))
 	return 1
 }

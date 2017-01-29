@@ -17,7 +17,20 @@ var exports = map[string]lua.LGFunction{
 	// file manager
 	"FindFileByName": func(L *lua.LState) int { return 0 },
 	"FindFile":       basicFn_FindFile,
-	"CreateFile":     func(L *lua.LState) int { return 0 },
+	"CreateFile": func(L *lua.LState) int {
+		file := checkFile(L)
+
+		err := fileManager.CreateFile(file.File)
+
+		if err != nil {
+			L.RaiseError("create file %s, err %s", file.FileID, err)
+			L.Push(lua.LBool(false))
+			return 1
+		}
+
+		L.Push(lua.LBool(true))
+		return 1
+	},
 	"CreateFileFrom": func(L *lua.LState) int { return 0 },
 	"UpdateFileFrom": func(L *lua.LState) int {
 		file := checkFile(L)
@@ -36,7 +49,63 @@ var exports = map[string]lua.LGFunction{
 		L.Push(lua.LBool(true))
 		return 1
 	},
-	"DeleteFile": func(L *lua.LState) int { return 0 },
+	"DeleteFile": func(L *lua.LState) int {
+		var id uuid.UUID
+
+		lv := L.Get(1)
+		switch lv.Type() {
+		case lua.LTString:
+			id = uuid.FromStringOrNil(lv.(lua.LString).String())
+		case lua.LTUserData:
+			switch v := lv.(*lua.LUserData).Value.(type) {
+			case uuid.UUID:
+				id = v
+			case string:
+				id = uuid.FromStringOrNil(v)
+			default:
+				L.ArgError(
+					1,
+					fmt.Sprintf("DeleteFile: not supported ID type %T", v),
+				)
+				L.Push(lua.LBool(false))
+				return 1
+			}
+		default:
+			L.ArgError(
+				1,
+				fmt.Sprintf(
+					"DeleteFile: not supported ID type %v",
+					lv.Type(),
+				),
+			)
+			L.Push(lua.LBool(false))
+			return 1
+		}
+
+		if uuid.Equal(uuid.Nil, id) {
+			L.ArgError(
+				1,
+				"DeleteFile: empty ID",
+			)
+			L.Push(lua.LBool(false))
+			return 1
+		}
+
+		if err := fileManager.DeleteFile(id); err != nil {
+			L.RaiseError(
+				"DeleteFile: error delete file %v, err: %s",
+				id,
+				err,
+			)
+			L.Push(lua.LBool(false))
+			return 1
+		}
+
+		log.Println("DeleteFile: success delete file ID", id)
+
+		L.Push(lua.LBool(true))
+		return 1
+	},
 
 	// bucket manager
 	"FindBucketByName": func(L *lua.LState) int { return 0 },
@@ -483,19 +552,48 @@ var fileMethods = map[string]lua.LGFunction{
 		}
 
 		file := checkFile(L)
+		var bucketID uuid.UUID
 
 		lv := L.Get(2)
 
-		switch v := L.CheckUserData(2).Value.(type) {
-		case uuid.UUID:
-			file.BucketID = v
-		case string:
-			file.BucketID = uuid.FromStringOrNil(v)
+		//
+		switch lv.Type() {
+		case lua.LTString:
+			bucketID = uuid.FromStringOrNil(lv.(lua.LString).String())
+		case lua.LTUserData:
+			switch v := lv.(*lua.LUserData).Value.(type) {
+			case uuid.UUID:
+				bucketID = v
+			case string:
+				bucketID = uuid.FromStringOrNil(v)
+			default:
+				L.ArgError(
+					2,
+					fmt.Sprintf("CreateFile: not supported bucket ID type %T", v),
+				)
+				return 0
+			}
 		default:
-			L.ArgError(2, fmt.Sprintf("SetBucketID: not expected type %#v", lv))
+			L.ArgError(
+				2,
+				fmt.Sprintf(
+					"CreateFile: not supported bucket ID type %v",
+					lv.Type(),
+				),
+			)
 			return 0
 		}
 
+		if uuid.Equal(uuid.Nil, bucketID) {
+			L.ArgError(
+				2,
+				"CreateFile: is nil ID",
+			)
+			return 0
+		}
+		//
+
+		file.BucketID = bucketID
 		return 0
 	},
 	"SetLuaScript": func(L *lua.LState) int {

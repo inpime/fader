@@ -59,6 +59,10 @@ func (r RoutePongo2) URLPath(pairs ...interface{}) *url.URL {
 	return v
 }
 
+func (r RoutePongo2) Has(name string) bool {
+	return r.GetName() == name
+}
+
 func (r RoutePongo2) GetName() string {
 	return r.route.GetName()
 }
