@@ -61,8 +61,12 @@ func (a *AddonBasic) LuaLoader(L *lua.LState) int {
 	// Custom Types
 	////////////////////////////////////
 
+	// FormFile
+	mt := L.NewTypeMetatable(luaFormFileTypeName)
+	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), formFileMethods))
+
 	// Route
-	mt := L.NewTypeMetatable(luaRouteTypeName)
+	mt = L.NewTypeMetatable(luaRouteTypeName)
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), routeMethods))
 
 	// File

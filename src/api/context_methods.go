@@ -26,6 +26,7 @@ var contextMethods = map[string]lua.LGFunction{
 	"Set":        contextMethodSet,
 	"Get":        contextMethodGet,
 	"FormValue":  contextMethodFormValue,
+	"FormFile":   contextMethodFormFile,
 	// alias IsCurrentRoute
 	"Route": contextRoute,
 	// "Get":        contextMethodGet,
@@ -204,6 +205,42 @@ func contextMethodFormValue(L *lua.LState) int {
 	L.Push(lua.LString(c.echoCtx.FormValue(L.CheckString(2))))
 
 	return 1
+}
+
+func contextMethodFormFile(L *lua.LState) int {
+	c := checkContext(L)
+
+	f, err := c.echoCtx.FormFile(L.CheckString(2))
+
+	if err != nil {
+		log.Println("FormFile: ", err)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	of, err := f.Open()
+
+	if err != nil {
+		log.Println("FormFile: open file,", err)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+	defer of.Close()
+
+	buf := &bytes.Buffer{}
+	_, err = io.Copy(buf, of)
+
+	if err != nil {
+		log.Println("FormFile: copy file,", err)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	return newLuaFormFile(
+		f.Filename,
+		f.Header.Get("Content-Type"),
+		buf.Bytes(),
+	)(L)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

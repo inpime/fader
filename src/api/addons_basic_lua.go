@@ -523,12 +523,27 @@ type luaFile struct {
 	*interfaces.File
 }
 
+func (f *luaFile) IsText() bool {
+	_type := interfaces.GetUserTypeFromContentType(f.ContentType)
+	return _type == interfaces.TextFile
+}
+
+func (f *luaFile) IsRaw() bool {
+	_type := interfaces.GetUserTypeFromContentType(f.ContentType)
+	return _type == interfaces.RawFile
+}
+
+func (f *luaFile) IsImage() bool {
+	_type := interfaces.GetUserTypeFromContentType(f.ContentType)
+	return _type == interfaces.ImageFile
+}
+
 func checkFile(L *lua.LState) *luaFile {
 	ud := L.CheckUserData(1)
 	if v, ok := ud.Value.(*luaFile); ok {
 		return v
 	}
-	L.ArgError(1, "route expected")
+	L.ArgError(1, "file expected")
 	return nil
 }
 
@@ -622,6 +637,27 @@ var fileMethods = map[string]lua.LGFunction{
 
 		file := checkFile(L)
 		file.RawData = L.CheckUserData(2).Value.([]byte)
+		return 0
+	},
+	"SetRawDataFromFile": func(L *lua.LState) int {
+		file := checkFile(L)
+
+		// method args
+		ud := L.CheckUserData(2)
+		var fileInfo *luaFormFile
+		var ok bool
+		if fileInfo, ok = ud.Value.(*luaFormFile); !ok {
+			reason := fmt.Sprintf("form file expected, got %T", ud.Value)
+			L.ArgError(2, reason)
+			return 0
+		}
+
+		// main
+
+		file.File.ContentType = fileInfo.ContentType
+		file.File.RawData = fileInfo.Data
+		file.File.FileName = fileInfo.FileName
+
 		return 0
 	},
 	"SetStructuralData": func(L *lua.LState) int {
@@ -797,6 +833,45 @@ var fileMethods = map[string]lua.LGFunction{
 
 		file := checkFile(L)
 		L.Push(lua.LBool(file.IsPrivate))
+
+		return 1
+	},
+	"IsImage": func(L *lua.LState) int {
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		_type := interfaces.GetUserTypeFromContentType(file.ContentType)
+		L.Push(lua.LBool(_type == interfaces.ImageFile))
+
+		return 1
+	},
+	"IsText": func(L *lua.LState) int {
+		L.Push(lua.LBool(false))
+		return 1
+
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		_type := interfaces.GetUserTypeFromContentType(file.ContentType)
+		L.Push(lua.LBool(_type == interfaces.TextFile))
+
+		return 1
+	},
+	"IsRaw": func(L *lua.LState) int {
+		L.Push(lua.LBool(false))
+		return 1
+
+		if L.GetTop() != 1 {
+			return 0
+		}
+
+		file := checkFile(L)
+		_type := interfaces.GetUserTypeFromContentType(file.ContentType)
+		L.Push(lua.LBool(_type == interfaces.RawFile))
 
 		return 1
 	},

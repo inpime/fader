@@ -1,14 +1,12 @@
 package interfaces
 
-type FileUserType string
-
 var (
-	ImageFile FileUserType = "image"
-	TextFile  FileUserType = "text"
-	RawFile   FileUserType = "raw"
+	ImageFile string = "image"
+	TextFile  string = "text"
+	RawFile   string = "raw"
 )
 
-func getUserTypeFromContentType(t string) FileUserType {
+func GetUserTypeFromContentType(t string) string {
 	switch t {
 	case "image/jpeg",
 		"image/pjpeg",
