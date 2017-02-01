@@ -21,12 +21,14 @@ var contextMethods = map[string]lua.LGFunction{
 	"NoContext":  contextNoContext,
 	"Redirect":   contextRedirect,
 	"JSON":       contextRenderJSON,
-	"IsGET":      contextMethodIsGET,
-	"IsPOST":     contextMethodIsPOST,
-	"Set":        contextMethodSet,
-	"Get":        contextMethodGet,
-	"FormValue":  contextMethodFormValue,
-	"FormFile":   contextMethodFormFile,
+	// FileContent
+	"FileContent": contextMethodFileContnet,
+	"IsGET":       contextMethodIsGET,
+	"IsPOST":      contextMethodIsPOST,
+	"Set":         contextMethodSet,
+	"Get":         contextMethodGet,
+	"FormValue":   contextMethodFormValue,
+	"FormFile":    contextMethodFormFile,
 	// alias IsCurrentRoute
 	"Route": contextRoute,
 	// "Get":        contextMethodGet,
@@ -143,6 +145,27 @@ func contextRenderJSON(L *lua.LState) int {
 
 	p.Err = p.echoCtx.JSON(status, jsonMap)
 	p.Rendered = true
+
+	return 0
+}
+
+func contextMethodFileContnet(L *lua.LState) int {
+	c := checkContext(L)
+	status := L.CheckInt(2)
+
+	ud := L.CheckUserData(3)
+	file, ok := ud.Value.(*luaFile)
+	if !ok {
+		L.ArgError(2, "file expected")
+		return 0
+	}
+
+	c.Err = c.echoCtx.Blob(
+		status,
+		file.ContentType,
+		file.RawData,
+	)
+	c.Rendered = true
 
 	return 0
 }
