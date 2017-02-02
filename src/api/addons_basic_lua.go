@@ -185,12 +185,13 @@ func newLuaRoute(route *interfaces.RouteMatch) func(L *lua.LState) int {
 	return func(L *lua.LState) int {
 		ud := L.NewUserData()
 		ud.Value = &luaRoute{
-			Name:        route.Handler.Name,
-			Path:        route.Handler.Path,
-			Bucket:      route.Handler.Bucket,
-			File:        route.Handler.File,
-			HandlerArgs: route.Handler.HandlerArgs,
-			route:       route.Route,
+			Name:          route.Handler.Name,
+			Path:          route.Handler.Path,
+			Bucket:        route.Handler.Bucket,
+			File:          route.Handler.File,
+			LuaScript:     route.Handler.LuaScript,
+			LuaArgsScript: route.Handler.LuaArgsScript,
+			route:         route.Route,
 		}
 		L.SetMetatable(ud, L.GetTypeMetatable(luaRouteTypeName))
 		L.Push(ud)
@@ -206,7 +207,9 @@ type luaRoute struct {
 
 	AllowedAlicenses []string
 	AllowedMethods   []string
-	HandlerArgs      string
+
+	LuaScript     string
+	LuaArgsScript string
 
 	route interfaces.Route
 }
@@ -227,8 +230,10 @@ var routeMethods = map[string]lua.LGFunction{
 	"Path":   rotueGetPath,
 	"Bucket": rotueGetBucket,
 	"File":   rotueGetFile,
-	"Args":   rotueGetHandlerArgs,
 	"Has":    routeHasRoute,
+
+	"Lua":     rotueGetLuaScript,
+	"LuaArgs": rotueGetLuaArgsScript,
 
 	// generate URL of the current routes in the parameters
 	// TODO: renate to URLPath
@@ -274,9 +279,15 @@ func rotueGetFile(L *lua.LState) int {
 	return 1
 }
 
-func rotueGetHandlerArgs(L *lua.LState) int {
+func rotueGetLuaScript(L *lua.LState) int {
 	r := checkRoute(L)
-	L.Push(lua.LString(r.HandlerArgs))
+	L.Push(lua.LString(r.LuaScript))
+	return 1
+}
+
+func rotueGetLuaArgsScript(L *lua.LState) int {
+	r := checkRoute(L)
+	L.Push(lua.LString(r.LuaArgsScript))
 	return 1
 }
 

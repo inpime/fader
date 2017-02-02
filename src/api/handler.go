@@ -35,15 +35,27 @@ var (
 )
 
 func FaderHandler(ctx echo.Context) error {
+	/*
+		- Routing
+		- Find files (file, middleware)
+		- Init lua addons
+		- Middleware
+		- Controller
+		- View
+	*/
 	// Routing ------------------------------------------------------
 
 	route := router.MatchVRouteFromContext(ctx)
 	logger.Printf("\t[DEBUG] route: name %q", route.Route.GetName())
 
-	// TODO: if special handler
+	// Load the handled file and middleware -------------------------
 
-	// Load the handled file ----------------------------------------
-	file, err := fileLoaderForRouting.File(
+	var file, fileMiddleware *interfaces.File
+	var err error
+	var withMiddleware bool
+
+	// handled file
+	file, err = fileLoaderForRouting.File(
 		ctx.StdContext(),
 		route.Handler.Bucket,
 		route.Handler.File,
@@ -58,36 +70,71 @@ func FaderHandler(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
 
-	// PreRender ----------------------------------------------------
+	// middleware
+	if len(route.Handler.LuaScript) != 0 {
+		fileMiddleware, err = fileManager.FindFileByName(
+			"settings",
+			route.Handler.LuaScript,
+			interfaces.LuaScript,
+		)
+
+		if err != nil {
+			logger.Printf("[WRN] load middleware %q, %q, %s",
+				"settings",
+				route.Handler.LuaScript,
+				err,
+			)
+		}
+
+		withMiddleware = err == nil
+	}
+
+	// Setup lua ----------------------------------------------------
 
 	var L = lua.NewState()
 	defer L.Close()
-
-	// Lua addons ---------------------------------------------------
 	for _, addon := range addons.Addons {
 		L.PreloadModule(addon.Name(), addon.LuaLoader)
 	}
-
 	_ctx := ContextLuaExecutor(L, ctx)
+
+	// Middleware ---------------------------------------------------
+
+	if withMiddleware {
+		err = L.DoString(string(fileMiddleware.LuaScript))
+
+		if _ctx.Rendered || err != nil || _ctx.Err != nil {
+			if err != nil {
+				logger.Println("[ERR] middleware script", err)
+			}
+
+			if _ctx.Err != nil {
+				logger.Println("[ERR] context executor", _ctx.Err)
+			}
+
+			return err
+		}
+	}
+
+	// Controller ---------------------------------------------------
+
 	_luaScript := string(file.LuaScript)
 
 	// TODO: if empty lua script - skip lua executor
-
 	err = L.DoString(_luaScript) // from loaded file
 
 	// render from lua script
 	if _ctx.Rendered || err != nil || _ctx.Err != nil {
-		if err != nil || _ctx.Err != nil {
+		if err != nil {
 			logger.Println("[ERR] lua script", err)
+		}
+
+		if _ctx.Err != nil {
 			logger.Println("[ERR] context executor", _ctx.Err)
 		}
 
 		return err
 	}
-
-	// TODO: flush session
-	// TODO: redirect if specified
-	// TODO: custom response type
 
 	// View -------------------------------------------------------------------
 

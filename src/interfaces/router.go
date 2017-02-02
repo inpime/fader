@@ -46,8 +46,8 @@ type RequestHandler struct {
 	Bucket string `toml:"bucket"`
 	File   string `toml:"file"`
 
-	SpecialHandler string `toml:"specialhandler"`
-	HandlerArgs    string `toml:"args"`
+	LuaScript     string `toml:"lua"`
+	LuaArgsScript string `toml:"lua_args"`
 
 	AllowedLicenses []string `toml:"licenses"`
 	AllowedMethods  []string `toml:"methods"`
