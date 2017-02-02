@@ -71,10 +71,12 @@ func FaderHandler(ctx echo.Context) error {
 	}
 
 	// middleware
-	if len(route.Handler.LuaScript) != 0 {
+	hlua := HandlerLuaScript(route.Handler.LuaScript)
+	if !hlua.IsEmpty() {
+
 		fileMiddleware, err = fileManager.FindFileByName(
-			"settings",
-			route.Handler.LuaScript,
+			hlua.GetBucket(),
+			hlua.GetFile(),
 			interfaces.LuaScript,
 		)
 

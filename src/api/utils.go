@@ -2,6 +2,7 @@ package api
 
 import (
 	"interfaces"
+	"strings"
 	"time"
 )
 
@@ -66,4 +67,31 @@ func ToFloat64(v interface{}) (f float64) {
 	}
 
 	return
+}
+
+// Handler utils
+
+type HandlerLuaScript string
+
+func (h HandlerLuaScript) IsEmpty() bool {
+	return len(string(h)) == 0
+}
+
+func (h HandlerLuaScript) GetBucket() string {
+	args := strings.Split(string(h), "/")
+	if len(args) <= 1 {
+		return "settings"
+	}
+	return args[0]
+}
+
+func (h HandlerLuaScript) GetFile() string {
+	args := strings.Split(string(h), "/")
+	if len(args) == 0 {
+		return ""
+	}
+	if len(args) == 1 {
+		return args[0]
+	}
+	return args[1]
 }
