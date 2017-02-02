@@ -110,7 +110,21 @@ var exports = map[string]lua.LGFunction{
 	// bucket manager
 	"FindBucketByName": func(L *lua.LState) int { return 0 },
 	"FindBucket":       basicFn_FindBucket,
-	"CreateBucket":     func(L *lua.LState) int { return 0 },
+
+	"CreateBucket": func(L *lua.LState) int {
+		bucketFile := interfaces.NewBucket()
+		bucketFile.BucketID = uuid.NewV4()
+		bucketFile.BucketName = L.CheckString(1)
+
+		if err := bucketManager.CreateBucket(bucketFile); err != nil {
+			L.RaiseError("create bucket %s, err %s", bucketFile.BucketName, err)
+			L.Push(lua.LBool(false))
+			return 1
+		}
+
+		L.Push(lua.LBool(true))
+		return 1
+	},
 	"CreateBucketFrom": func(L *lua.LState) int { return 0 },
 	"UpdateBucketFrom": func(L *lua.LState) int { return 0 },
 }
