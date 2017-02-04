@@ -82,6 +82,28 @@ func (a *AddonBasic) LuaLoader(L *lua.LState) int {
 	)
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), fileMethods))
 
+	// Session
+	mt = L.NewTypeMetatable(luaSessionTypeName)
+	L.SetGlobal("Session", mt)
+	L.SetField(
+		mt,
+		"empty",
+		L.NewFunction(func(L *lua.LState) int {
+			L.Push(NewSession(L))
+			return 1
+		}),
+	)
+	L.SetField(
+		mt,
+		"bySessionID",
+		L.NewFunction(func(L *lua.LState) int {
+			sid := L.CheckString(1)
+			L.Push(NewSessionFromSID(L, sid))
+			return 1
+		}),
+	)
+	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), sessionMethods))
+
 	// Bucket
 	mt = L.NewTypeMetatable(luaBucketTypeName)
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), bucketMethods))

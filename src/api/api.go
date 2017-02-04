@@ -28,6 +28,7 @@ var (
 
 	fileManager   interfaces.FileManager
 	bucketManager interfaces.BucketManager
+	inMemStore    *InMemoryStore
 
 	db *bolt.DB
 
@@ -61,6 +62,7 @@ func Setup(e *echo.Echo, _settings *Settings) error {
 
 	bucketManager = boltdb.NewBucketManager(db)
 	fileManager = boltdb.NewFileManager(db)
+	inMemStore = NewInMemoryStore(db)
 
 	templates.DefaultTemplatesLoader = interfaces.NewTemplatesStore(fileManager)
 	templates.SetupSettings()

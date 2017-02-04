@@ -11,6 +11,10 @@ import (
 )
 
 var exports = map[string]lua.LGFunction{
+	"MemorySet": basicFn_InMemorySet,
+	"MemoryGet": basicFn_InMemoryGet,
+	"MemoryDel": basicFn_InMemoryDel,
+
 	"ListBuckets":         basicFn_ListBuckets,
 	"ListFilesByBucketID": basicFn_listFilesFromBucketID,
 
@@ -1052,4 +1056,70 @@ func basicFn_FindBucket(L *lua.LState) int {
 	}
 
 	return newLuaBucket(bucket)(L)
+}
+
+// Memory storage
+
+func basicFn_InMemorySet(L *lua.LState) int {
+	key := L.CheckString(1)
+	lv := L.CheckUserData(2)
+	obj, ok := lv.Value.(interfaces.MsgpackMarshaller)
+	if !ok {
+		L.RaiseError(
+			"InMemorySet: expected MsgpackMarshaller obj, got %T",
+			lv.Value,
+		)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+	if err := inMemStore.Set(key, obj); err != nil {
+		L.RaiseError(
+			"InMemorySet: error setting, %s",
+			err,
+		)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+	L.Push(lua.LBool(true))
+	return 1
+}
+
+func basicFn_InMemoryGet(L *lua.LState) int {
+	key := L.CheckString(1)
+	lv := L.CheckUserData(2)
+	obj, ok := lv.Value.(interfaces.MsgpackMarshaller)
+	if !ok {
+		L.RaiseError(
+			"InMemoryGet: expected MsgpackMarshaller obj, got %T",
+			lv.Value,
+		)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+	if err := inMemStore.Get(key, obj); err != nil {
+		L.RaiseError(
+			"InMemoryGet: errro getting, %s",
+			err,
+		)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	L.Push(lua.LBool(true))
+	return 1
+}
+
+func basicFn_InMemoryDel(L *lua.LState) int {
+	key := L.CheckString(1)
+	if err := inMemStore.Del(key); err != nil {
+		L.RaiseError(
+			"InMemoryDel: error deleting, %s",
+			err,
+		)
+		L.Push(lua.LBool(false))
+		return 1
+	}
+
+	L.Push(lua.LBool(true))
+	return 1
 }
