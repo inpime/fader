@@ -1,17 +1,17 @@
 
 vendor:
-	go get -v github.com/labstack/echo/... \
-		github.com/stretchr/testify/assert \
-		github.com/tylerb/graceful \
-		github.com/satori/go.uuid \
-		github.com/flosch/pongo2 \
-		github.com/BurntSushi/toml
+	curl https://glide.sh/get | sh
+	cd src && glide up
 .PHONY: vendor 
 test:
 	rm -rf _app.db
 	GOPATH=${PWD} go test -v \
+		-run= ./src/test/...
+	GOPATH=${PWD} go test -v \
 		-bench=. -benchmem \
 		-run= ./src/api/...
+	GOPATH=${PWD} go test -v \
+		-run= ./src/interfaces/...
 	GOPATH=${PWD} go test -v \
 		-run= ./src/store/...
 .PHONY: test
