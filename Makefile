@@ -8,11 +8,11 @@ vendor:
 		github.com/BurntSushi/toml
 .PHONY: vendor 
 test:
-#	rm -rf _app.db
+	rm -rf _app.db
 	GOPATH=${PWD} go test -v \
 		-bench=. -benchmem \
-		-run=TestAddonsBasic_ContextCurrentFile ./src/api/...
-	# GOPATH=${PWD} go test -v \
+		-run= ./src/api/...
+	GOPATH=${PWD} go test -v \
 		-run= ./src/store/...
 .PHONY: test
 

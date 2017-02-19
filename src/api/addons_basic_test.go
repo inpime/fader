@@ -101,12 +101,33 @@ func TestAddonsBasic_ContextCurrentFile(t *testing.T) {
 	if d.object.foo == 1 then
 		seq = seq + 1 
 	end
+
+	d.newint = 2
+	d.newfloat = 2.2
+	d.newbool = true
+	d.newnull = nil
+	d.newstring = "new foo bar"
+	d.newarray = {"a", 2}
+	d.object = {
+		a = "qw",
+		i = 3.1,
+	}
+
+	cf:SetStructuralData(d)
 	
 	ctx():Set("res", seq)
 `)
 
 	assert.NoError(t, err, "execute lua")
 	assert.EqualValues(t, 8, ctx.EchoCtx().Get("res"), "checksum")
+
+	assert.EqualValues(t, 2, ctx.CurrentFile.StructuralData["newint"])
+	assert.EqualValues(t, 2.2, ctx.CurrentFile.StructuralData["newfloat"])
+	assert.EqualValues(t, true, ctx.CurrentFile.StructuralData["newbool"])
+	assert.EqualValues(t, nil, ctx.CurrentFile.StructuralData["newnull"])
+	assert.EqualValues(t, "new foo bar", ctx.CurrentFile.StructuralData["newstring"])
+	assert.EqualValues(t, []interface{}{"a", 2.0}, ctx.CurrentFile.StructuralData["newarray"])
+	assert.EqualValues(t, map[string]interface{}{"a": "qw", "i": 3.1}, ctx.CurrentFile.StructuralData["object"])
 }
 
 func TestAddonsBasic_UsedData_Lua(t *testing.T) {
@@ -226,26 +247,26 @@ ctx():Set("associative", ass)
 	assert.EqualValues(
 		t,
 		"c",
-		ctx.EchoCtx().Get("associative").(map[interface{}]interface{})["a"],
+		ctx.EchoCtx().Get("associative").(map[string]interface{})["a"],
 	)
 	assert.EqualValues(
 		t,
 		"b",
-		ctx.EchoCtx().Get("associative").(map[interface{}]interface{})["b"],
+		ctx.EchoCtx().Get("associative").(map[string]interface{})["b"],
 	)
 	assert.EqualValues(
 		t,
 		"a",
-		ctx.EchoCtx().Get("associative").(map[interface{}]interface{})["c"],
+		ctx.EchoCtx().Get("associative").(map[string]interface{})["c"],
 	)
 	assert.EqualValues(
 		t,
 		2,
-		ctx.EchoCtx().Get("associative").(map[interface{}]interface{})["1"],
+		ctx.EchoCtx().Get("associative").(map[string]interface{})["1"],
 	)
 	assert.EqualValues(
 		t,
 		3.3,
-		ctx.EchoCtx().Get("associative").(map[interface{}]interface{})["2"],
+		ctx.EchoCtx().Get("associative").(map[string]interface{})["2"],
 	)
 }

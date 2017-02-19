@@ -134,10 +134,11 @@ func TestImporter_simple(t *testing.T) {
 			interfaces.FullFile,
 		)
 
-		assert.NoError(t, err, "find file: %v, %v", bucketName, fileName)
-		assert.Equal(t, file.FileName, fileName)
-		assert.Equal(t, file.RawData, []byte(`1
+		if assert.NoError(t, err, "find file: %v, %v", bucketName, fileName) {
+			assert.Equal(t, file.FileName, fileName)
+			assert.Equal(t, file.RawData, []byte(`1
             2
             b`))
+		}
 	}
 }
