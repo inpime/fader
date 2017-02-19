@@ -291,10 +291,10 @@ func (a *AddonBasic) ExtContextPongo2(_ctx pongo2.Context) error {
 }
 
 func (a *AddonBasic) ExtTagsFiltersPongo2(
-	addf func(name string, fn pongo2.FilterFunction),
-	repf func(name string, fn pongo2.FilterFunction),
-	addt func(name string, fn pongo2.TagParser),
-	rapt func(name string, fn pongo2.TagParser),
+	addf addons.RegisterPongo2Filters,
+	repf addons.RegisterPongo2Filters,
+	addt addons.RegisterPongo2Tags,
+	rapt addons.RegisterPongo2Tags,
 ) error {
 	tagsFiltersPongo2Init.Do(func() {
 		pongo2.RegisterFilter(

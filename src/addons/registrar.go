@@ -8,6 +8,12 @@ import (
 // Регистрация расшриений
 var Addons = make(map[string]Addon)
 
+type RegisterPongo2Filters func(name string, fn pongo2.FilterFunction)
+type RegisterPongo2Tags func(name string, fn pongo2.TagParser)
+
+var _ RegisterPongo2Filters = pongo2.RegisterFilter
+var _ RegisterPongo2Tags = pongo2.RegisterTag
+
 type Addon interface {
 	Version() string // MAJOR.MINOR.PATCH
 	// utils github.com/hashicorp/go-version
@@ -19,9 +25,9 @@ type Addon interface {
 	LuaLoader(L *lua.LState) int
 	ExtContextPongo2(c pongo2.Context) error
 	ExtTagsFiltersPongo2(
-		addf func(name string, fn pongo2.FilterFunction),
-		repf func(name string, fn pongo2.FilterFunction),
-		addt func(name string, fn pongo2.TagParser),
-		rapt func(name string, fn pongo2.TagParser),
+		addf RegisterPongo2Filters,
+		repf RegisterPongo2Filters,
+		addt RegisterPongo2Tags,
+		rapt RegisterPongo2Tags,
 	) error
 }

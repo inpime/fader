@@ -62,10 +62,10 @@ func (a *Addon) ExtContextPongo2(_ctx pongo2.Context) error {
 }
 
 func (a *Addon) ExtTagsFiltersPongo2(
-	addf func(name string, fn pongo2.FilterFunction),
-	repf func(name string, fn pongo2.FilterFunction),
-	addt func(name string, fn pongo2.TagParser),
-	rapt func(name string, fn pongo2.TagParser),
+	addf addons.RegisterPongo2Filters,
+	repf addons.RegisterPongo2Filters,
+	addt addons.RegisterPongo2Tags,
+	rapt addons.RegisterPongo2Tags,
 ) error {
 	return nil
 }
