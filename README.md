@@ -1,6 +1,6 @@
 # Fader
 
-[![Dev Status](https://img.shields.io/badge/status-dev-red.svg)]()
+[![Status](https://img.shields.io/badge/status-experimental-blue.svg)]()
 [![License](http://img.shields.io/badge/license-mit-blue.svg)](https://raw.githubusercontent.com/inpime/fader/master/LICENSE)
 [![Build Status](https://travis-ci.org/inpime/fader.svg?branch=master)](https://travis-ci.org/inpime/fader)
 
