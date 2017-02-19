@@ -1,5 +1,8 @@
 package interfaces
 
+import "bufio"
+import "bytes"
+
 var (
 	ImageFile string = "image"
 	TextFile  string = "text"
@@ -33,4 +36,33 @@ func GetUserTypeFromContentType(t string) string {
 	default:
 		return RawFile
 	}
+}
+
+// untils for mporter
+
+func readLine(scanner *bufio.Reader) ([]byte, error) {
+	line, hasMore, err := scanner.ReadLine()
+
+	if err != nil {
+		return []byte{}, err
+	}
+
+	if !hasMore {
+		return line, nil
+	}
+
+	buf := bytes.NewBuffer([]byte{})
+	buf.Write(line)
+
+	for true {
+		line, hasMore, err = scanner.ReadLine()
+
+		buf.Write(line)
+
+		if !hasMore {
+			break
+		}
+	}
+
+	return buf.Bytes(), err
 }

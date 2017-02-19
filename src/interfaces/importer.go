@@ -50,11 +50,21 @@ type ImportManager struct {
 }
 
 func (m *ImportManager) Import(data []byte) (info ArchiveInfoLine, err error) {
-	scanner := bufio.NewScanner(bytes.NewReader(data))
-	var mode = infoPartFile
+	// bufio.MaxScanTokenSize = 64 * 1024 * 1000
+	// TODO: удалить после замены на bufio.Reader
 
-	for scanner.Scan() {
-		line := scanner.Bytes()
+	// bufio.Reader.ReadLine
+
+	var mode = infoPartFile
+	var scanner *bufio.Reader
+	scanner = bufio.NewReader(bytes.NewReader(data))
+
+	line, err := readLine(scanner)
+	var seq = 0
+	for ; err == nil; line, err = readLine(scanner) {
+
+		log.Println(">> ", seq)
+		seq++
 
 		if mode == bucketsPartFile && string(line) == endbuckets {
 			mode = filesPartFile
@@ -210,7 +220,7 @@ func (m *ImportManager) Import(data []byte) (info ArchiveInfoLine, err error) {
 		}
 	}
 
-	return info, scanner.Err()
+	return info, nil
 }
 
 func (m *ImportManager) Export(
