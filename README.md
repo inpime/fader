@@ -2,6 +2,7 @@
 
 [![Dev Status](https://img.shields.io/badge/status-dev-red.svg)]()
 [![License](http://img.shields.io/badge/license-mit-blue.svg)](https://raw.githubusercontent.com/inpime/fader/master/LICENSE)
+[![Build Status](https://travis-ci.org/inpime/fader.svg?branch=master)](https://travis-ci.org/inpime/fader)
 
 Comming soon v2. This was going to be cool!
 Now v1 is no supported!
