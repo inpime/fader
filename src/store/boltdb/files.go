@@ -456,7 +456,7 @@ func getFileData(
 	if used&interfaces.MetaData != 0 {
 		superID[16] = MetaData
 
-		err := msgpack.Unmarshal(
+		err := decodeToStringInterface(
 			bucket.Get(superID),
 			&file.MetaData,
 		)
@@ -470,7 +470,7 @@ func getFileData(
 	if used&interfaces.StructuralData != 0 {
 		superID[16] = StructuralData
 
-		err := msgpack.Unmarshal(
+		err := decodeToStringInterface(
 			bucket.Get(superID),
 			&file.StructuralData,
 		)

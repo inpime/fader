@@ -16,9 +16,6 @@ var testhandler = interfaces.RequestHandler{
 
 	Bucket: "a",
 	File:   "b",
-
-	SpecialHandler: "specialhandler",
-	HandlerArgs:    "arg1, arg2",
 }
 
 func TestVRoute_buildUrl_simple(t *testing.T) {

@@ -5,6 +5,8 @@ import (
 	"interfaces"
 	"log"
 
+	"encoding/json"
+
 	"github.com/flosch/pongo2"
 	uuid "github.com/satori/go.uuid"
 	"github.com/yuin/gopher-lua"
@@ -307,6 +309,29 @@ func (a *AddonBasic) ExtTagsFiltersPongo2(
 				return pongo2.AsValue(""), nil
 			}
 			return pongo2.AsValue(string(v)), nil
+		},
+	)
+
+	pongo2.RegisterFilter(
+		"maptojson",
+		func(
+			in *pongo2.Value,
+			param *pongo2.Value,
+		) (
+			*pongo2.Value,
+			*pongo2.Error,
+		) {
+			// v, ok := in.Interface().(map[string]interface{})
+			// if !ok {
+			// 	// TODO: handler error
+			// 	return pongo2.AsValue("{}"), nil
+			// }
+			json, err := json.Marshal(in.Interface())
+			if err != nil {
+				// TODO: handler error
+				return pongo2.AsValue("{}"), nil
+			}
+			return pongo2.AsValue(string(json)), nil
 		},
 	)
 

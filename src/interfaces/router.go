@@ -48,6 +48,8 @@ type RequestHandler struct {
 
 	LuaScript     string `toml:"lua"`
 	LuaArgsScript string `toml:"lua_args"`
+	// Middleware     []string `toml:"middleware"`
+	// MiddlewareArgs string   `toml:"middleware_args"`
 
 	AllowedLicenses []string `toml:"licenses"`
 	AllowedMethods  []string `toml:"methods"`

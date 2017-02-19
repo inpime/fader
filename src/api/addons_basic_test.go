@@ -1,8 +1,11 @@
 package api
 
 import (
+	"interfaces"
 	"testing"
+	"time"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -10,6 +13,101 @@ import (
 // TODO: Тест роутинга
 // TODO: Тест менеджера файлов: создать, найти, обновить, удалить
 // TODO: Создать context для тестирования что бы передавать результат операции
+
+func TestAddonsBasic_ContextCurrentFile(t *testing.T) {
+	var L = lua.NewState()
+	defer L.Close()
+	SetupAddons()
+	setupLuaModules(L)
+	ctx := setupLuaContext("POST", "/", nil, L)
+	// Регистрация типа файл
+	mt := L.NewTypeMetatable(luaFileTypeName)
+	L.SetGlobal("File", mt)
+	L.SetField(
+		mt,
+		"new",
+		L.NewFunction(func(L *lua.LState) int {
+			L.Push(FileAsLuaFile(L, nil))
+			return 1
+		}),
+	)
+	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), fileMethods))
+
+	ctx.CurrentFile = &interfaces.File{
+		FileID:   uuid.NewV4(),
+		BucketID: uuid.NewV4(),
+
+		FileName: "filename",
+
+		ContentType: "text/plain",
+		Owners: []uuid.UUID{
+			uuid.NewV4(),
+		},
+		IsPrivate:  true,
+		IsReadOnly: false,
+
+		MetaData: map[string]interface{}{},
+		StructuralData: map[string]interface{}{
+			"a":       "b",
+			"int":     1,
+			"float":   0.5,
+			"boolean": true,
+			"null":    nil,
+			"string":  "foo bar",
+			"array":   []string{"foo", "bar"},
+			"object": map[string]interface{}{
+				"foo": 1,
+				"bar": 0.5,
+			},
+		},
+		RawData: []byte("data data"),
+
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	err := L.DoString(`
+	cf = ctx():CurrentFile()
+	d = cf:StructuralData()
+	seq = 0
+	if d.a == "b" then
+		seq = seq + 1
+	end 
+
+	if d.int == 1 then
+		seq = seq + 1
+	end 
+
+	if d.float == 0.5 then
+		seq = seq + 1
+	end 
+
+	if d.boolean then
+		seq = seq + 1 
+	end 
+
+	if d.null == nil then
+		seq = seq + 1 
+	end
+	
+	if d.string == "foo bar" then
+		seq = seq + 1 
+	end
+
+	if d.array[1] == "foo" then
+		seq = seq + 1 
+	end
+
+	if d.object.foo == 1 then
+		seq = seq + 1 
+	end
+	
+	ctx():Set("res", seq)
+`)
+
+	assert.NoError(t, err, "execute lua")
+	assert.EqualValues(t, 8, ctx.EchoCtx().Get("res"), "checksum")
+}
 
 func TestAddonsBasic_UsedData_Lua(t *testing.T) {
 	var L = lua.NewState()

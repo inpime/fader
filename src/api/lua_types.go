@@ -129,7 +129,36 @@ func ToLValueOrNil(v interface{}, L *lua.LState) lua.LValue {
 
 		return tb
 
-		// case map[string]string, map[string]interface{}, map[interface{}]interface{}:
+	case map[string]string, map[string]interface{}, map[interface{}]interface{}:
+		tb := L.NewTable()
+
+		var keys, values []lua.LValue
+
+		// types
+		switch v := v.(type) {
+		case map[string]string:
+		case map[string]interface{}:
+			keys = make([]lua.LValue, len(v))
+			values = make([]lua.LValue, len(v))
+			var seq = 0
+			for key, value := range v {
+				keys[seq] = ToLValueOrNil(key, L)
+				values[seq] = ToLValueOrNil(value, L)
+				seq++
+			}
+		case map[interface{}]interface{}:
+		default:
+			log.Printf(
+				"[ERR] ToLValueOrNil: not expected type value, got %T",
+				v,
+			)
+		}
+
+		for i := 0; i < len(keys); i++ {
+			tb.RawSet(keys[i], values[i])
+		}
+
+		return tb
 	default:
 		log.Printf(
 			"[ERR] ToLValueOrNil: not expected type value, got %T",
@@ -137,5 +166,5 @@ func ToLValueOrNil(v interface{}, L *lua.LState) lua.LValue {
 		)
 	}
 
-	return nil
+	return lua.LNil
 }

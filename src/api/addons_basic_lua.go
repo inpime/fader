@@ -6,6 +6,8 @@ import (
 
 	"fmt"
 
+	"encoding/json"
+
 	uuid "github.com/satori/go.uuid"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -689,14 +691,23 @@ var fileMethods = map[string]lua.LGFunction{
 
 		return 0
 	},
-	"SetStructuralData": func(L *lua.LState) int {
+	// SetStructuralDataFromJSON
+	"SetStructuralDataFromStrJSON": func(L *lua.LState) int {
 		if L.GetTop() != 2 {
 			return 0
 		}
 
-		// file := checkFile(L)
-		L.ArgError(2, "SetStructuralData: not implemented")
-		// file.StructuralData = L.CheckUserData(2).Value.([]byte)
+		file := checkFile(L)
+
+		rawJSON := L.CheckString(2)
+		err := json.Unmarshal([]byte(rawJSON), &file.StructuralData)
+
+		if err != nil {
+			reason := fmt.Sprintf("error unmarshal json, %s", err)
+			L.ArgError(2, reason)
+			return 0
+		}
+
 		return 0
 	},
 	"SetContentType": func(L *lua.LState) int {
@@ -803,18 +814,18 @@ var fileMethods = map[string]lua.LGFunction{
 			return 0
 		}
 
-		// file := checkFile(L)
-
-		return 0
+		file := checkFile(L)
+		L.Push(ToLValueOrNil(file.MetaData, L))
+		return 1
 	},
 	"StructuralData": func(L *lua.LState) int {
 		if L.GetTop() != 1 {
 			return 0
 		}
 
-		// file := checkFile(L)
-
-		return 0
+		file := checkFile(L)
+		L.Push(ToLValueOrNil(file.StructuralData, L))
+		return 1
 	},
 	"RawData": func(L *lua.LState) int {
 		if L.GetTop() != 1 {

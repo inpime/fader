@@ -99,6 +99,8 @@ func FaderHandler(ctx echo.Context) error {
 		L.PreloadModule(addon.Name(), addon.LuaLoader)
 	}
 	_ctx := ContextLuaExecutor(L, ctx)
+	_ctx.CurrentFile = file
+	_ctx.MiddlewareFile = fileMiddleware
 
 	// Middleware ---------------------------------------------------
 

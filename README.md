@@ -18,6 +18,12 @@ Fader is a abstract tool for creation of web applications. Gives maximum flexibi
 
 ## Quick start
 
+```
+cp example.env .env
+# update .evn
+make run
+```
+
 ## Support
 
 # Contributing

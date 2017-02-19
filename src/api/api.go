@@ -1,3 +1,6 @@
+// Copyright (c) Fader, OOO. All Rights Reserved.
+// See LICENSE for license information.
+
 package api
 
 import (

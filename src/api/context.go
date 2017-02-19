@@ -1,6 +1,8 @@
 package api
 
 import (
+	"interfaces"
+
 	"github.com/labstack/echo"
 	"github.com/yuin/gopher-lua"
 )
@@ -27,6 +29,9 @@ type Context struct {
 
 	Err      error // in lua script was error
 	Rendered bool  // in lua script was executed render
+
+	CurrentFile    *interfaces.File
+	MiddlewareFile *interfaces.File
 
 	ResponseStatus int // in lua script set response status
 }

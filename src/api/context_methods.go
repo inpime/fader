@@ -18,10 +18,10 @@ import (
 var contextMethods = map[string]lua.LGFunction{
 	// "URI":        contextGetURI,
 	"QueryParam": contextGetQueryParam,
-	"NoContext":  contextNoContext,
+	"NoContent":  contextNoContent,
 	"Redirect":   contextRedirect,
 	"JSON":       contextRenderJSON,
-	// FileContent
+	// FileContent рендер переданного файла (RawData)
 	"FileContent": contextMethodFileContnet,
 	"IsGET":       contextMethodIsGET,
 	"IsPOST":      contextMethodIsPOST,
@@ -35,6 +35,9 @@ var contextMethods = map[string]lua.LGFunction{
 
 	"AppExport": contextAppExport,
 	"AppImport": contextAppImport,
+
+	"CurrentFile":    contextGetCurrentFile,
+	"MiddlewareFile": contextGetMiddlewareFile,
 }
 
 func contextGetPath(L *lua.LState) int {
@@ -90,7 +93,7 @@ func contextGetQueryParam(L *lua.LState) int {
 	return 1
 }
 
-func contextNoContext(L *lua.LState) int {
+func contextNoContent(L *lua.LState) int {
 	p := checkContext(L)
 
 	p.Err = p.echoCtx.NoContent(L.CheckInt(2))
@@ -149,6 +152,7 @@ func contextRenderJSON(L *lua.LState) int {
 	return 0
 }
 
+// contextMethodFileContnet рендер файла RawData
 func contextMethodFileContnet(L *lua.LState) int {
 	c := checkContext(L)
 	status := L.CheckInt(2)
@@ -337,4 +341,15 @@ func contextAppImport(L *lua.LState) int {
 
 	L.Push(lua.LBool(true))
 	return 1
+}
+
+func contextGetCurrentFile(L *lua.LState) int {
+	c := checkContext(L)
+
+	return newLuaFile(c.CurrentFile)(L)
+}
+func contextGetMiddlewareFile(L *lua.LState) int {
+	c := checkContext(L)
+
+	return newLuaFile(c.MiddlewareFile)(L)
 }

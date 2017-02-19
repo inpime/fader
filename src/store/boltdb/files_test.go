@@ -20,10 +20,29 @@ func testFile(bucketID uuid.UUID) *interfaces.File {
 		LuaScript: []byte("-- lua script"),
 
 		MetaData: map[string]interface{}{
-			"a": "b",
+			"a":     "b",
+			"arr":   []int64{1, 2, 3},
+			"null":  nil,
+			"int":   1,
+			"float": 0.5,
+			"bool":  true,
+			"obj": map[string]interface{}{
+				"foo": 1,
+				"bar": 0.5,
+			},
 		},
 		StructuralData: map[string]interface{}{
-			"c": "d",
+			"c":     "d",
+			"a":     "b",
+			"arr":   []int64{1, 2, 3},
+			"null":  nil,
+			"int":   1,
+			"float": 0.5,
+			"bool":  true,
+			"obj": map[string]interface{}{
+				"foo": 1,
+				"bar": 0.5,
+			},
 		},
 		RawData:     []byte("123456"),
 		ContentType: "text/plain",
@@ -73,6 +92,12 @@ func TestFileManager_createfulldata_simple(t *testing.T) {
 	assert.Equal(t, expected.MetaData["b"], got.MetaData["b"])
 	assert.Equal(t, expected.StructuralData["c"], got.StructuralData["c"])
 	assert.Equal(t, expected.StructuralData["d"], got.StructuralData["d"])
+	assert.Equal(t, expected.StructuralData["null"], got.StructuralData["null"])
+	assert.EqualValues(t, expected.StructuralData["int"], got.StructuralData["int"])
+	assert.EqualValues(t, expected.StructuralData["float"], got.StructuralData["float"])
+	assert.Equal(t, expected.StructuralData["bool"], got.StructuralData["bool"])
+	// assert.EqualValues(t, expected.StructuralData["obj"], got.StructuralData["obj"])
+	// assert.Equal(t, expected.StructuralData["arr"], got.StructuralData["arr"])
 	assert.Equal(t, expected.LuaScript, got.LuaScript)
 }
 
@@ -120,6 +145,12 @@ func TestFileManager_update_simple(t *testing.T) {
 	assert.Equal(t, expected.MetaData["b"], got.MetaData["b"])
 	assert.Equal(t, expected.StructuralData["c"], got.StructuralData["c"])
 	assert.Equal(t, expected.StructuralData["d"], got.StructuralData["d"])
+	assert.Equal(t, expected.StructuralData["null"], got.StructuralData["null"])
+	assert.EqualValues(t, expected.StructuralData["int"], got.StructuralData["int"])
+	assert.EqualValues(t, expected.StructuralData["float"], got.StructuralData["float"])
+	assert.Equal(t, expected.StructuralData["bool"], got.StructuralData["bool"])
+	// assert.EqualValues(t, expected.StructuralData["obj"], got.StructuralData["obj"])
+	// assert.Equal(t, expected.StructuralData["arr"], got.StructuralData["arr"])
 	assert.Equal(t, expected.LuaScript, got.LuaScript)
 }
 
@@ -168,6 +199,12 @@ func TestFileManager_findbyname_simple(t *testing.T) {
 		assert.Equal(t, expected.MetaData["b"], got.MetaData["b"])
 		assert.Equal(t, expected.StructuralData["c"], got.StructuralData["c"])
 		assert.Equal(t, expected.StructuralData["d"], got.StructuralData["d"])
+		assert.Equal(t, expected.StructuralData["null"], got.StructuralData["null"])
+		assert.EqualValues(t, expected.StructuralData["int"], got.StructuralData["int"])
+		assert.EqualValues(t, expected.StructuralData["float"], got.StructuralData["float"])
+		assert.Equal(t, expected.StructuralData["bool"], got.StructuralData["bool"])
+		// assert.EqualValues(t, expected.StructuralData["obj"], got.StructuralData["obj"])
+		// assert.EqualValues(t, expected.StructuralData["arr"], got.StructuralData["arr"])
 		assert.Equal(t, expected.LuaScript, got.LuaScript)
 	}
 
@@ -211,6 +248,12 @@ func TestFileManager_findbyname_simple(t *testing.T) {
 		assert.Equal(t, expected.MetaData["b"], got.MetaData["b"])
 		assert.Equal(t, expected.StructuralData["c"], got.StructuralData["c"])
 		assert.Equal(t, expected.StructuralData["d"], got.StructuralData["d"])
+		assert.Equal(t, expected.StructuralData["null"], got.StructuralData["null"])
+		assert.EqualValues(t, expected.StructuralData["int"], got.StructuralData["int"])
+		assert.EqualValues(t, expected.StructuralData["float"], got.StructuralData["float"])
+		assert.Equal(t, expected.StructuralData["bool"], got.StructuralData["bool"])
+		// assert.EqualValues(t, expected.StructuralData["obj"], got.StructuralData["obj"])
+		// assert.Equal(t, expected.StructuralData["arr"], got.StructuralData["arr"])
 		assert.Equal(t, expected.LuaScript, got.LuaScript)
 	}
 }
