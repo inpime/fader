@@ -21,6 +21,9 @@ gen:
 	-rm -rf ${FADER_INITFILE}
 	GOPATH=${PWD} go run src/cmd/gen/main.go
 
+
+full: vendor test
+
 run:
 	GOOS="darwin" \
 	GOARCH="amd64" \

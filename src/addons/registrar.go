@@ -8,8 +8,8 @@ import (
 // Регистрация расшриений
 var Addons = make(map[string]Addon)
 
-type RegisterPongo2Filters func(name string, fn pongo2.FilterFunction)
-type RegisterPongo2Tags func(name string, fn pongo2.TagParser)
+type RegisterPongo2Filters func(name string, fn pongo2.FilterFunction) error
+type RegisterPongo2Tags func(name string, fn pongo2.TagParser) error
 
 var _ RegisterPongo2Filters = pongo2.RegisterFilter
 var _ RegisterPongo2Tags = pongo2.RegisterTag
