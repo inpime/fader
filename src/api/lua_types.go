@@ -18,7 +18,8 @@ func ToValueFromLValue(v lua.LValue) interface{} {
 		return v.(*lua.LUserData).Value
 	case lua.LTTable:
 		tbl := v.(*lua.LTable)
-		var keys, vals []interface{}
+		var keys []string
+		var vals []interface{}
 
 		isArray := true
 		counter := 0
@@ -40,7 +41,7 @@ func ToValueFromLValue(v lua.LValue) interface{} {
 			return vals
 		}
 
-		_vals := make(map[interface{}]interface{}, counter)
+		_vals := make(map[string]interface{}, counter)
 		for i := 0; i < counter; i++ {
 			_vals[keys[i]] = vals[i]
 		}
@@ -129,7 +130,7 @@ func ToLValueOrNil(v interface{}, L *lua.LState) lua.LValue {
 
 		return tb
 
-	case map[string]string, map[string]interface{}, map[interface{}]interface{}:
+	case map[string]interface{}, map[interface{}]interface{}:
 		tb := L.NewTable()
 
 		var keys, values []lua.LValue
@@ -147,6 +148,14 @@ func ToLValueOrNil(v interface{}, L *lua.LState) lua.LValue {
 				seq++
 			}
 		case map[interface{}]interface{}:
+			keys = make([]lua.LValue, len(v))
+			values = make([]lua.LValue, len(v))
+			var seq = 0
+			for key, value := range v {
+				keys[seq] = ToLValueOrNil(key, L)
+				values[seq] = ToLValueOrNil(value, L)
+				seq++
+			}
 		default:
 			log.Printf(
 				"[ERR] ToLValueOrNil: not expected type value, got %T",

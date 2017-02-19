@@ -691,21 +691,39 @@ var fileMethods = map[string]lua.LGFunction{
 
 		return 0
 	},
-	// SetStructuralDataFromJSON
-	"SetStructuralDataFromStrJSON": func(L *lua.LState) int {
+	"SetStructuralData": func(L *lua.LState) int {
 		if L.GetTop() != 2 {
 			return 0
 		}
 
 		file := checkFile(L)
 
-		rawJSON := L.CheckString(2)
-		err := json.Unmarshal([]byte(rawJSON), &file.StructuralData)
+		lv := L.Get(2)
+		switch lv.Type() {
+		case lua.LTString:
+			v := string(lv.(lua.LString))
+			err := json.Unmarshal([]byte(v), &file.StructuralData)
 
-		if err != nil {
-			reason := fmt.Sprintf("error unmarshal json, %s", err)
+			if err != nil {
+				reason := fmt.Sprintf("error unmarshal json, %s", err)
+				L.ArgError(2, reason)
+				return 0
+			}
+		case lua.LTTable:
+			v, ok := ToValueFromLValue(lv).(map[string]interface{})
+			if ok {
+				file.StructuralData = v
+			} else {
+				reason := fmt.Sprintf(
+					"error transform data %T to map[string]interface{}",
+					lv,
+				)
+				L.ArgError(2, reason)
+			}
+
+		default:
+			reason := fmt.Sprintf("not supported type %T", lv)
 			L.ArgError(2, reason)
-			return 0
 		}
 
 		return 0
